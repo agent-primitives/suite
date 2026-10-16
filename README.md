@@ -70,6 +70,6 @@ canonical bytes or digests. Go module versions and format versions are independe
 
 Extracted with portable history from
 [kaimahi-agents/kaimahi](https://github.com/kaimahi-agents/kaimahi/tree/e48f063f422bd38b7f92173351defd21bfcda5cc/agentsuite).
-Licensed under the [Apache License 2.0](LICENSE).
+Licensed under the [MIT License](LICENSE). Copyright (c) Microsoft Corporation.
 See [SECURITY.md](SECURITY.md) for private vulnerability reporting and
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for the Microsoft community policy.

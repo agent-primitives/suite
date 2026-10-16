@@ -7,6 +7,21 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
+## Unreleased — OCI filesystem safety fix
+
+The OCI loader refuses special files and symlinks in layout metadata and
+referenced blobs before opening them, including FIFO inputs that previously
+could hang offline validation or evidence verification. Blob directories must
+also be real directories. Unix reads use nonblocking, no-follow opens; Windows
+reads open reparse points rather than following them. Other platforms retain
+pre-open type and opened-file checks where native flags are unavailable.
+
+This is a compatible fix for malformed filesystem envelopes: regular layouts,
+public APIs, schema/media types, canonical bytes and descriptor digests are
+unchanged. Previously followed layout-entry symlinks now refuse; materialize
+regular files instead. Caller-selected root directory aliases and the content
+layer's symlink semantics remain unchanged. No release tag is created here.
+
 ## v0.3.0 — policies, Agent binding and inference contracts
 
 v0.3.0 combines standalone network-only policy v2, optional per-Agent policy

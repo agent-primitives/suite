@@ -72,7 +72,7 @@ func loadPathContent(value string) (*contentSet, error) {
 	if !info.IsDir() {
 		return nil, errors.New("AgentSuite validation currently requires an extracted content directory or OCI image-layout directory")
 	}
-	if _, err := os.Stat(filepath.Join(value, "oci-layout")); err == nil {
+	if _, err := os.Lstat(filepath.Join(value, "oci-layout")); err == nil {
 		return loadOCILayoutContent(value)
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return nil, err
@@ -91,6 +91,14 @@ func ValidateDirectory(root string) (*Report, error) {
 }
 
 func loadOCILayoutContent(root string) (*contentSet, error) {
+	// Preserve caller-selected directory aliases without ever opening a root FIFO.
+	info, err := os.Stat(root)
+	if err != nil {
+		return nil, err
+	}
+	if !info.IsDir() {
+		return nil, errors.New("OCI layout root must be a directory")
+	}
 	layoutBytes, err := readRegularFile(filepath.Join(root, "oci-layout"), maxJSONBytes)
 	if err != nil {
 		return nil, fmt.Errorf("read oci-layout: %w", err)
@@ -195,8 +203,34 @@ func loadOCILayoutContent(root string) (*contentSet, error) {
 	return content, nil
 }
 
+// openOCIRegularFile refuses special files before open. Native no-follow and
+// nonblocking flags also protect the final component if it changes after Lstat.
+func openOCIRegularFile(name string) (*os.File, error) {
+	before, err := os.Lstat(name)
+	if err != nil {
+		return nil, err
+	}
+	if !before.Mode().IsRegular() {
+		return nil, errors.New("OCI entry must be a regular file, not a symlink or special file")
+	}
+	file, err := os.OpenFile(name, os.O_RDONLY|ociReadFlags, 0)
+	if err != nil {
+		return nil, err
+	}
+	after, err := file.Stat()
+	if err != nil {
+		file.Close()
+		return nil, err
+	}
+	if !after.Mode().IsRegular() || !os.SameFile(before, after) {
+		file.Close()
+		return nil, errors.New("OCI entry changed while opening")
+	}
+	return file, nil
+}
+
 func readRegularFile(name string, limit int64) ([]byte, error) {
-	file, err := os.Open(name)
+	file, err := openOCIRegularFile(name)
 	if err != nil {
 		return nil, err
 	}
@@ -258,9 +292,19 @@ func openBlob(root string, descriptor ociDescriptor) (*os.File, error) {
 	if hasEmbedded && (int64(len(embedded)) != descriptor.Size || digestBytes(embedded) != descriptor.Digest) {
 		return nil, errors.New("descriptor data does not match digest and size")
 	}
+	// Blob storage components are envelope directories, not content-layer links.
+	for _, directory := range []string{filepath.Join(root, "blobs"), filepath.Join(root, "blobs", "sha256")} {
+		info, err := os.Lstat(directory)
+		if err != nil {
+			return nil, err
+		}
+		if !info.IsDir() {
+			return nil, errors.New("OCI blob storage must use directories, not symlinks or special files")
+		}
+	}
 	encoded := strings.TrimPrefix(descriptor.Digest, "sha256:")
 	blobPath := filepath.Join(root, "blobs", "sha256", encoded)
-	file, err := os.Open(blobPath)
+	file, err := openOCIRegularFile(blobPath)
 	if err != nil {
 		return nil, err
 	}

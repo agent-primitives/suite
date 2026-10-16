@@ -29,6 +29,11 @@ A non-nil error means validation failed. On success, `report` summarizes the
 validated suite's name, counts, capabilities and composition selections; it does
 not contain a separate list of conformance failures.
 
+OCI metadata and referenced blobs must be regular files. FIFOs, devices,
+sockets and symlinks refuse before opening; blob directories must not be
+symlinks. These rules also apply to the OCI reads used by `VerifyEvaluation`.
+The content layer's own symlink inventory rules are separate and unchanged.
+
 Use `ValidateDirectory` for extracted content without OCI auto-detection.
 Use `Unmarshal` rather than `encoding/json` directly when strict JSON decoding
 is required, including duplicate-key and closed-field enforcement.

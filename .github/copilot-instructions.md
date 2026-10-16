@@ -25,5 +25,4 @@ Adapted from the source Kaimahi review guidance. Review in this order:
    or workspace files.
 
 Skip style nits already enforced by tools. Prefer one concrete failing scenario
-over speculative comments. Repository controls and maintainer-team approval are
-operator decisions; do not infer them from policy files.
+over speculative comments.

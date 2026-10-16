@@ -3,10 +3,15 @@ import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { latestRelease } from './release.mjs'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const dist = path.join(root, 'docs/.vitepress/dist')
-const schemas = ['agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'execution', 'inference', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
+const schemas = ['administrative-policy-v2', 'agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'execution', 'inference', 'policy-v2', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
+const policySchemaIDs = {
+  'policy-v2.schema.json': 'https://kaimahi.dev/schemas/agentsuite/policy/v2/policy.schema.json',
+  'administrative-policy-v2.schema.json': 'https://kaimahi.dev/schemas/agentsuite/policy/v2/administrative-policy.schema.json'
+}
 const html = name => readFile(path.join(dist, `${name}.html`), 'utf8')
 
 test('all documentation pages render with root-based navigation and assets', async () => {
@@ -21,6 +26,51 @@ test('all documentation pages render with root-based navigation and assets', asy
   for (const word of ['AgentSuite', 'kmx', 'agentsessions', 'Orka', 'planned']) assert.ok(home.includes(word))
   assert.match(home, /href="\/spec"/)
   assert.match(home, /https:\/\/github.com\/agent-primitives\/suite/)
+})
+
+test('the landing page exposes the format and release-first reading paths without JavaScript', async () => {
+  const home = await html('index')
+  const article = home.match(/<main class="suite-home"[\s\S]*?<\/main>/)?.[0]
+  assert.ok(article, 'the format overview must be server-rendered')
+  assert.match(article, /docs track main/)
+  for (const route of ['spec', 'schemas', 'go', 'conformance']) {
+    assert.ok(article.includes(`href="/${route}"`), `missing ${route} entry point`)
+  }
+  for (const term of ['agentsuite.json', 'ToolProviders', 'canonical', 'exact bytes', 'does not execute']) {
+    assert.ok(article.includes(term), `missing format boundary: ${term}`)
+  }
+})
+
+test('status and footer labels and links agree with the latest release constant', async () => {
+  const home = await html('index')
+  const links = [...home.matchAll(/<a href="([^"]+)"[^>]*>(v\d+\.\d+\.\d+(?: tag)?)<\/a>/g)]
+    .map(([, href, text]) => ({ href, text }))
+  const href = `https://github.com/agent-primitives/suite/tree/${latestRelease}`
+  assert.deepEqual(links, [{ href, text: latestRelease }, { href, text: `${latestRelease} tag` }])
+})
+
+test('the validation section links the portable evidence verifier to its spec section', async () => {
+  const home = await html('index')
+  const section = home.match(/<section class="suite-validation"[\s\S]*?<\/section>/)?.[0] || ''
+  assert.ok(section.includes('v0.2.0 adds portable evaluation evidence with an offline verifier'))
+  assert.ok(section.includes('href="/spec#824-portable-evaluation-evidence"'))
+  assert.ok(section.includes('VerifyEvaluation'))
+  assert.ok((await html('spec')).includes('id="824-portable-evaluation-evidence"'))
+})
+
+test('the geometric mark ships as nav logo, favicon and correctly sized PNG exports', async () => {
+  const home = await html('index')
+  assert.match(home, /rel="icon"[^>]*href="\/brand\/agentsuite.svg"/)
+  assert.match(home, /class="[^\"]*logo[^\"]*"[^>]*src="\/brand\/agentsuite.svg"/)
+  const mark = await readFile(path.join(dist, 'brand/agentsuite.svg'), 'utf8')
+  assert.match(mark, /viewBox="0 0 64 64"/)
+  assert.doesNotMatch(mark, /<script|https?:\/\/(?!www\.w3\.org)/)
+  for (const [file, width, height] of [['agentsuite.png', 512, 512], ['social-preview.png', 1280, 640]]) {
+    const png = await readFile(path.join(dist, 'brand', file))
+    assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
+    assert.equal(png.readUInt32BE(16), width, file)
+    assert.equal(png.readUInt32BE(20), height, file)
+  }
 })
 
 test('the authoritative specification keeps every GitHub heading anchor', async () => {
@@ -52,7 +102,7 @@ test('every downloadable schema is raw source JSON with its frozen ID', async ()
   for (const name of schemas) {
     const source = await readFile(path.join(root, 'schema', name))
     assert.deepEqual(await readFile(path.join(dist, 'schema', name)), source, name)
-    assert.equal(JSON.parse(source).$id, `https://kaimahi.dev/schemas/agentsuite/v1/${name}`)
+    assert.equal(JSON.parse(source).$id, policySchemaIDs[name] || `https://kaimahi.dev/schemas/agentsuite/v1/${name}`)
     assert.ok(downloads.includes(`/schema/${name}`), `missing download ${name}`)
   }
   assert.equal(await readFile(path.join(dist, 'CNAME'), 'utf8'), 'suite.agent-primitives.dev\n')

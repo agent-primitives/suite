@@ -64,7 +64,11 @@ Use Node.js 22.12 or newer. Run `npm --prefix docs ci --ignore-scripts`, then
 `npm --prefix docs run docs:check` to build and test the rendered site. Use
 `npm --prefix docs run docs:dev` for a loopback-only preview. Keep generated HTML,
 cache and node_modules untracked; spec.md and schema/ remain authoritative.
-The required **Documentation** job includes this build and its rendered checks.
+The required **Documentation** job includes this build, its rendered checks and
+Chromium browser regressions. After building, run `npm --prefix docs exec playwright install chromium`
+and `npm --prefix docs run docs:test-browser` to check mobile navigation, keyboard
+focus, themes, local search, raw schema downloads and the JavaScript-free landing page.
+CI installs Chromium's system dependencies with `--with-deps` as well.
 See [site hosting](docs/hosting.md) for owner-only Pages/domain setup and
 publication boundaries. Lint both workflows with `actionlint .github/workflows/*.yml`.
 
@@ -100,6 +104,11 @@ Before a release:
    green, plus an independent `GOWORK=off` verification.
 2. Publish the reviewed immutable root tag. Consumers then pin that version and
    verify clean-checkout `GOWORK=off` tests against the published module.
+3. Update `latestRelease` in `docs/.vitepress/release.mjs` to the published tag,
+   then run `npm --prefix docs run docs:check` and
+   `npm --prefix docs run docs:test-browser`. The site test requires the home-page
+   status and footer labels and tag links to agree with this single constant;
+   verify it against the latest published tag when reviewing a release.
 
 ## Pull requests
 

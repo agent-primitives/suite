@@ -17,8 +17,13 @@ export default defineConfig({
   base: '/',
   cleanUrls: true,
   useWebFonts: false,
+  head: [
+    ['link', { rel: 'icon', href: '/brand/agentsuite.svg', type: 'image/svg+xml' }],
+    ['link', { rel: 'icon', href: '/brand/agentsuite.png', type: 'image/png', sizes: '512x512' }],
+    ['link', { rel: 'preload', href: '/fonts/PublicSans-Regular.woff2', as: 'font', type: 'font/woff2', crossorigin: '' }]
+  ],
   rewrites: Object.fromEntries(pages.map(page => [`docs/${page}.md`, `${page}.md`])),
-  srcExclude: ['README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md', '.github/**', 'testdata/**', 'node_modules/**'],
+  srcExclude: ['README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md', '.github/**', '.agents/**', 'testdata/**', 'node_modules/**'],
   markdown: {
     anchor: { slugify: slug },
     config(md) {
@@ -55,11 +60,14 @@ export default defineConfig({
     await cp(path.join(root, 'schema'), path.join(config.outDir, 'schema'), { recursive: true })
   },
   themeConfig: {
+    logo: { src: '/brand/agentsuite.svg', alt: '', width: '32', height: '32' },
+    mobileMenuLabel: 'Site navigation',
+    sidebarMenuLabel: 'Documentation',
     nav: [
       { text: 'Specification', link: '/spec' },
       { text: 'Schemas', link: '/schemas' },
       { text: 'Go usage', link: '/go' },
-      { text: 'main · development', link: '/releases' }
+      { text: 'Conformance', link: '/conformance' }
     ],
     sidebar: [
       { text: 'Overview', link: '/' },
@@ -74,6 +82,6 @@ export default defineConfig({
     outline: [2, 3],
     socialLinks: [{ icon: 'github', link: repository }],
     editLink: { pattern: `${repository}/edit/main/:path` },
-    footer: { message: 'Development documentation from the repository Markdown.' }
+    footer: { message: 'AgentSuite · an open format in the agent-primitives family.' }
   }
 })

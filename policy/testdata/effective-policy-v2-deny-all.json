@@ -1,0 +1,1 @@
+{"network":{"egressAllow":[]},"requiredCapabilities":["network/egress-allow/v1"],"version":"agentsuite.policy/v2"}

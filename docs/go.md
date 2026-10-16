@@ -42,4 +42,23 @@ Validation does not execute evaluations or establish a passing result.
 Builders, registry transfer and runtime execution belong to consumers, not this
 package.
 
+## Standalone policy contracts
+
+The `github.com/agent-primitives/suite/policy` package owns policy resolution,
+canonical bytes and the policy-specific framed digest. It is separate from
+`ValidatePath` and the root artifact content digest.
+
+The network-only v2 API is an **unreleased development addition**, not part of
+v0.2.0. Once a maintainer publishes the next minor release, pin that version
+before using it. V1 filesystem policies remain supported without conversion.
+
+Use `DecodeSuitePolicy` to read the explicit version, then
+`DecodeAdministrativePolicyForVersion(data, suite.Version)`, `Resolve` and
+`Payload`. Verify a provider carrier with `VerifyPayload`, and preserve its
+`PolicyBytes` unchanged. Legacy `DecodeAdministrativePolicy` stays v1-only.
+This flow does not bind a policy to an Agent or execute/qualify a runtime.
+
+See the
+[normative specification](../spec.md#appendix-b-standalone-policy-contracts-normative).
+
 [Go API reference](https://pkg.go.dev/github.com/agent-primitives/suite)

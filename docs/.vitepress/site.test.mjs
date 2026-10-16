@@ -7,7 +7,11 @@ import { latestRelease } from './release.mjs'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const dist = path.join(root, 'docs/.vitepress/dist')
-const schemas = ['agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
+const schemas = ['administrative-policy-v2', 'agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'policy-v2', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
+const policySchemaIDs = {
+  'policy-v2.schema.json': 'https://kaimahi.dev/schemas/agentsuite/policy/v2/policy.schema.json',
+  'administrative-policy-v2.schema.json': 'https://kaimahi.dev/schemas/agentsuite/policy/v2/administrative-policy.schema.json'
+}
 const html = name => readFile(path.join(dist, `${name}.html`), 'utf8')
 
 test('all documentation pages render with root-based navigation and assets', async () => {
@@ -98,7 +102,7 @@ test('every downloadable schema is raw source JSON with its frozen ID', async ()
   for (const name of schemas) {
     const source = await readFile(path.join(root, 'schema', name))
     assert.deepEqual(await readFile(path.join(dist, 'schema', name)), source, name)
-    assert.equal(JSON.parse(source).$id, `https://kaimahi.dev/schemas/agentsuite/v1/${name}`)
+    assert.equal(JSON.parse(source).$id, policySchemaIDs[name] || `https://kaimahi.dev/schemas/agentsuite/v1/${name}`)
     assert.ok(downloads.includes(`/schema/${name}`), `missing download ${name}`)
   }
   assert.equal(await readFile(path.join(dist, 'CNAME'), 'utf8'), 'suite.agent-primitives.dev\n')

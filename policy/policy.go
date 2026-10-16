@@ -22,8 +22,8 @@ var digestDomain = []byte("agentsuite-effective-policy\x00v1\x00")
 
 // DecodeSuitePolicy strictly decodes exactly one JSON object.
 func DecodeSuitePolicy(data []byte) (SuitePolicy, error) {
-	var p SuitePolicy
-	if err := decodeStrict(data, &p); err != nil {
+	p, err := decodeSuiteWire(data)
+	if err != nil {
 		return p, fmt.Errorf("decode policy: %w", err)
 	}
 	if err := Validate(p); err != nil {
@@ -32,12 +32,15 @@ func DecodeSuitePolicy(data []byte) (SuitePolicy, error) {
 	return p, nil
 }
 
-// DecodeAdministrativePolicy applies the same closed JSON rules as suite policy decoding.
+// DecodeAdministrativePolicy decodes the closed filesystem-only v1 administrative profile.
 func DecodeAdministrativePolicy(data []byte) (AdministrativePolicy, error) {
-	var p AdministrativePolicy
-	if err := decodeStrict(data, &p); err != nil {
-		return p, fmt.Errorf("decode administrative policy: %w", err)
+	var wire struct {
+		DenyWritePaths []string `json:"denyWritePaths,omitempty"`
 	}
+	if err := decodeStrict(data, &wire); err != nil {
+		return AdministrativePolicy{}, fmt.Errorf("decode administrative policy: %w", err)
+	}
+	p := AdministrativePolicy{DenyWritePaths: wire.DenyWritePaths}
 	if len(p.DenyWritePaths) > 4096 {
 		return p, errors.New("too many administrative denyWritePaths")
 	}
@@ -58,8 +61,14 @@ func decodeStrict(data []byte, dst any) error {
 }
 
 func Validate(p SuitePolicy) error {
+	if p.Version == SchemaVersionV2 {
+		return validateNetworkProfile(p.DenyWritePaths, p.Network, p.RequiredCapabilities)
+	}
 	if p.Version != SchemaVersion {
 		return fmt.Errorf("unsupported policy version %q", p.Version)
+	}
+	if p.Network != nil {
+		return errors.New("network is not allowed in v1 policy")
 	}
 	if len(p.DenyWritePaths) == 0 {
 		return errors.New("denyWritePaths must not be empty")
@@ -118,6 +127,12 @@ func Resolve(s SuitePolicy, a AdministrativePolicy) (EffectivePolicy, error) {
 	if err := Validate(s); err != nil {
 		return EffectivePolicy{}, err
 	}
+	if s.Version == SchemaVersionV2 {
+		return resolveNetwork(s, a)
+	}
+	if a.Network != nil {
+		return EffectivePolicy{}, errors.New("administrative network is not allowed in v1 policy")
+	}
 	for _, item := range a.DenyWritePaths {
 		if err := validatePath(item); err != nil {
 			return EffectivePolicy{}, fmt.Errorf("administrative: %w", err)
@@ -139,24 +154,14 @@ func Resolve(s SuitePolicy, a AdministrativePolicy) (EffectivePolicy, error) {
 
 // CanonicalBytes emits at most 4 MiB of deterministic UTF-8 JSON for a fully valid effective policy.
 func CanonicalBytes(p EffectivePolicy) ([]byte, error) {
-	if p.Version != SchemaVersion {
-		return nil, errors.New("unsupported effective policy version")
-	}
-	if len(p.DenyWritePaths) == 0 {
-		return nil, errors.New("denyWritePaths must not be empty")
-	}
-	if len(p.DenyWritePaths) > 4096 {
-		return nil, errors.New("too many denyWritePaths")
-	}
-	for _, item := range p.DenyWritePaths {
-		if err := validatePath(item); err != nil {
-			return nil, err
-		}
-	}
-	if err := validateCapabilities(p.RequiredCapabilities); err != nil {
+	if err := Validate(SuitePolicy(p)); err != nil {
 		return nil, err
 	}
-	p.DenyWritePaths = uniqueSorted(p.DenyWritePaths)
+	if p.Version == SchemaVersionV2 {
+		p.Network = &NetworkPolicy{EgressAllow: normalizeEndpoints(p.Network.EgressAllow)}
+	} else {
+		p.DenyWritePaths = uniqueSorted(p.DenyWritePaths)
+	}
 	data, err := agentsuite.Marshal(p)
 	if err != nil {
 		return nil, err
@@ -184,7 +189,7 @@ func Payload(p EffectivePolicy) (ProviderPayload, error) {
 		return ProviderPayload{}, err
 	}
 	return ProviderPayload{
-		Version:              SchemaVersion,
+		Version:              p.Version,
 		PolicyBytes:          data,
 		PolicyDigest:         Digest(data),
 		RequiredCapabilities: append([]string(nil), p.RequiredCapabilities...),
@@ -192,19 +197,23 @@ func Payload(p EffectivePolicy) (ProviderPayload, error) {
 }
 
 func VerifyPayload(p ProviderPayload) error {
-	if p.Version != SchemaVersion {
+	if p.Version != SchemaVersion && p.Version != SchemaVersionV2 {
 		return errors.New("unsupported payload version")
 	}
-	if err := validateCapabilities(p.RequiredCapabilities); err != nil {
+	if err := validateProfileCapabilities(p.RequiredCapabilities, p.Version); err != nil {
 		return fmt.Errorf("payload: %w", err)
 	}
 	if Digest(p.PolicyBytes) != p.PolicyDigest {
 		return errors.New("policy digest mismatch")
 	}
-	var effective EffectivePolicy
-	if err := decodeStrict(p.PolicyBytes, &effective); err != nil {
+	inner, err := DecodeSuitePolicy(p.PolicyBytes)
+	if err != nil {
 		return fmt.Errorf("decode effective policy: %w", err)
 	}
+	if inner.Version != p.Version {
+		return errors.New("payload version does not match policy version")
+	}
+	effective := EffectivePolicy(inner)
 	canonical, err := CanonicalBytes(effective)
 	if err != nil {
 		return err

@@ -710,11 +710,11 @@ not substitutes. Evidence MUST additionally bind the member identifier and
 canonical manifest digest, composition and build-profile digests, and platform.
 A member result MUST NOT imply that other members or invoked agents passed.
 
-The execution identity MUST distinguish runtime identifier, version and
-implementation digest; model protocol, identifier and non-secret inference
-configuration digest; harness identifier and version; renderer, execution profile
-and execution configuration digest. These are reported, not provider-attested,
-identities. A pass MUST NOT qualify a different harness, runtime or model.
+The execution identity MUST distinguish runtime, harness, renderer and execution
+profile, each with its own identifier, version and implementation digest; model
+protocol, identifier and non-secret inference configuration digest; and execution
+configuration digest. These are reported, not provider-attested, identities.
+A pass MUST NOT qualify a different harness, runtime or model.
 
 The inventory MUST identify the public index and every ordered case by path and
 canonical descriptor. Evidence MUST retain index order; a filename-sorted hash
@@ -748,8 +748,8 @@ rules or request/tool-count observations require a supported policy/schema
 revision, never silent reinterpretation of v1.
 
 Evaluator identity, version, accepted policy and non-secret configuration identity
-MUST accompany start/completion UTC RFC3339 timestamps, with start no later than
-completion. Time is reported history, not trusted-clock or freshness proof.
+MUST accompany start/completion UTC RFC3339 timestamps ending in `Z`, with up to
+nine fractional-second digits and start no later than completion. Time is reported history, not trusted-clock or freshness proof.
 Producers MUST capture unavailable metadata when evaluating rather than invent
 it at export. Legacy records lacking required data MUST refuse export with a
 re-evaluation remedy; modification time or export time MUST NOT replace run time.

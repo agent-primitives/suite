@@ -142,6 +142,8 @@ type EvidenceJudgeConfiguration struct {
 // observed response model identities. Neither identity is attested. Each
 // observed model must exactly equal model or model + "-" + version. Scores and
 // observedModels are either both empty (unavailable) or both length two.
+// Producers must initialize empty slices rather than leave them nil: JSON null
+// is malformed; non-null empty arrays represent an unavailable observation.
 type EvidenceJudgeResult struct {
 	Configuration  EvidenceJudgeConfiguration `json:"configuration"`
 	ObservedModels []string                   `json:"observedModels"`

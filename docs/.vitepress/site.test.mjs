@@ -23,6 +23,20 @@ test('all documentation pages render with root-based navigation and assets', asy
   assert.match(home, /https:\/\/github.com\/agent-primitives\/suite/)
 })
 
+test('the landing page exposes the format and release-first reading paths without JavaScript', async () => {
+  const home = await html('index')
+  const article = home.match(/<article class="suite-home"[\s\S]*?<\/article>/)?.[0]
+  assert.ok(article, 'the format overview must be server-rendered')
+  assert.match(article, /href="https:\/\/github.com\/agent-primitives\/suite\/tree\/v0\.1\.0"[^>]*>v0\.1\.0<\/a>/)
+  assert.match(article, /docs track main/)
+  for (const route of ['spec', 'schemas', 'go', 'conformance']) {
+    assert.ok(article.includes(`href="/${route}"`), `missing ${route} entry point`)
+  }
+  for (const term of ['agentsuite.json', 'ToolProviders', 'canonical', 'exact bytes', 'does not execute']) {
+    assert.ok(article.includes(term), `missing format boundary: ${term}`)
+  }
+})
+
 test('the authoritative specification keeps every GitHub heading anchor', async () => {
   const { default: GithubSlugger } = await import('github-slugger')
   const slugger = new GithubSlugger()

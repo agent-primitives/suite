@@ -23,9 +23,11 @@ report, err := agentsuite.ValidatePath("./example-suite")
 if err != nil {
     return err
 }
-// Inspect report for conformance findings before using the content.
-_ = report
 ```
+
+A non-nil error means validation failed. On success, `report` summarizes the
+validated suite's name, counts, capabilities and composition selections; it does
+not contain a separate list of conformance failures.
 
 Use `ValidateDirectory` for extracted content without OCI auto-detection.
 Use `Unmarshal` rather than `encoding/json` directly when strict JSON decoding

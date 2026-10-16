@@ -1,7 +1,7 @@
 # JSON schemas
 
 Download the current main-branch schemas below. They are copied byte-for-byte
-from the repository's [schema directory](../schema/), not rendered as HTML.
+from the repository's schema directory, not rendered as HTML.
 
 - [agent.schema.json](../schema/agent.schema.json)
 - [build-profile.schema.json](../schema/build-profile.schema.json)

@@ -118,6 +118,46 @@ func TestAdministrativePolicyDecodeIsClosed(t *testing.T) {
 	}
 }
 
+func TestEffectivePolicyUsesUTF16PathOrdering(t *testing.T) {
+	suite := SuitePolicy{
+		Version:              SchemaVersion,
+		DenyWritePaths:       []string{"/\ue000", "/\U00010000", "/\ue000"},
+		RequiredCapabilities: []string{FilesystemDenyWrite},
+	}
+	effective, err := Resolve(suite, AdministrativePolicy{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"/\U00010000", "/\ue000"}
+	if !equalStrings(effective.DenyWritePaths, want) {
+		t.Fatalf("Resolve path order = %q, want UTF-16 order %q", effective.DenyWritePaths, want)
+	}
+
+	reversed := EffectivePolicy{
+		Version:              SchemaVersion,
+		DenyWritePaths:       []string{"/\ue000", "/\U00010000", "/\ue000"},
+		RequiredCapabilities: []string{FilesystemDenyWrite},
+	}
+	got, err := CanonicalBytes(reversed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fixture, err := os.ReadFile(filepath.Join("testdata", "effective-policy-ordering-v1.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, fixture) {
+		t.Fatalf("CanonicalBytes ordering vector = %s, want %s", got, fixture)
+	}
+	wantDigest, err := os.ReadFile(filepath.Join("testdata", "effective-policy-ordering-v1.sha256"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := Digest(fixture); got != strings.TrimSpace(string(wantDigest)) {
+		t.Fatalf("ordering vector digest = %s, want %s", got, strings.TrimSpace(string(wantDigest)))
+	}
+}
+
 func TestPolicyDecodeRejectsUnpairedSurrogate(t *testing.T) {
 	input := `{"version":"agentsuite.policy/v1","denyWritePaths":["/safe/\udcff"],"requiredCapabilities":["filesystem/deny-write/v1"]}`
 	if _, err := DecodeSuitePolicy([]byte(input)); err == nil {

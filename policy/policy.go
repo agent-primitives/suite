@@ -9,8 +9,10 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"slices"
 	"sort"
 	"strings"
+	"unicode/utf16"
 	"unicode/utf8"
 
 	agentsuite "github.com/agent-primitives/suite"
@@ -123,11 +125,24 @@ func uniqueSorted(groups ...[]string) []string {
 			values[value] = struct{}{}
 		}
 	}
-	out := make([]string, 0, len(values))
-	for value := range values {
-		out = append(out, value)
+	type sortablePath struct {
+		value string
+		key   []uint16
 	}
-	sort.Strings(out)
+	sorted := make([]sortablePath, 0, len(values))
+	for value := range values {
+		sorted = append(sorted, sortablePath{
+			value: value,
+			key:   utf16.Encode([]rune(value)),
+		})
+	}
+	sort.Slice(sorted, func(i, j int) bool {
+		return slices.Compare(sorted[i].key, sorted[j].key) < 0
+	})
+	out := make([]string, len(sorted))
+	for i := range sorted {
+		out[i] = sorted[i].value
+	}
 	return out
 }
 

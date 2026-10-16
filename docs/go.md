@@ -49,8 +49,7 @@ canonical bytes and the policy-specific framed digest. `ValidatePath` validates
 optional `Agent.Policy` FileRefs and reuses the same policy semantic decoder.
 The root artifact content digest and policy-specific framed digest stay distinct.
 
-The network-only v2 API is an **unreleased development addition**, not part of
-v0.2.0. Once a maintainer publishes the next minor release, pin that version
+The network-only v2 API is available from v0.3.0; pin that version or later
 before using it. V1 filesystem policies remain supported without conversion.
 
 Use `DecodeSuitePolicy` to read the explicit version, then

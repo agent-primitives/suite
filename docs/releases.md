@@ -7,12 +7,11 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
-## Unreleased — planned v0.3.0 policies and Agent binding
+## v0.3.0 — policies, Agent binding and inference contracts
 
-The planned v0.3.0 minor release combines standalone network-only policy v2
-with optional per-Agent policy descriptor binding and graph validation. Neither
-change creates a release tag. Neither is included in v0.2.0, which introduced the
-filesystem policy package.
+v0.3.0 combines standalone network-only policy v2, optional per-Agent policy
+descriptor binding with graph validation, and experimental inference and
+execution contracts. v0.2.0 introduced the filesystem policy package.
 
 - Opt into `agentsuite.policy/v2` / `SchemaVersionV2` for exact IPv4/TCP/port
   allowances. An empty list denies all; admin restrictions intersect.

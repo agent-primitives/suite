@@ -7,10 +7,11 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
-## Unreleased — standalone network-only policy v2 (next minor)
+## Unreleased — planned v0.3.0 policies and Agent binding
 
-This development addition requires a new minor module release; no new tag is
-created by the change. It is not included in v0.2.0, which introduced the
+The planned v0.3.0 minor release combines standalone network-only policy v2
+with optional per-Agent policy descriptor binding and graph validation. Neither
+change creates a release tag. Neither is included in v0.2.0, which introduced the
 filesystem policy package.
 
 - Opt into `agentsuite.policy/v2` / `SchemaVersionV2` for exact IPv4/TCP/port
@@ -28,8 +29,19 @@ filesystem policy package.
   preserve exact bytes, and reject mismatched payload versions/capabilities.
   `VerifyPayload` validates either contract, not provider support: a filesystem-only
   provider must still explicitly refuse v2/network requirements.
-- Standalone validation is not runtime enforcement or Agent/OCI graph binding.
-  Per-Agent descriptor binding is a subsequent change, not part of this release note.
+- Agents gain optional `policy` FileRefs at `policies/<agent-id>.json`. Existing
+  no-policy Agents remain valid and serialize unchanged; explicit null refuses.
+  Use keyed `Agent` literals because the Go struct gains a field. Older validators
+  that do not know this field must refuse rather than silently ignore it.
+- Binding validates v1/v2 authored policy semantics, version-matched media types,
+  exact ordinary content descriptors and closed policy graph membership in both
+  extracted and OCI content. A changed policy requires rebinding its Agent and
+  suite ancestors. Framed effective-policy identity is not an OCI descriptor hash.
+- The JSON codec moves unchanged to `internal/jsoncodec` behind the existing root
+  public wrappers. Existing strict-decoding and canonical-byte behavior is retained.
+- Neither standalone nor graph validation establishes runtime enforcement or
+  provider support. No runtime wiring, installed/active claim or release publication
+  is included.
 
 See the [normative policy contract](../spec.md#appendix-b-standalone-policy-contracts-normative)
 and [reference schemas](schemas.md).

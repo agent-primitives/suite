@@ -29,7 +29,9 @@ from the repository's schema directory, not rendered as HTML.
 - [policy-v2.schema.json](../schema/policy-v2.schema.json): authored/effective IPv4 TCP egress allowances.
 - [administrative-policy-v2.schema.json](../schema/administrative-policy-v2.schema.json): optional intersecting restrictions.
 
-These development additions do not add an Agent descriptor or OCI graph edge.
+The Agent schema also defines optional policy FileRefs; the validator checks
+owning-Agent paths, descriptor/version agreement and closed policy graph membership.
+See [Agent policy binding](../spec.md#83-agent-policy-binding).
 See the [normative policy contract](../spec.md#appendix-b-standalone-policy-contracts-normative).
 
 ## Validation and identity
@@ -46,8 +48,9 @@ Hosting of the new policy identifiers is likewise separate from the raw download
 
 Schemas validate document shapes. The [Go validator](go.md) additionally checks
 cross-document references, canonical bytes, descriptors and the closed content graph.
-Standalone policy decoding and payload verification use the separate `policy`
-package, not automatic discovery by `ValidatePath`.
+Policy semantics and payload verification use the `policy` package. `ValidatePath`
+reuses its semantic decoder for explicitly bound authored policy files; unreferenced
+files in the policy namespace refuse rather than being silently discovered or applied.
 
 For release-pinned schemas, use the
 [v0.1.0 schema directory](https://github.com/agent-primitives/suite/tree/v0.1.0/schema).

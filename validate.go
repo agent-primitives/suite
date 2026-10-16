@@ -76,6 +76,7 @@ func validateContentGraph(content *contentSet) (*validator, *Report, error) {
 	var errs []error
 	errs = append(errs, v.validateSuite())
 	errs = append(errs, v.loadAgents())
+	errs = append(errs, v.validatePolicies())
 	errs = append(errs, v.validateEvaluations())
 	errs = append(errs, v.loadToolProviders())
 	errs = append(errs, v.loadBuildProfiles())
@@ -226,6 +227,10 @@ func (v *validator) loadAgents() error {
 		var fields map[string]json.RawMessage
 		if err := json.Unmarshal(data, &fields); err != nil {
 			errs = append(errs, fmt.Errorf("agent %s: %w", ref.ID, err))
+			continue
+		}
+		if raw, exists := fields["policy"]; exists && isJSONNull(raw) {
+			errs = append(errs, fmt.Errorf("agent %s policy must not be null", ref.ID))
 			continue
 		}
 		if raw, exists := fields["evals"]; exists && strings.TrimSpace(string(raw)) == "null" {

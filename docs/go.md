@@ -45,8 +45,9 @@ package.
 ## Standalone policy contracts
 
 The `github.com/agent-primitives/suite/policy` package owns policy resolution,
-canonical bytes and the policy-specific framed digest. It is separate from
-`ValidatePath` and the root artifact content digest.
+canonical bytes and the policy-specific framed digest. `ValidatePath` validates
+optional `Agent.Policy` FileRefs and reuses the same policy semantic decoder.
+The root artifact content digest and policy-specific framed digest stay distinct.
 
 The network-only v2 API is an **unreleased development addition**, not part of
 v0.2.0. Once a maintainer publishes the next minor release, pin that version
@@ -56,7 +57,16 @@ Use `DecodeSuitePolicy` to read the explicit version, then
 `DecodeAdministrativePolicyForVersion(data, suite.Version)`, `Resolve` and
 `Payload`. Verify a provider carrier with `VerifyPayload`, and preserve its
 `PolicyBytes` unchanged. Legacy `DecodeAdministrativePolicy` stays v1-only.
-This flow does not bind a policy to an Agent or execute/qualify a runtime.
+This flow resolves effective deployment policy separately from optional authored
+Agent bindings. Graph validation verifies the declared authored file's bytes;
+it does not apply administrative restrictions or execute/qualify a runtime.
+
+The optional `Agent.Policy` points to `policies/<agent-id>.json` using
+`MediaTypePolicyV1` or `MediaTypePolicyV2`, matching the document's version.
+Its descriptor hashes the exact authored JCS bytes with ordinary content SHA-256;
+never put `policy.Digest` in that descriptor. Bind the policy descriptor into the
+Agent, then rebind the Agent descriptor into the suite manifest. Existing Agents
+with nil `Policy` retain their prior serialized form. Use keyed struct literals.
 
 See the
 [normative specification](../spec.md#appendix-b-standalone-policy-contracts-normative).

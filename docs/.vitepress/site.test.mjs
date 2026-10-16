@@ -7,7 +7,7 @@ import { latestRelease } from './release.mjs'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const dist = path.join(root, 'docs/.vitepress/dist')
-const schemas = ['administrative-policy-v2', 'agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'execution', 'inference', 'policy-v2', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
+const schemas = ['administrative-policy-v2', 'agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'execution', 'inference', 'policy-v2', 'runtime-profile', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
 const policySchemaIDs = {
   'policy-v2.schema.json': 'https://kaimahi.dev/schemas/agentsuite/policy/v2/policy.schema.json',
   'administrative-policy-v2.schema.json': 'https://kaimahi.dev/schemas/agentsuite/policy/v2/administrative-policy.schema.json'

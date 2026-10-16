@@ -55,6 +55,7 @@
         "required": ["agent", "platform", "path", "descriptor"],
         "properties": {
           "agent": {"$ref": "#/$defs/id"},
+          "runtimeProfile": {"$ref": "#/$defs/id"},
           "platform": {"$ref": "#/$defs/platform"},
           "path": {"$ref": "#/$defs/path"},
           "descriptor": {"$ref": "#/$defs/descriptor"}
@@ -62,6 +63,11 @@
       }
     },
     "buildProfiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/ref"}
+    },
+    "runtimeProfiles": {
       "type": "array",
       "minItems": 1,
       "items": {"$ref": "#/$defs/ref"}

@@ -11,6 +11,7 @@
     "agent": {"$ref": "#/$defs/id"},
     "platform": {"$ref": "#/$defs/platform"},
     "buildProfile": {"$ref": "#/$defs/id"},
+    "runtimeProfile": {"$ref": "#/$defs/id"},
     "toolProviders": {
       "type": "array",
       "uniqueItems": true,

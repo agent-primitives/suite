@@ -32,10 +32,11 @@ type Report struct {
 }
 
 type CompositionSelection struct {
-	Agent        string   `json:"agent"`
-	Platform     Platform `json:"platform"`
-	BuildProfile string   `json:"buildProfile"`
-	Digest       string   `json:"digest"`
+	RuntimeProfile string   `json:"runtimeProfile,omitempty"`
+	Agent          string   `json:"agent"`
+	Platform       Platform `json:"platform"`
+	BuildProfile   string   `json:"buildProfile"`
+	Digest         string   `json:"digest"`
 }
 
 type validator struct {
@@ -47,6 +48,7 @@ type validator struct {
 	toolProviderCompositions map[string]ToolProviderComposition
 	compositions             map[string]Composition
 	builds                   map[string]BuildProfile
+	runtimes                 map[string]RuntimeProfile
 }
 
 func validateContent(content *contentSet) (*Report, error) {
@@ -72,6 +74,7 @@ func validateContentGraph(content *contentSet) (*validator, *Report, error) {
 		toolProviderCompositions: map[string]ToolProviderComposition{},
 		compositions:             map[string]Composition{},
 		builds:                   map[string]BuildProfile{},
+		runtimes:                 map[string]RuntimeProfile{},
 	}
 	var errs []error
 	errs = append(errs, v.validateSuite())
@@ -80,6 +83,7 @@ func validateContentGraph(content *contentSet) (*validator, *Report, error) {
 	errs = append(errs, v.validateEvaluations())
 	errs = append(errs, v.loadToolProviders())
 	errs = append(errs, v.loadBuildProfiles())
+	errs = append(errs, v.loadRuntimeProfiles())
 	errs = append(errs, v.loadToolProviderCompositions())
 	errs = append(errs, v.loadCompositions())
 	errs = append(errs, v.validateReferences())
@@ -98,27 +102,27 @@ func validateContentGraph(content *contentSet) (*validator, *Report, error) {
 		slices.SortFunc(platforms, func(a, b Platform) int {
 			return strings.Compare(a.String(), b.String())
 		})
-		agentPlatforms = append(agentPlatforms, AgentPlatform{ID: agentID, Platforms: platforms})
+		agentPlatforms = append(agentPlatforms, AgentPlatform{ID: agentID, Platforms: slices.Compact(platforms)})
 	}
 	slices.SortFunc(agentPlatforms, func(a, b AgentPlatform) int {
 		return strings.Compare(a.ID, b.ID)
 	})
 	selections := make([]CompositionSelection, 0, len(v.suite.Compositions))
 	for _, ref := range v.suite.Compositions {
-		key := ref.Agent + "@" + ref.Platform.String()
+		key := compositionKey(ref.Agent, ref.Platform, ref.RuntimeProfile)
 		composition, ok := v.compositions[key]
 		if !ok {
 			continue
 		}
 		selections = append(selections, CompositionSelection{
-			Agent: ref.Agent, Platform: ref.Platform,
+			Agent: ref.Agent, Platform: ref.Platform, RuntimeProfile: ref.RuntimeProfile,
 			BuildProfile: composition.BuildProfile, Digest: ref.Descriptor.Digest,
 		})
 	}
 	slices.SortFunc(selections, func(a, b CompositionSelection) int {
 		return strings.Compare(
-			a.Agent+"@"+a.Platform.String()+"@"+a.BuildProfile,
-			b.Agent+"@"+b.Platform.String()+"@"+b.BuildProfile,
+			compositionKey(a.Agent, a.Platform, a.RuntimeProfile)+"@"+a.BuildProfile,
+			compositionKey(b.Agent, b.Platform, b.RuntimeProfile)+"@"+b.BuildProfile,
 		)
 	})
 	report := &Report{
@@ -376,8 +380,14 @@ func (v *validator) loadToolProviderCompositions() error {
 
 func (v *validator) loadCompositions() error {
 	var errs []error
+	profiled := map[string]bool{}
 	for _, ref := range v.suite.Compositions {
-		key := ref.Agent + "@" + ref.Platform.String()
+		tuple := compositionKey(ref.Agent, ref.Platform, "")
+		if previous, exists := profiled[tuple]; exists && previous != (ref.RuntimeProfile != "") {
+			errs = append(errs, fmt.Errorf("composition %s mixes legacy and runtime profile selections", tuple))
+		}
+		profiled[tuple] = ref.RuntimeProfile != ""
+		key := compositionKey(ref.Agent, ref.Platform, ref.RuntimeProfile)
 		if _, exists := v.compositions[key]; exists {
 			errs = append(errs, fmt.Errorf("duplicate composition %s", key))
 			continue
@@ -400,7 +410,7 @@ func (v *validator) loadCompositions() error {
 			errs = append(errs, fmt.Errorf("composition %s: %w", key, err))
 			continue
 		}
-		if composition.Agent != ref.Agent || composition.Platform != ref.Platform {
+		if composition.Agent != ref.Agent || composition.Platform != ref.Platform || composition.RuntimeProfile != ref.RuntimeProfile {
 			errs = append(errs, fmt.Errorf("composition %s identity does not match its reference", key))
 			continue
 		}
@@ -408,6 +418,18 @@ func (v *validator) loadCompositions() error {
 		if !ok || !profileSupportsPlatform(profile, composition.Platform) {
 			errs = append(errs, fmt.Errorf("composition %s build profile %q does not support %s", key, composition.BuildProfile, composition.Platform))
 			continue
+		}
+		if composition.RuntimeProfile != "" {
+			runtime, ok := v.runtimes[composition.RuntimeProfile]
+			if !ok {
+				errs = append(errs, fmt.Errorf("composition %s references unknown runtime profile %s", key, composition.RuntimeProfile))
+				continue
+			}
+			for _, image := range profile.Harness {
+				if image.Platform == composition.Platform && image.Image.Digest != runtime.Harness.Digest {
+					errs = append(errs, fmt.Errorf("composition %s runtime profile harness digest mismatch", key))
+				}
+			}
 		}
 		v.compositions[key] = composition
 	}

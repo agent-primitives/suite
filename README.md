@@ -8,7 +8,7 @@ ToolProvider, composition, and build-profile manifests.
 This standalone Go module, `github.com/agent-primitives/suite`, provides:
 
 - public types for suites, agents, ToolProviders, callable Tools, compositions,
-  and build profiles;
+  build profiles, and optional [runtime profiles](spec.md#111-runtime-profiles);
 - media types and specification version constants;
 - strict JSON decoding with closed-field and duplicate-key enforcement;
 - JCS canonical encoding and digest calculation;

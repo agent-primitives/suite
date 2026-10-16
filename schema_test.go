@@ -409,7 +409,7 @@ func compileReferenceSchema(t *testing.T, name string) *jsonschema.Resolved {
 	}
 	resolved, err := schema.Resolve(&jsonschema.ResolveOptions{Loader: func(uri *url.URL) (*jsonschema.Schema, error) {
 		name := filepath.Base(uri.Path)
-		if uri.String() != "https://kaimahi.dev/schemas/agentsuite/v1/"+name || name != "inference.schema.json" && name != "execution.schema.json" {
+		if uri.String() != "https://kaimahi.dev/schemas/agentsuite/v1/"+name || name != "inference.schema.json" && name != "execution.schema.json" && name != "suite.schema.json" && name != "eval-evidence.schema.json" {
 			return nil, fmt.Errorf("unsupported schema reference")
 		}
 		data, err := os.ReadFile(filepath.Join("schema", name))

@@ -79,7 +79,7 @@ A **descriptor** is a closed object:
 
 - for a content reference whose referenced file is a normative AgentSuite JSON
   document (agent, tool provider, tool provider catalog, composition, tool
-  provider composition, build profile, evaluation index, evaluation case and
+  provider composition, build profile, runtime profile, evaluation index, evaluation case and
   authored policy manifests), `digest` and `size` describe the [RFC 8785 JCS canonical
   representation](#61-canonical-json) of that document, and the referenced
   file itself MUST be stored on disk as those exact canonical bytes: a
@@ -178,6 +178,7 @@ change the image-local closure.
 | [ToolProvider catalog](#91-toolprovider-catalog) | `application/vnd.agentsuite.tool.provider.catalog.v1+json` |
 | [ToolProvider manifest](#9-tool-providers-and-tools) | `application/vnd.agentsuite.tool.provider.v1+json` |
 | [Composition manifest](#10-composition-manifests) | `application/vnd.agentsuite.composition.v1+json` |
+| [Runtime profile](#111-runtime-profiles) | `application/vnd.agentsuite.runtime.profile.v1+json` |
 | [ToolProvider composition](#101-toolprovider-compositions) | `application/vnd.agentsuite.tool.provider.composition.v1+json` |
 | [Build profile](#11-build-profiles) | `application/vnd.agentsuite.build.profile.v1+json` |
 | [Agent sandbox binding](#13-agent-sandbox-binding) | `application/vnd.agentsuite.sandbox.binding.v1+json` |
@@ -320,6 +321,8 @@ serialization details.
 │   └── <provider>-<os>-<architecture>.json
 ├── build-profiles/
 │   └── <profile>.json
+├── runtime-profiles/
+│   └── <profile>.json
 └── metadata/
     └── ...
 ```
@@ -408,7 +411,7 @@ of optional members.
 An agent composition resolves:
 
 ```text
-agent + platform + build profile + zero or more tool providers
+agent + platform + optional runtime profile + build profile + zero or more tool providers
 ```
 
 A ToolProvider composition resolves:
@@ -419,7 +422,10 @@ tool provider manifest + platform variant + build profile
 
 The digest in a suite `compositions` reference is the JCS digest of the
 complete composition manifest. The manifest is an exact, resolved result, not
-a version constraint or resolver input.
+a version constraint or resolver input. Runtime profiles have their own canonical
+content descriptors in the suite root. Changing any profile changes the suite
+root and packaged OCI manifest identity **S**; selecting an already packaged
+profile MUST NOT repackage S. One suite may require several images.
 
 The digest in a suite `toolProviderCompositions` reference is the JCS digest of the
 complete ToolProvider composition manifest.
@@ -434,6 +440,8 @@ complete ToolProvider composition manifest.
 - one or more per-agent, per-platform compositions;
 - zero or more per-provider, per-platform ToolProvider compositions (`toolProviderCompositions`);
 - one or more descriptor-bound build profiles;
+- optional `runtimeProfiles`, a nonempty array of descriptor-bound `ManifestRef`
+  objects (`id`, `path`, `descriptor`, optional `version`);
 - capabilities derived from tool provider declarations;
 - optional non-critical extensions.
 
@@ -745,6 +753,24 @@ profile, each with its own identifier, version and implementation digest; model
 protocol, identifier and non-secret inference configuration digest; and execution
 configuration digest. These are reported, not provider-attested, identities.
 A pass MUST NOT qualify a different harness, runtime or model.
+
+For a profiled composition (§10), the verifier MUST resolve the exact composition
+by member, platform and composition digest, not array position or legacy pair.
+`execution.runtime`, `harness` and `renderer` MUST equal the selected runtime
+profile's identities. `execution.profile` MUST equal that profile's `id`, the
+suite `schemaVersion` (`1.0.0-draft`) as `version`, and its canonical descriptor
+digest. Configuration ABI and image requirements bind through this profile digest.
+Producers and callers MUST include image identity (when required), selected ABI
+and non-secret execution settings in their documented execution-configuration
+projection. The verifier compares its opaque digest to independent expectations;
+it cannot inspect the preimage or prove that an image identity was included.
+Image/build associations remain consumer-owned; evidence v1 gains no image field.
+
+The same S and member/cases may have separate detached passes for two profiles.
+A pass for one runtime MUST NOT qualify another. Relabeling execution claims and
+expectations together while retaining the source composition MUST refuse.
+Rewriting unsigned subjects, claims and expectations together is not detectable
+forgery: independent expectations and trusted evaluation remain caller duties.
 
 The inventory MUST identify the public index and every ordered case by path and
 canonical descriptor. Evidence MUST retain index order; a filename-sorted hash
@@ -1408,7 +1434,7 @@ to, for every call.
 ## 10. Composition manifests
 
 A composition manifest is the closed, resolved, digest-pinned composition of
-one agent for one exact platform and one build profile. It is not the suite
+one agent for one exact platform, optional runtime profile and one build profile. It is not the suite
 tool provider catalog and it is not a request for runtime resolution. It MUST NOT be
 applied to a different agent.
 
@@ -1417,16 +1443,16 @@ not a runtime actor template, deployment object, or snapshot policy. Runtime
 systems MAY derive their own templates from the resulting image, but those
 templates and their lifecycle policies are outside this specification.
 
-The suite-level composition selection key is the tuple:
-
-```text
-(agent, platform)
-```
-
-The composition selects exactly one `buildProfile`. A suite MUST contain exactly
-one composition for each supported `(agent, platform)` pair; selecting another
-build profile therefore requires replacing that composition and its digest,
-rather than adding an ambiguous second composition for the same pair.
+The suite-level composition selection key is `(agent, platform)` for legacy
+compositions, or `(agent, platform, runtimeProfile)` when profiled. The optional
+`runtimeProfile` identifier MUST be nonempty when present, MUST resolve to one
+suite-local profile (§11.1), and MUST agree on reference and manifest. Explicit
+null or empty selectors, duplicate keys, dangling profiles, and mixing legacy
+and profiled compositions for the same agent/platform MUST refuse. There is no
+implicit profile selection or fallback. Each key selects exactly one
+`buildProfile`; changing that selection replaces the composition and its digest.
+All profiles share the same member manifest: profiles MUST NOT override its
+instructions, model, policy, ordered cases, tool requirements or invocation edges.
 
 Its `toolProviders` array MUST be sorted lexicographically by `id` and then `version`.
 For every provider requirement in the named agent manifest, it MUST contain exactly
@@ -1488,8 +1514,8 @@ additional top-level resolved provider records unless the agent also declares th
 directly.
 
 An agent with no tool provider requirements still MUST have an empty composition for
-each supported platform. The empty composition explicitly binds the agent to a
-platform and build profile and prevents ambient runtime tools from becoming
+each supported platform/profile selection. The empty composition explicitly binds the agent to a
+platform, optional runtime profile and build profile and prevents ambient runtime tools from becoming
 implicitly authorized.
 
 The same immutable tool provider and variant may appear in several compositions.
@@ -1624,6 +1650,37 @@ MUST validate the combined final filesystem against each bundled provider's ABI,
 dynamic loader, shared library, interpreter, CA bundle, NSS, shell, required
 path, and CPU-baseline requirements.
 
+### 11.1 Runtime profiles
+
+The optional closed [runtime-profile schema](schema/runtime-profile.schema.json)
+pins execution declarations. All fields are REQUIRED and non-null:
+
+| Field | Requirement |
+|---|---|
+| `schemaVersion`, `mediaType` | `1.0.0-draft`, `application/vnd.agentsuite.runtime.profile.v1+json`. |
+| `id` | Suite-local identifier matching its reference; also valid as an evidence identifier. |
+| `runtime`, `harness`, `renderer` | Each is a closed evidence implementation identity: `id`, `version`, `digest` (§8.2.4). |
+| `configurationABI` | Opaque consumer-owned identifier matching `^[a-z0-9][a-z0-9._-]{0,127}$`. |
+| `imageRequired` | Explicit boolean; false is permitted and MUST NOT be treated as omission. |
+
+Profile IDs MUST be unique; every reference MUST resolve canonical bytes with
+matching identity, media type, digest and size. Every selecting composition MUST
+have a build profile supporting its platform. The runtime profile's harness digest
+MUST equal the build profile's selected platform harness image digest.
+
+Runtime profiles declare requirements, not installed implementations or runtime
+support. The portable validator checks shape and graph consistency only; execution
+consumers MUST refuse unsupported runtime, harness, renderer, configuration ABI,
+image or policy requirements, without fallback. Endpoints, credentials, placement
+and snapshots remain external bindings, not profile fields. Build-profile
+`execution` remains image-serving metadata; its AgentKit HTTP ABI does not imply
+support for another harness protocol.
+
+Omitting all new optional fields preserves legacy bytes, validity and canonical
+digests without migration. New readers support both paths; older strict readers
+reject profiled documents as unknown fields. This additive format/API and diff
+change requires a Go module minor release, not a format/media-type rename.
+
 ## 12. Agent Sandbox Image construction
 
 Construction MUST be a pure, offline file-composition operation:
@@ -1742,7 +1799,8 @@ A conforming suite validator asserts:
 | `AS-ID-001` | Every content-addressed identity matches its normative algorithm. |
 | `AS-GRAPH-001` | All manifest and invocation references form a closed graph. |
 | `AS-EVAL-001` | Optional evaluations conform to §8.2. |
-| `AS-COMPOSE-001` | Every agent/platform composition exactly resolves its declared tool providers and contains no ambient providers. |
+| `AS-COMPOSE-001` | Every agent/platform/profile composition exactly resolves its declared tool providers and contains no ambient providers. |
+| `AS-RUNTIME-001` | Optional runtime profiles and selections satisfy §10 and §11.1 shape, identity, uniqueness and harness consistency. |
 | `AS-PROVIDER-COMPOSE-001` | Every ToolProvider composition resolves one exact same-platform variant, dependency closure, and runtime base. |
 | `AS-PROVIDER-001` | Bundled variants match content inventory and exact platforms; remote ToolProviders contain only supported transports and valid references. |
 | `AS-SECRET-001` | Content contains references and names, not credential-shaped literal values. |
@@ -1757,6 +1815,11 @@ plane. Validation MUST NOT invoke an agent, tool, model, or judge.
 The CLI validation report counts `toolProviders` and
 `toolProviderCompositions`. These counts describe provider manifests and
 standalone provider compositions, respectively; they do not count callable tools.
+`compositionSelections` includes optional `runtimeProfile`; `agentPlatforms` remains
+a deduplicated platform inventory. Semantic diff uses legacy composition IDs
+`agent@platform` or profiled IDs `agent@platform@profile`, and `runtimeProfile`
+records keyed by profile ID. Profile changes affect only selecting members, plus
+existing transitive invocation impact. Legacy report/diff outputs are unchanged.
 
 ### 15.2 Sandbox image validator
 

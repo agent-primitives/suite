@@ -13,6 +13,7 @@ from the repository's schema directory, not rendered as HTML.
 - [tool-provider.schema.json](../schema/tool-provider.schema.json): provider contracts and variants.
 - [composition.schema.json](../schema/composition.schema.json): agent and provider selections.
 - [build-profile.schema.json](../schema/build-profile.schema.json): sandbox build inputs.
+- [runtime-profile.schema.json](../schema/runtime-profile.schema.json): optional pinned runtime/harness/renderer requirements and configuration ABI.
 - [tool-provider-composition.schema.json](../schema/tool-provider-composition.schema.json): standalone provider composition.
 
 ## Optional evaluations

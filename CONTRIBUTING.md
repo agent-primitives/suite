@@ -51,7 +51,8 @@ path-filtered. The Go job runs every test uncached, rejects all skipped tests an
 requires explicit passing results for the existing minimal, coordinator-workers,
 remote-MCP, bundled-provider, standalone-provider-composition, embedded-evaluation
 and OCI conformance tests, plus policy-binding fixture/schema/digest-propagation
-coverage. A missing or renamed required test must not become
+coverage. Generated two-runtime-profile graph/schema and same-OCI separate-evidence
+conformance tests are also required passes. A missing or renamed required test must not become
 a green empty selection. Race tests, vet, staticcheck and formatting also gate CI.
 
 The small offline docs checker covers local links and Markdown heading anchors

@@ -25,6 +25,7 @@ const (
 	MediaTypeToolProviderComposition = "application/vnd.agentsuite.tool.provider.composition.v1+json"
 	MediaTypeComposition             = "application/vnd.agentsuite.composition.v1+json"
 	MediaTypeBuildProfile            = "application/vnd.agentsuite.build.profile.v1+json"
+	MediaTypeRuntimeProfile          = "application/vnd.agentsuite.runtime.profile.v1+json"
 	MediaTypeInstructions            = "text/markdown; charset=utf-8"
 	MediaTypeJSONSchema              = "application/schema+json"
 
@@ -135,6 +136,7 @@ type Suite struct {
 	ToolProviderCompositions []ToolProviderCompositionRef `json:"toolProviderCompositions,omitempty"`
 	Compositions             []CompositionRef             `json:"compositions"`
 	BuildProfiles            []ManifestRef                `json:"buildProfiles"`
+	RuntimeProfiles          []ManifestRef                `json:"runtimeProfiles,omitempty"`
 	Capabilities             []string                     `json:"capabilities,omitempty"`
 	Extensions               []Extension                  `json:"extensions,omitempty"`
 }
@@ -147,10 +149,11 @@ type ManifestRef struct {
 }
 
 type CompositionRef struct {
-	Agent      string     `json:"agent"`
-	Platform   Platform   `json:"platform"`
-	Path       string     `json:"path"`
-	Descriptor Descriptor `json:"descriptor"`
+	RuntimeProfile string     `json:"runtimeProfile,omitempty"`
+	Agent          string     `json:"agent"`
+	Platform       Platform   `json:"platform"`
+	Path           string     `json:"path"`
+	Descriptor     Descriptor `json:"descriptor"`
 }
 
 type ToolProviderCompositionRef struct {
@@ -413,12 +416,13 @@ type PlatformImage struct {
 }
 
 type Composition struct {
-	SchemaVersion string                 `json:"schemaVersion"`
-	MediaType     string                 `json:"mediaType"`
-	Agent         string                 `json:"agent"`
-	Platform      Platform               `json:"platform"`
-	BuildProfile  string                 `json:"buildProfile"`
-	ToolProviders []ResolvedToolProvider `json:"toolProviders"`
+	RuntimeProfile string                 `json:"runtimeProfile,omitempty"`
+	SchemaVersion  string                 `json:"schemaVersion"`
+	MediaType      string                 `json:"mediaType"`
+	Agent          string                 `json:"agent"`
+	Platform       Platform               `json:"platform"`
+	BuildProfile   string                 `json:"buildProfile"`
+	ToolProviders  []ResolvedToolProvider `json:"toolProviders"`
 }
 
 type ResolvedToolProvider struct {

@@ -94,7 +94,7 @@ for (const colorScheme of ['light', 'dark']) {
         }
         if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, `after-spec-${device}-${colorScheme}.png`), fullPage: true })
         await ready(page, '/schemas')
-        assert.equal(await page.locator('.vp-doc a[href^="/schema/"]').count(), 8)
+        assert.equal(await page.locator('.vp-doc a[href^="/schema/"]').count(), 9)
         const response = await page.request.get(`${origin}/schema/agent.schema.json`)
         assert.equal(response.status(), 200)
         assert.equal((await response.json()).$id, 'https://kaimahi.dev/schemas/agentsuite/v1/agent.schema.json')

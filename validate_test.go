@@ -1752,6 +1752,8 @@ func tarDirectory(t *testing.T, root string) []byte {
 		header.Name = filepath.ToSlash(relative)
 		header.Uid = 0
 		header.Gid = 0
+		header.Uname = ""
+		header.Gname = ""
 		header.ModTime = time.Unix(0, 0)
 		header.AccessTime = time.Time{}
 		header.ChangeTime = time.Time{}

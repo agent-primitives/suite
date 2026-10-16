@@ -655,8 +655,9 @@ size. The referring manifest follows the
 [OCI artifact guidance][oci-artifact-guidance].
 Discovery follows [OCI Distribution][oci-distribution-spec]
 referrers semantics, not a new registry endpoint. Private local result files
-MAY remain unpublished. Result payload schemas, signatures, trust policy, and
-local storage formats are outside this draft.
+MAY remain unpublished. The public v1 evidence payload is defined in §8.2.4.
+Other result payload schemas, signatures, trust policy, and private local
+storage formats are outside this draft.
 
 Results SHOULD additionally identify the agent and its digest, index and ordered
 case digests, target composition digest (§6.4), observed runtime/model, evaluator
@@ -664,6 +665,148 @@ policy/configuration, and ordered per-assertion verdicts. Trust considerations
 are defined in §17.
 
 See the [writer evaluation example](testdata/coordinator-workers/evals/writer/).
+
+#### 8.2.4 Portable evaluation evidence
+
+A portable evidence document records an unsigned claim about a complete evaluation
+of one member, composition, platform, and execution subject. Its `schemaVersion`
+MUST be `1.0.0`, independent of the suite format version, and its `mediaType`
+MUST be `application/vnd.agentsuite.eval.evidence.v1+json`.
+The closed reference schema is
+[`eval-evidence.schema.json`](schema/eval-evidence.schema.json).
+
+All objects are closed. All fields below are REQUIRED except an assertion's
+`judge`; explicit `null` is never allowed. Schema validation checks storage
+shape, not evaluation success. The wire objects are:
+
+| Object | Fields |
+|---|---|
+| Document | `schemaVersion`, `mediaType`, `subject`, `execution`, `evaluation`, `evaluator`, `results`. |
+| `subject` | `manifest`, `memberID`, `memberDigest`, `compositionDigest`, `buildProfileDigest`, `platform`. |
+| Descriptor | `mediaType`, `digest`, `size`; annotations, URLs and embedded data are forbidden. |
+| `platform` | `os`, `architecture`, `variant` (the empty string means no variant). |
+| `execution` | `runtime`, `model`, `harness`, `renderer`, `profile`, `configurationDigest`. |
+| Implementation | `id`, `version`, `digest`; used separately by runtime, harness, renderer and execution profile. |
+| `model` | `protocol`, `id`, `configurationDigest`. |
+| `evaluation` | `index` (`path`, `descriptor`) and ordered `cases`. |
+| Case reference | `id`, `path`, `descriptor`, effective `runs`, effective `minPasses`. |
+| `evaluator` | `identity` (`id`, `version`, `policy`), `startedAt`, `completedAt`. |
+| Policy | `id`, `version`, `configurationDigest`. |
+| Case result | `id`, `outcome`, ordered `runs`. |
+| Run result | `number`, `status`, `outcome`, ordered `assertions`. |
+| Assertion result | `id`, `type`, `outcome`, optional `judge`. |
+| `judge` | `configuration` (`model`, `version`, `policy`), `observedModels`, `scores`, `minScore`. |
+
+Outcomes are `pass`, `fail` or `unknown`. Run status is `completed`, `error`,
+`cancelled` or `unknown`; only `completed` can qualify. An unavailable judge
+records empty score/model arrays; otherwise both arrays contain exactly two
+entries. Scores and thresholds are integers in `0..100`. A missing judge object
+cannot qualify an authored `llmJudge`; a non-judge assertion MUST omit it.
+
+The subject MUST bind the complete suite OCI manifest descriptor: media type,
+SHA-256 digest of the exact manifest bytes, and size. The suite content-layer
+digest, canonical digest of `agentsuite.json`, and a mutable registry tag are
+not substitutes. Evidence MUST additionally bind the member identifier and
+canonical manifest digest, composition and build-profile digests, and platform.
+A member result MUST NOT imply that other members or invoked agents passed.
+
+The execution identity MUST distinguish runtime, harness, renderer and execution
+profile, each with its own identifier, version and implementation digest; model
+protocol, identifier and non-secret inference configuration digest; and execution
+configuration digest. These are reported, not provider-attested, identities.
+A pass MUST NOT qualify a different harness, runtime or model.
+
+The inventory MUST identify the public index and every ordered case by path and
+canonical descriptor. Evidence MUST retain index order; a filename-sorted hash
+does not establish that order. Effective `runs` and `minPasses` MUST match the
+authored values with defaults from §8.2.2. Every declared case, run and assertion
+MUST appear exactly once, in order; run ordinals start at one and are contiguous.
+Empty evaluation content, subsets, missing, extra or duplicate rows MUST refuse.
+
+Results MUST retain assertion identifiers, types and verdicts and run verdicts,
+including failed runs inside passing repeat policies. Verifiers MUST recompute
+outcomes, not trust an overall pass flag. Every supported assertion must pass
+for a run to pass, including known non-critical assertions. Unknown assertions
+or runs, missing observations, unsupported observation mechanisms, unavailable
+judges, execution errors and cancellation MUST prevent a verified pass. Known
+failing runs MAY be absorbed by authored `minPasses`; unknown runs MUST NOT.
+
+The v1 verifier supports text assertions and an explicit versioned two-score
+judge policy. Tool observations and unrecognized policies MUST refuse. Judge
+results MUST retain both integer scores, threshold, model/version and policy
+configuration identity. The authored judge model/version and threshold MUST
+match. Both scores MUST be on the same side of the threshold for a known
+verdict; a split is unknown and MUST refuse even inside a repeat policy.
+The evaluator policy is `agentsuite-text-v1` version `1.0.0`: text assertions
+use §8.2.2 semantics, known assertions form a conjunction, and unknown vetoes.
+Judge observations additionally require `agentsuite-double-score-v1` version
+`1.0.0` and a complete caller-accepted judge configuration. Each observed model
+MUST equal the authored model or that model joined with `-` and authored version.
+This is a declared response identity, not model attestation. Policy and
+configuration digests MUST exactly match caller expectations. Other aggregation
+rules or request/tool-count observations require a supported policy/schema
+revision, never silent reinterpretation of v1.
+
+Evaluator identity, version, accepted policy and non-secret configuration identity
+MUST accompany start/completion UTC RFC3339 timestamps ending in `Z`, with up to
+nine fractional-second digits and start no later than completion. Time is reported history, not trusted-clock or freshness proof.
+Producers MUST capture unavailable metadata when evaluating rather than invent
+it at export. Legacy records lacking required data MUST refuse export with a
+re-evaluation remedy; modification time or export time MUST NOT replace run time.
+
+Only schema-defined bounded identifiers, digests, numeric observations, verdicts
+and timestamps are permitted. Prompts, answers, rubrics, assertion operands,
+reasoning, endpoints, credentials, secret references, tenant/host/session IDs and
+arbitrary annotations MUST NOT appear. Public configuration digests MUST use a
+documented non-secret projection, never credentials or resolved secret values.
+Producers MUST construct allowlisted fields rather than redact private receipts.
+
+**Verification.** `agentsuite.VerifyEvaluation` takes a local OCI layout,
+independently supplied expected subject and evaluator policy, and evidence reader.
+Expected execution identities MUST come from the caller, not copied claims;
+there are no wildcards. Verification MUST validate local manifest/blob bytes and
+the suite graph before matching evidence to the inventory and expectations.
+A digest alone or loose content directory cannot establish OCI identity; archive
+consumers first materialize a local layout. No model, cluster, registry, remote
+schema or private store may be consulted.
+
+Only success returns a verified summary. Failure MUST return a typed refusal;
+missing, malformed, mismatched, unsupported, partial, unknown or failing evidence
+MUST NOT become an evaluated badge. Refusal text MUST NOT echo untrusted JSON,
+paths, authored operands or private causes. Consumers SHOULD display
+`evaluation: not verified` with a safe category; CI MUST fail closed. Resource
+limits MUST refuse explicitly, never truncate or omit failed repeats.
+
+The reference verifier bounds documents to 4,194,304 UTF-8 bytes, nesting to
+100 levels, object members to 1,024 per object and 100,000 per document. There
+are at most 128 cases, 1,000 runs per case, 4,096 total runs, 1,000 assertions
+per run and 32,000 total assertion observations. Authored policies exceeding
+these limits refuse even if the document omits corresponding rows. Digest strings
+use lowercase `sha256:` plus 64 hexadecimal digits; descriptors have positive
+sizes no larger than 4,194,304 bytes. Schema-defined identifier restrictions
+are deliberately narrower than arbitrary provider strings; unsupported values
+MUST refuse rather than be transformed or redacted to create a matching identity.
+These shape checks cannot guarantee that a producer has not disguised sensitive
+data as an identifier; producers remain responsible for the allowlist boundary.
+
+`ExpectedEvaluation` requires a complete `Subject`, `Execution` and evaluator
+identity plus an explicit `Judges` allowlist (empty when no judge is accepted).
+The verifier additionally matches the model protocol/identifier to the member
+manifest. `VerifiedEvaluation` contains only the validated subject, case/run
+totals, completion time and `unsigned: true`. `EvidenceRefusal.Code` is one of
+`missing`, `malformed`, `unsupported`, `limit`, `artifact`, `subject`, `coverage`,
+`policy`, `unknown`, `not-passing`. Callers SHOULD use the typed code rather
+than parse error text. Detached schema/privacy fixtures and their use are
+[documented here](testdata/evidence/README.md).
+
+**Distribution and trust.** V1 uses an explicitly selected detached file beside,
+not inside, the suite layout/archive; filenames convey no identity. OCI referrer
+publication/discovery is separate transport under §8.2.3, with the complete suite
+descriptor as referring-manifest subject. Signatures MAY later wrap unchanged v1
+bytes. This verifier establishes consistency of unsigned claims, not who ran
+the evaluation, whether observations are true, or deployment readiness. Anyone
+able to write the document can forge a consistent pass. Unsigned evidence MUST
+NOT be presented as authenticated provenance.
 
 ## 9. Tool providers and tools
 
@@ -1591,8 +1734,8 @@ specification requires such calls to be refused.
 This draft does not specify:
 
 - session transcripts, checkpoints, snapshots, or mutable memory;
-- embedded evaluation results, result payload formats, evaluator execution
-  protocols;
+- embedded evaluation results, result payload formats other than §8.2.4,
+  evaluator execution protocols;
 - plaintext credentials or resolved secret values;
 - OAuth flows, consent UX, token issuance, refresh, or revocation;
 - a deployment's Connection or account-link storage and identity verification

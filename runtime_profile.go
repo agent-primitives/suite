@@ -66,7 +66,10 @@ func (s *Suite) UnmarshalJSON(data []byte) error {
 			return errors.New("runtimeProfiles must be a nonempty array")
 		}
 		for _, ref := range value.RuntimeProfiles {
-			if !identifierPattern.MatchString(ref.ID) || ref.Path == "" || ref.Descriptor.MediaType == "" ||
+			if _, err := validateContentPath(ref.Path); err != nil {
+				return fmt.Errorf("runtime profile reference path: %w", err)
+			}
+			if !identifierPattern.MatchString(ref.ID) || ref.Descriptor.MediaType == "" ||
 				!IsValidDigest(ref.Descriptor.Digest) || ref.Descriptor.Size < 0 {
 				return errors.New("runtimeProfiles requires complete manifest references")
 			}

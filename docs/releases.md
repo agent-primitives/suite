@@ -15,6 +15,12 @@ omitting new fields preserves existing bytes, digests and report/diff output.
 No migration or implicit fallback is performed. Older strict readers reject the
 new fields. Use keyed Go literals for the extended public types.
 
+`Suite`, `Composition` and `CompositionRef` now implement `UnmarshalJSON`, so
+plain `encoding/json.Unmarshal` also uses strict decoding for these types,
+rejecting unknown or duplicate properties and other malformed input previously
+accepted by that decoder. Normatively valid legacy bytes remain compatible;
+this tightens malformed-input acceptance, not the legacy wire contract.
+
 Profile documents bind runtime/harness/renderer identities, an opaque consumer-owned
 configuration ABI and an explicit image requirement. Validation checks declarations
 and graph consistency, not runtime support. Evidence v1 is unchanged: two profiles

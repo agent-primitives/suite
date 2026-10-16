@@ -67,7 +67,21 @@ func TestRuntimeProfilesGraphAndReport(t *testing.T) {
 }
 
 func TestRuntimeProfilesGraphRefusals(t *testing.T) {
-	for _, name := range []string{"duplicate-selection", "unknown", "selector-mismatch", "mixed", "profile-digest", "profile-size", "profile-media", "duplicate-profile", "missing-profile", "profile-id", "harness", "build", "platform"} {
+	for name, want := range map[string]string{
+		"duplicate-selection": "duplicate composition writer@linux/amd64@orka",
+		"unknown":             "references unknown runtime profile missing",
+		"selector-mismatch":   "composition writer@linux/amd64@orka identity does not match its reference",
+		"mixed":               "mixes legacy and runtime profile selections",
+		"profile-digest":      "runtime profile orka digest mismatch",
+		"profile-size":        "runtime profile orka digest mismatch",
+		"profile-media":       "runtime profile orka digest mismatch",
+		"duplicate-profile":   `duplicate runtime profile "orka"`,
+		"missing-profile":     "required file runtime-profiles/orka.json is missing",
+		"profile-id":          "runtime profile reference orka points to other",
+		"harness":             "runtime profile harness digest mismatch",
+		"build":               `build profile "missing" does not support linux/amd64`,
+		"platform":            `build profile "default" does not support linux/arm64`,
+	} {
 		t.Run(name, func(t *testing.T) {
 			root, suite, profiles := runtimeProfileSuite(t)
 			var c Composition
@@ -109,8 +123,8 @@ func TestRuntimeProfilesGraphRefusals(t *testing.T) {
 			}
 			suite.Compositions[0].Descriptor = mustWriteJSON(t, root, suite.Compositions[0].Path, MediaTypeComposition, c)
 			mustWriteJSON(t, root, "agentsuite.json", MediaTypeSuite, suite)
-			if _, err := ValidateDirectory(root); err == nil {
-				t.Fatal("invalid profile graph accepted")
+			if _, err := ValidateDirectory(root); err == nil || !strings.Contains(err.Error(), want) {
+				t.Fatalf("want refusal containing %q, got %v", want, err)
 			}
 		})
 	}
@@ -269,6 +283,30 @@ func TestRuntimeProfileReferencesShape(t *testing.T) {
 			validateSchemaJSON(t, compileReferenceSchema(t, "suite.schema.json"), string(data), false)
 			if err := Unmarshal(data, &Suite{}); err == nil {
 				t.Fatal("malformed profile reference decoded")
+			}
+		})
+	}
+}
+
+func TestRuntimeProfileReferencePaths(t *testing.T) {
+	_, suite, _ := runtimeProfileSuite(t)
+	schema := compileReferenceSchema(t, "suite.schema.json")
+	for _, tc := range []struct {
+		name, path  string
+		schemaValid bool
+	}{
+		{"absolute", "/runtime-profiles/orka.json", false},
+		{"backslash", `runtime-profiles\orka.json`, false},
+		{"overlong", strings.Repeat("a", 1025), false},
+		// Schema shape alone permits traversal; semantic decoding is stricter.
+		{"traversal", "../orka.json", true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			suite.RuntimeProfiles[0].Path = tc.path
+			data := mustJSON(t, suite)
+			validateSchemaJSON(t, schema, string(data), tc.schemaValid)
+			if err := Unmarshal(data, &Suite{}); err == nil {
+				t.Fatal("unsafe runtime profile reference path decoded")
 			}
 		})
 	}

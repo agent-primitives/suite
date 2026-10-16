@@ -5,25 +5,28 @@ agents and the exact ToolProviders used to construct their runnable sandboxes.
 Suites are distributed as OCI artifacts and contain a closed graph of agent,
 ToolProvider, composition, and build-profile manifests.
 
-This package provides the format's public Go model within Kaimahi's root Go
-module; it does not have a separate module or release version:
+This standalone Go module, `github.com/agent-primitives/suite`, provides:
 
-- object types for suites, agents, ToolProviders, callable Tools, compositions,
+- public types for suites, agents, ToolProviders, callable Tools, compositions,
   and build profiles;
 - media types and specification version constants;
 - strict JSON decoding with closed-field and duplicate-key enforcement;
 - JCS canonical encoding and digest calculation;
 - offline validation of extracted content and OCI image-layout directories;
 - optional [agent evaluations](spec.md#82-agent-evaluations) with ordered cases;
-- closed JSON Schema 2020-12 documents in [`schema/`](schema/).
+- closed JSON Schema 2020-12 documents in [schema/](schema/).
 
 The normative format and conformance requirements are defined in
-[`spec.md`](spec.md).
+[spec.md](spec.md). Examples and conformance fixtures live in
+[testdata/](testdata/).
 
 ## Go package
 
+Use Go 1.26.0 or newer. The module path ends in `suite`, but the Go package
+remains `agentsuite`; use an explicit import alias:
+
 ```go
-import "github.com/kaimahi-agents/kaimahi/agentsuite"
+import agentsuite "github.com/agent-primitives/suite"
 
 data, err := agentsuite.Marshal(suite)
 if err != nil {
@@ -42,8 +45,29 @@ read loose manifests should use `ValidateDirectory` to validate extracted
 content explicitly, without OCI layout auto-detection.
 
 The Go validator compiles evaluation regex assertions with `regexp`, whose
-accepted expression syntax is RE2.
+accepted expression syntax is RE2. Validation does not execute evaluations,
+tools, models or agents, and does not attest runtime or sandbox conformance.
 
 Builders, packers, registry transfer, sandbox-image construction, and
 builder-owned image metadata are implementation concerns and are not part of
-this package.
+this package. Kaimahi's builder-owned
+[sandbox-binding schema](https://github.com/kaimahi-agents/kaimahi/blob/e48f063f422bd38b7f92173351defd21bfcda5cc/internal/kmx/agentsuite/schema/sandbox-binding.schema.json)
+remains in its source repository.
+
+## Development and releases
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for verification, cross-repository
+`go.work` development and [release policy](CONTRIBUTING.md#release-policy).
+The first planned release is `v0.1.0`; Tom owns releases. Publication is a
+separate maintainer action, not part of the extraction rehearsal.
+
+Repository extraction does not change schema IDs, media types, format versions,
+canonical bytes or digests. Go module versions and format versions are independent.
+
+## Project policies and provenance
+
+Extracted with portable history from
+[kaimahi-agents/kaimahi](https://github.com/kaimahi-agents/kaimahi/tree/e48f063f422bd38b7f92173351defd21bfcda5cc/agentsuite).
+The source MIT copyright attribution is retained in [LICENSE](LICENSE).
+See [SECURITY.md](SECURITY.md) for private vulnerability reporting and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for the Microsoft community policy.

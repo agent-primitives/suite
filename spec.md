@@ -1427,6 +1427,9 @@ signed provenance attestation or OCI referrer.
 
 ## 13. Agent sandbox binding
 
+Kaimahi's builder-owned [sandbox-binding reference schema](https://github.com/kaimahi-agents/kaimahi/blob/e48f063f422bd38b7f92173351defd21bfcda5cc/internal/kmx/agentsuite/schema/sandbox-binding.schema.json)
+is maintained in the source repository, outside this portable package.
+
 Each platform image MUST embed a binding record at:
 
 ```text

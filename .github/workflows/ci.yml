@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GOWORK: "off"
+  GOFLAGS: "-mod=readonly"
+
+jobs:
+  go:
+    name: Go and conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: go.mod
+      - name: Module metadata
+        run: go mod tidy -diff
+      - name: Formatting
+        run: |
+          formatted=$(gofmt -l .)
+          if [ -n "$formatted" ]; then
+            printf '%s\n' "$formatted"
+            exit 1
+          fi
+      - name: Tests and required conformance fixtures (no skips)
+        env:
+          TEST_RESULTS: ${{ runner.temp }}/suite-tests.jsonl
+        run: |
+          set -euo pipefail
+          go test -count=1 -json ./... | tee "$TEST_RESULTS"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          required = {
+              "TestValidatePathAcceptsMinimalExtractedSuite",
+              "TestCoordinatorWorkersFixtureIsConformant",
+              "TestRemoteMCPFixtureIsConformantAndCatalogable",
+              "TestToolProviderSchemaAcceptsMultiFileCLIBundles",
+              "TestToolProviderCompositionSchemaDefinesStandaloneSandboxInput",
+              "TestEmbeddedEvaluationsAcceptDirectoryAndOCI",
+              "TestEvaluationReferenceSchemas",
+              "TestValidatePathAcceptsOCILayout",
+              "TestDiffPathsTreatsExtractedSuiteAndOCILayoutAsEquivalent",
+          }
+          events = [json.loads(line) for line in Path(os.environ["TEST_RESULTS"]).read_text().splitlines()]
+          passed = {event.get("Test") for event in events if event.get("Action") == "pass"}
+          skipped = [event.get("Test", event.get("Package")) for event in events if event.get("Action") == "skip"]
+          missing = sorted(required - passed)
+          if skipped or missing:
+              raise SystemExit(f"Conformance gate failed: skipped={skipped}; missing passes={missing}")
+          print(f"Conformance gate: {len(required)} required tests passed; no skips")
+          PY
+      - name: Race detector
+        run: go test -race -count=1 ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Staticcheck
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@2026.2.1
+          "$(go env GOPATH)/bin/staticcheck" ./...
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Link checker selftests
+        run: python3 scripts/check-doc-links.py --selftest
+      - name: Documentation links and anchors
+        run: python3 scripts/check-doc-links.py

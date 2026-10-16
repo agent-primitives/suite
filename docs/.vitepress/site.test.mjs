@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const dist = path.join(root, 'docs/.vitepress/dist')
-const schemas = ['agent', 'build-profile', 'composition', 'eval-case', 'eval-index', 'execution', 'inference', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
+const schemas = ['agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'execution', 'inference', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
 const html = name => readFile(path.join(dist, `${name}.html`), 'utf8')
 
 test('all documentation pages render with root-based navigation and assets', async () => {

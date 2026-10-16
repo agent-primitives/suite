@@ -12,7 +12,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	agentsuite "github.com/agent-primitives/suite"
+	"github.com/agent-primitives/suite/internal/jsoncodec"
 )
 
 // Match the root JSON decoder limit used by VerifyPayload.
@@ -57,7 +57,7 @@ func decodeStrict(data []byte, dst any) error {
 	if len(trimmed) == 0 || trimmed[0] != '{' {
 		return errors.New("policy JSON must be an object")
 	}
-	return agentsuite.Unmarshal(data, dst)
+	return jsoncodec.Unmarshal(data, dst)
 }
 
 func Validate(p SuitePolicy) error {
@@ -162,7 +162,7 @@ func CanonicalBytes(p EffectivePolicy) ([]byte, error) {
 	} else {
 		p.DenyWritePaths = uniqueSorted(p.DenyWritePaths)
 	}
-	data, err := agentsuite.Marshal(p)
+	data, err := jsoncodec.Marshal(p)
 	if err != nil {
 		return nil, err
 	}

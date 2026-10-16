@@ -72,6 +72,22 @@
         }
       }
     },
+    "policy": {
+      "description": "Optional authored policy at policies/<owning-agent-id>.json; the validator checks ownership and mediaType/version agreement.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "descriptor"],
+      "properties": {
+        "path": {"type": "string", "maxLength": 1024, "pattern": "^policies/[a-z0-9][a-z0-9._-]{0,127}\\.json$"},
+        "descriptor": {
+          "$ref": "#/$defs/descriptor",
+          "properties": {
+            "mediaType": {"enum": ["application/vnd.agentsuite.policy.v1+json", "application/vnd.agentsuite.policy.v2+json"]},
+            "size": {"maximum": 4194304}
+          }
+        }
+      }
+    },
     "extensions": {"type": "array"}
   },
   "$defs": {

@@ -16,6 +16,8 @@ const (
 	MediaTypeContent                 = "application/vnd.agentsuite.content.v1.tar+gzip"
 	MediaTypeSuite                   = "application/vnd.agentsuite.manifest.v1+json"
 	MediaTypeAgent                   = "application/vnd.agentsuite.agent.v1+json"
+	MediaTypePolicyV1                = "application/vnd.agentsuite.policy.v1+json"
+	MediaTypePolicyV2                = "application/vnd.agentsuite.policy.v2+json"
 	MediaTypeEvaluationIndex         = "application/vnd.agentsuite.eval.index.v1+json"
 	MediaTypeEvaluationCase          = "application/vnd.agentsuite.eval.case.v1+json"
 	MediaTypeToolProviderCatalog     = "application/vnd.agentsuite.tool.provider.catalog.v1+json"
@@ -169,6 +171,7 @@ type Agent struct {
 	ToolProviders []ToolProviderRequirement `json:"toolProviders,omitempty"`
 	Invokes       []AgentInvoke             `json:"invokes,omitempty"`
 	Evals         []FileRef                 `json:"evals,omitempty"`
+	Policy        *FileRef                  `json:"policy,omitempty"`
 	Extensions    []Extension               `json:"extensions,omitempty"`
 }
 

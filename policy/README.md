@@ -52,8 +52,14 @@ suite's tuple set, never unions or grants extra endpoints. Restrictions from the
 other profile refuse rather than being dropped. Lists are bounded at 4096
 entries before deduplication; canonical output retains the v1 4 MiB limit.
 
-This is a standalone contract: no Agent descriptor, OCI graph edge or runtime
-integration is added. Valid bytes do not prove installation, observed activation,
+The root package validates optional [Agent policy bindings](../spec.md#83-agent-policy-binding)
+at `policies/<agent-id>.json` in extracted and OCI content. These descriptors
+commit exact authored JCS bytes with ordinary content SHA-256, not this package's
+framed effective-policy digest. Authored array order/duplicates remain byte-bound;
+`Resolve` and `CanonicalBytes` separately normalize effective policy sets. No
+administrative deployment restrictions are implicitly folded into the artifact.
+
+Valid bytes and graph references do not prove installation, observed activation,
 startup safety or enforcement. A provider must refuse if it cannot mediate the
 claimed boundary; no target is qualified by this package.
 

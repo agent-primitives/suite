@@ -23,6 +23,11 @@ const (
 	maxJSONDocumentMembers = 100_000
 )
 
+var (
+	errJSONMemberLimit = errors.New("JSON object member limit exceeded")
+	errJSONDepthLimit  = fmt.Errorf("JSON nesting exceeds %d", maxJSONDepth)
+)
+
 // Marshal serializes value as JSON Canonicalization Scheme (JCS) JSON.
 func Marshal(value any) ([]byte, error) {
 	data, err := json.Marshal(value)
@@ -121,14 +126,14 @@ func scanJSONValue(decoder *json.Decoder, depth int, documentMembers *int, objec
 		return nil
 	}
 	if depth >= maxJSONDepth {
-		return fmt.Errorf("JSON nesting exceeds %d", maxJSONDepth)
+		return errJSONDepthLimit
 	}
 	switch delim {
 	case '{':
 		seen := map[string]bool{}
 		for decoder.More() {
 			if len(seen) >= objectLimit || *documentMembers >= documentLimit {
-				return errors.New("JSON object member limit exceeded")
+				return errJSONMemberLimit
 			}
 			keyToken, err := decoder.Token()
 			if err != nil {

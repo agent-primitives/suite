@@ -76,8 +76,8 @@ an unpublished version can be fetched.
 
 ## Release policy
 
-Tom owns releases. The first tag is **`v0.1.0`**, at the repository root
-(not `agentsuite/v0.1.0`). No tag is created by bootstrap or CI.
+Releases are cut by the maintainers as root tags (`vX.Y.Z`, not
+`agentsuite/vX.Y.Z`). CI never creates tags.
 
 While the module is v0, breaking Go API changes, changes to validation acceptance,
 wire shapes, canonicalization/digests or semantic-diff contracts require an
@@ -85,20 +85,11 @@ explicitly documented **minor** release. Compatible additions use a minor releas
 compatible fixes use a patch release. Document compatibility effects and migration
 guidance in release notes. Format/schema versions are independent of Go tags.
 
-Before Tom creates or publishes a release:
-1. Review the exact source commit and compatibility notes; require both CI jobs
-   and fresh independent `GOWORK=off` verification.
-2. Verify the approved maintainer team, enterprise admission, CLA checks,
-   dependency/security scanning, Copilot review and branch/tag protections with
-   organization administrators. These are operator-owned controls, not established
-   merely by adding workflow files. Configure required checks for both CI jobs,
-   PR approval/thread resolution, and no force-push or deletion.
-3. Publish the reviewed immutable root tag; consumers then pin that version and
+Before a release:
+1. Review the exact source commit and compatibility notes; both CI jobs must be
+   green, plus an independent `GOWORK=off` verification.
+2. Publish the reviewed immutable root tag. Consumers then pin that version and
    verify clean-checkout `GOWORK=off` tests against the published module.
-
-No approved maintainer team is recorded here, so CODEOWNERS is intentionally
-deferred rather than assigning an invented roster. The extraction rehearsal
-does not push, tag, open PRs or configure enterprise/repository controls.
 
 ## Pull requests
 

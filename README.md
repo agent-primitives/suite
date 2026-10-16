@@ -58,8 +58,7 @@ remains in its source repository.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for verification, cross-repository
 `go.work` development and [release policy](CONTRIBUTING.md#release-policy).
-The first planned release is `v0.1.0`; Tom owns releases. Publication is a
-separate maintainer action, not part of the extraction rehearsal.
+Releases are root tags (`vX.Y.Z`) cut by the maintainers.
 
 Repository extraction does not change schema IDs, media types, format versions,
 canonical bytes or digests. Go module versions and format versions are independent.

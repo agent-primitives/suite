@@ -1635,4 +1635,4 @@ This draft does not specify:
 [helm-oci]: https://helm.sh/docs/topics/registries/
 [agentkit]: https://github.com/orka-agents/agentkit
 [dalec-homebrew]: https://github.com/sozercan/dalec-homebrew
-[agentsessions]: https://github.com/aramase/agentsessions
+[agentsessions]: https://github.com/agent-primitives/sessions

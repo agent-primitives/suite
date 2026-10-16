@@ -193,6 +193,95 @@ func TestCanonicalBytesUseJCSStringEncoding(t *testing.T) {
 	}
 }
 
+func TestCanonicalBytesRejectsOversizedComposition(t *testing.T) {
+	const limit = 4 << 20
+	suite := sample()
+	suite.DenyWritePaths = make([]string, 2048)
+	admin := AdministrativePolicy{DenyWritePaths: make([]string, 2048)}
+	padding := strings.Repeat("x", 1024)
+	for i := range suite.DenyWritePaths {
+		suite.DenyWritePaths[i] = fmt.Sprintf("/suite/%04d/%s", i, padding)
+		admin.DenyWritePaths[i] = fmt.Sprintf("/admin/%04d/%s", i, padding)
+	}
+	suiteJSON, err := json.Marshal(suite)
+	if err != nil {
+		t.Fatal(err)
+	}
+	adminJSON, err := json.Marshal(admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(suiteJSON) > limit || len(adminJSON) > limit {
+		t.Fatal("individual inputs exceed decoder limit")
+	}
+	suite, err = DecodeSuitePolicy(suiteJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	admin, err = DecodeAdministrativePolicy(adminJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	effective, err := Resolve(suite, admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serialized, err := json.Marshal(effective)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(effective.DenyWritePaths) != 4096 || len(serialized) <= limit {
+		t.Fatal("composition must fit path count but exceed byte limit")
+	}
+	if data, err := CanonicalBytes(effective); err == nil || data != nil {
+		t.Errorf("oversized CanonicalBytes: returned %d bytes, error = %v", len(data), err)
+	}
+	if _, err := Payload(effective); err == nil {
+		t.Error("Payload accepted oversized composition")
+	}
+}
+
+func TestCanonicalBytesSizeBoundary(t *testing.T) {
+	const limit = 4 << 20
+	const prefix = `{"denyWritePaths":["/`
+	const suffix = `"],"requiredCapabilities":["filesystem/deny-write/v1"],"version":"agentsuite.policy/v1"}`
+	for _, size := range []int{limit - 1, limit, limit + 1} {
+		t.Run(fmt.Sprint(size), func(t *testing.T) {
+			effective := EffectivePolicy{
+				Version:              SchemaVersion,
+				DenyWritePaths:       []string{"/" + strings.Repeat("x", size-len(prefix)-len(suffix))},
+				RequiredCapabilities: []string{FilesystemDenyWrite},
+			}
+			data, err := CanonicalBytes(effective)
+			if size > limit {
+				if err == nil || data != nil {
+					t.Errorf("oversized CanonicalBytes: returned %d bytes, error = %v", len(data), err)
+				}
+				if _, err := Payload(effective); err == nil {
+					t.Error("Payload accepted oversized policy")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(data) != size {
+				t.Fatalf("canonical size = %d, want %d", len(data), size)
+			}
+			payload, err := Payload(effective)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(payload.PolicyBytes, data) {
+				t.Fatal("Payload changed canonical bytes")
+			}
+			if err := VerifyPayload(payload); err != nil {
+				t.Fatalf("policy at %d bytes failed round-trip: %v", size, err)
+			}
+		})
+	}
+}
+
 func TestCompositionCannotWeaken(t *testing.T) {
 	base, err := Resolve(sample(), AdministrativePolicy{})
 	if err != nil {

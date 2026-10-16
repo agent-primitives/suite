@@ -15,6 +15,9 @@ import (
 	agentsuite "github.com/agent-primitives/suite"
 )
 
+// Match the root JSON decoder limit used by VerifyPayload.
+const maxCanonicalBytes = 4 << 20
+
 var digestDomain = []byte("agentsuite-effective-policy\x00v1\x00")
 
 // DecodeSuitePolicy strictly decodes exactly one JSON object.
@@ -134,7 +137,7 @@ func Resolve(s SuitePolicy, a AdministrativePolicy) (EffectivePolicy, error) {
 	}, nil
 }
 
-// CanonicalBytes emits deterministic UTF-8 JSON for a fully valid effective policy.
+// CanonicalBytes emits at most 4 MiB of deterministic UTF-8 JSON for a fully valid effective policy.
 func CanonicalBytes(p EffectivePolicy) ([]byte, error) {
 	if p.Version != SchemaVersion {
 		return nil, errors.New("unsupported effective policy version")
@@ -154,7 +157,14 @@ func CanonicalBytes(p EffectivePolicy) ([]byte, error) {
 		return nil, err
 	}
 	p.DenyWritePaths = uniqueSorted(p.DenyWritePaths)
-	return agentsuite.Marshal(p)
+	data, err := agentsuite.Marshal(p)
+	if err != nil {
+		return nil, err
+	}
+	if len(data) > maxCanonicalBytes {
+		return nil, fmt.Errorf("effective policy exceeds %d bytes", maxCanonicalBytes)
+	}
+	return data, nil
 }
 
 // Digest returns a domain-separated, length-framed SHA-256 digest.

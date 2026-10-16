@@ -50,7 +50,8 @@ The required CI jobs are **Go and conformance** and **Documentation**: neither i
 path-filtered. The Go job runs every test uncached, rejects all skipped tests and
 requires explicit passing results for the existing minimal, coordinator-workers,
 remote-MCP, bundled-provider, standalone-provider-composition, embedded-evaluation
-and OCI conformance tests. A missing or renamed required test must not become
+and OCI conformance tests, plus policy-binding fixture/schema/digest-propagation
+coverage. A missing or renamed required test must not become
 a green empty selection. Race tests, vet, staticcheck and formatting also gate CI.
 
 The small offline docs checker covers local links and Markdown heading anchors

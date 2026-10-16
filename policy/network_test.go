@@ -183,8 +183,7 @@ func TestNetworkAdministration(t *testing.T) {
 	if _, err := DecodeAdministrativePolicyForVersion([]byte(`{}`), "future"); err == nil {
 		t.Error("accepted unknown admin profile")
 	}
-	// The explicit v1 API preserves all legacy successful inputs, including null paths.
-	for _, input := range []string{`{}`, `{"denyWritePaths":null}`, `{"denyWritePaths":[]}`, `{"denyWritePaths":["/a"]}`} {
+	for _, input := range []string{`{}`, `{"denyWritePaths":[]}`, `{"denyWritePaths":["/a"]}`} {
 		legacy, err := DecodeAdministrativePolicy([]byte(input))
 		if err != nil {
 			t.Fatal(err)
@@ -192,6 +191,16 @@ func TestNetworkAdministration(t *testing.T) {
 		versioned, err := DecodeAdministrativePolicyForVersion([]byte(input), SchemaVersion)
 		if err != nil || !reflect.DeepEqual(legacy, versioned) {
 			t.Fatalf("v1 admin behavior changed: %#v, %v", versioned, err)
+		}
+	}
+	for _, decode := range []func([]byte) (AdministrativePolicy, error){
+		DecodeAdministrativePolicy,
+		func(data []byte) (AdministrativePolicy, error) {
+			return DecodeAdministrativePolicyForVersion(data, SchemaVersion)
+		},
+	} {
+		if _, err := decode([]byte(`{"denyWritePaths":null}`)); err == nil {
+			t.Error("accepted explicit-null v1 administrative paths")
 		}
 	}
 }

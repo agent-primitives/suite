@@ -79,8 +79,8 @@ A **descriptor** is a closed object:
 
 - for a content reference whose referenced file is a normative AgentSuite JSON
   document (agent, tool provider, tool provider catalog, composition, tool
-  provider composition, build profile, evaluation index, and evaluation case
-  manifests), `digest` and `size` describe the [RFC 8785 JCS canonical
+  provider composition, build profile, evaluation index, evaluation case and
+  authored policy manifests), `digest` and `size` describe the [RFC 8785 JCS canonical
   representation](#61-canonical-json) of that document, and the referenced
   file itself MUST be stored on disk as those exact canonical bytes: a
   producer MUST write the canonical serialization, not merely compute
@@ -171,6 +171,8 @@ change the image-local closure.
 | [Content layer](#5-content-layer) | `application/vnd.agentsuite.content.v1.tar+gzip` |
 | [Suite manifest](#7-suite-manifest) | `application/vnd.agentsuite.manifest.v1+json` |
 | [Agent manifest](#8-agents) | `application/vnd.agentsuite.agent.v1+json` |
+| [Filesystem policy v1](#83-agent-policy-binding) | `application/vnd.agentsuite.policy.v1+json` |
+| [Network policy v2](#83-agent-policy-binding) | `application/vnd.agentsuite.policy.v2+json` |
 | [Evaluation index](#82-agent-evaluations) | `application/vnd.agentsuite.eval.index.v1+json` |
 | [Evaluation case](#822-case-documents-and-assertions) | `application/vnd.agentsuite.eval.case.v1+json` |
 | [ToolProvider catalog](#91-toolprovider-catalog) | `application/vnd.agentsuite.tool.provider.catalog.v1+json` |
@@ -290,6 +292,8 @@ serialization details.
 │   └── <agent>.json
 ├── instructions/
 │   └── <agent>.md
+├── policies/
+│   └── <agent>.json
 ├── evals/
 │   └── <agent>/
 │       ├── index.json
@@ -455,6 +459,7 @@ An agent manifest defines:
 - exact tool provider requirements (`toolProviders`);
 - bounded references to other suite agents;
 - an optional descriptor-bound evaluation index reference (`evals`);
+- an optional descriptor-bound authored policy reference (`policy`);
 - optional extensions.
 
 Every tool provider requirement MUST include exact `id`, semantic `version`, and
@@ -824,6 +829,75 @@ bytes. This verifier establishes consistency of unsigned claims, not who ran
 the evaluation, whether observations are true, or deployment readiness. Anyone
 able to write the document can forge a consistent pass. Unsigned evidence MUST
 NOT be presented as authenticated provenance.
+
+### 8.3 Agent policy binding
+
+An agent MAY declare one optional `policy` content reference. Omission is valid
+and declares no policy requirement; `policy: null` MUST refuse, not mean omission.
+The reference is a closed object with exactly required `path` and `descriptor`
+fields. Its path MUST be exactly `policies/<agent-id>.json`, where `<agent-id>`
+is the owning Agent's `id`. Shared or cross-Agent paths MUST refuse; identical
+bytes MAY be stored separately under each owning Agent's path.
+
+For example, the [policy-binding fixture](testdata/policy-binding/) contains:
+
+```json
+{
+  "policy": {
+    "descriptor": {
+      "digest": "sha256:9579149c9e7bdecb5b49b67c6dd279e434e4d8a1feb28c517299750b96ffcd8b",
+      "mediaType": "application/vnd.agentsuite.policy.v2+json",
+      "size": 213
+    },
+    "path": "policies/writer.json"
+  }
+}
+```
+
+The descriptor's media type MUST match the policy document's version:
+
+| Policy version | Descriptor media type |
+|---|---|
+| `agentsuite.policy/v1` | `application/vnd.agentsuite.policy.v1+json` |
+| `agentsuite.policy/v2` | `application/vnd.agentsuite.policy.v2+json` |
+
+The policy MUST be a regular file of at most 4194304 bytes, stored as its exact
+RFC 8785 JCS canonical **authored** JSON bytes, and MUST satisfy the closed
+version-specific semantics in [Appendix B](#appendix-b-standalone-policy-contracts-normative).
+Unsupported versions/capabilities, malformed policy documents and a mismatched
+media type MUST refuse. A validator MUST check descriptor validity, raw size and
+digest before full policy decoding, then check semantic validity, version/media
+agreement and exact canonical storage. Descriptor annotations remain descriptive.
+
+The `policies/` namespace is closed: every policy file MUST be referenced by
+its owning Agent, and only those regular files and the optional top-level
+`policies/` directory are permitted. The top-level directory MAY be empty.
+Orphan files, nested/extra directories, symlinks and OCI archive hardlinks MUST refuse.
+A suite with no policies remains valid; no existing no-policy fixture requires
+rewriting. These rules apply equally to extracted content and OCI content layers.
+
+A policy descriptor uses the ordinary content SHA-256 digest and byte length,
+**not** the framed effective-policy digest from Appendix B. A producer MUST
+preserve the authored bytes when binding them: administrative composition,
+endpoint/path set normalization and effective-policy framing happen separately.
+Authored arrays retain their stored order and duplicates under JCS; resolution
+and effective-policy canonicalization still normalize those sets. Changing
+authored bytes therefore changes their descriptor even when effective sets
+would be equivalent.
+
+Policy content identity is committed through policy descriptor → Agent manifest
+descriptor → suite manifest. After a policy change, all affected ancestor
+descriptors MUST be updated; stale ancestors MUST refuse. A conformant changed
+suite has a different suite content identity and, when repackaged, OCI manifest
+digest. Policy files are in the existing content layer, not additional OCI
+layers or an external policy store.
+
+Validation establishes definition/graph conformance only, not installation,
+observed activation, startup/lifetime safety, provider qualification or runtime
+enforcement. Consumers MUST inspect declared policy requirements and refuse
+unsupported boundaries; successful generic validation is not capability
+negotiation. The tool-derived suite `capabilities` list does not certify policy
+support. Runtime wiring, held-start and drift stopping remain outside this binding.
 
 ## 9. Tool providers and tools
 
@@ -1786,9 +1860,9 @@ This draft does not specify:
 
 These standalone contracts are owned by the `policy` package. Policy format
 versions are independent of the Go module version and the AgentSuite artifact
-schema version. This appendix does not add an Agent policy descriptor or OCI
-graph edge. Per-Agent descriptor binding and graph validation are separate work;
-a standalone policy is not automatically committed by an Agent or suite digest.
+schema version. [Section 8.3](#83-agent-policy-binding) defines optional Agent
+policy descriptors and graph validation. A standalone document is committed by
+an Agent/suite only when explicitly bound through that reference.
 
 ### B.1 Versions and closed inputs
 
@@ -1796,7 +1870,11 @@ a standalone policy is not automatically committed by an Agent or suite digest.
 clean absolute UTF-8 `denyWritePaths` excludes `/`, its required capability is
 exactly `["filesystem/deny-write/v1"]`, and administrative denied paths are
 unioned with requested denied paths. Duplicate paths collapse and paths sort
-lexicographically. Existing v1 canonical bytes and digest vectors are unchanged.
+lexicographically by unsigned UTF-16 code units, the comparison model RFC 8785
+uses for JSON object property names. JCS preserves this normalized array order;
+it does not sort array elements. An omitted administrative `denyWritePaths`
+field and an explicit empty array add no restrictions; explicit `null` MUST
+fail closed. The existing v1 vector is unchanged.
 That capability covers create, writable open/write, truncate, rename effects,
 unlink, link, metadata and symlink mutation, including declared mount/path bypass
 coverage; a provider unable to cover the required boundary MUST refuse.
@@ -1842,7 +1920,7 @@ mediate with the declared exact meaning. Syntax validity is not target qualifica
 The required capability list is exactly `["network/egress-allow/v1"]`; absent,
 empty, duplicate or unknown capabilities MUST refuse. V2 does not combine
 filesystem or Tool capabilities. Duplicate endpoint tuples are permitted in
-authored input, but MUST collapse during resolution/canonicalization. Sort by
+authored input, but MUST collapse during resolution/effective-policy canonicalization. Sort by
 canonical dotted-decimal address strings lexicographically using their ASCII
 bytes (not numeric IPv4 order), then by numeric port; TCP is constant. For example, `10.0.0.2` precedes `9.0.0.1`, and port 80 precedes 443 for
 the same address. Normalization MUST NOT mutate or alias caller-owned rule sets.
@@ -1905,12 +1983,14 @@ of noncanonical bytes is insufficient. Consumers MUST preserve and verify the
 bytes rather than decode and reserialize them before use. Carrier transport
 encoding is not a new policy representation.
 
-Language-neutral vectors live in `policy/testdata/`: the unchanged v1 JSON/digest
-pair, plus v2 nonempty and deny-all JSON/digest pairs. Read JSON fixture bytes
-directly without adding a newline. Installation, observed activation and lifetime
+Language-neutral vectors live in `policy/testdata/`: the existing v1 JSON/digest
+pair, a v1 ordering pair that orders U+10000 before U+E000, plus v2 nonempty and
+deny-all JSON/digest pairs. Read JSON fixture bytes directly without adding a
+newline. Installation, observed activation and lifetime
 safety are distinct runtime claims; neither valid policy bytes nor a provider
-payload establishes any of them. Runtime wiring, held-start, drift stopping and
-per-Agent artifact binding are outside this standalone contract change.
+payload establishes any of them. Runtime wiring, held-start and drift stopping
+remain outside these contracts. Section 8.3's authored policy binding does not
+establish any runtime guarantee.
 
 ## 18. Normative references
 

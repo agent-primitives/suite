@@ -58,8 +58,7 @@ remains in its source repository.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for verification, cross-repository
 `go.work` development and [release policy](CONTRIBUTING.md#release-policy).
-The first planned release is `v0.1.0`; Tom owns releases. Publication is a
-separate maintainer action, not part of the extraction rehearsal.
+Releases are root tags (`vX.Y.Z`) cut by the maintainers.
 
 Repository extraction does not change schema IDs, media types, format versions,
 canonical bytes or digests. Go module versions and format versions are independent.
@@ -68,6 +67,6 @@ canonical bytes or digests. Go module versions and format versions are independe
 
 Extracted with portable history from
 [kaimahi-agents/kaimahi](https://github.com/kaimahi-agents/kaimahi/tree/e48f063f422bd38b7f92173351defd21bfcda5cc/agentsuite).
-The source MIT copyright attribution is retained in [LICENSE](LICENSE).
+Licensed under the [Apache License 2.0](LICENSE).
 See [SECURITY.md](SECURITY.md) for private vulnerability reporting and
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for the Microsoft community policy.

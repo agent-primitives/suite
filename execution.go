@@ -32,6 +32,15 @@ type ExecutionInput struct {
 	Secret      bool   `json:"secret"`
 }
 
+// MarshalJSON encodes nil Inputs as the required empty array without changing c.
+func (c ExecutionContract) MarshalJSON() ([]byte, error) {
+	type wire ExecutionContract
+	if c.Inputs == nil {
+		c.Inputs = []ExecutionInput{}
+	}
+	return json.Marshal(wire(c))
+}
+
 // UnmarshalJSON preserves required-field presence before decoding zero values.
 func (c *ExecutionContract) UnmarshalJSON(data []byte) error {
 	type wire ExecutionContract

@@ -1837,7 +1837,11 @@ an Agent/suite only when explicitly bound through that reference.
 clean absolute UTF-8 `denyWritePaths` excludes `/`, its required capability is
 exactly `["filesystem/deny-write/v1"]`, and administrative denied paths are
 unioned with requested denied paths. Duplicate paths collapse and paths sort
-lexicographically. Existing v1 canonical bytes and digest vectors are unchanged.
+lexicographically by unsigned UTF-16 code units, the comparison model RFC 8785
+uses for JSON object property names. JCS preserves this normalized array order;
+it does not sort array elements. An omitted administrative `denyWritePaths`
+field and an explicit empty array add no restrictions; explicit `null` MUST
+fail closed. The existing v1 vector is unchanged.
 That capability covers create, writable open/write, truncate, rename effects,
 unlink, link, metadata and symlink mutation, including declared mount/path bypass
 coverage; a provider unable to cover the required boundary MUST refuse.
@@ -1946,9 +1950,10 @@ of noncanonical bytes is insufficient. Consumers MUST preserve and verify the
 bytes rather than decode and reserialize them before use. Carrier transport
 encoding is not a new policy representation.
 
-Language-neutral vectors live in `policy/testdata/`: the unchanged v1 JSON/digest
-pair, plus v2 nonempty and deny-all JSON/digest pairs. Read JSON fixture bytes
-directly without adding a newline. Installation, observed activation and lifetime
+Language-neutral vectors live in `policy/testdata/`: the existing v1 JSON/digest
+pair, a v1 ordering pair that orders U+10000 before U+E000, plus v2 nonempty and
+deny-all JSON/digest pairs. Read JSON fixture bytes directly without adding a
+newline. Installation, observed activation and lifetime
 safety are distinct runtime claims; neither valid policy bytes nor a provider
 payload establishes any of them. Runtime wiring, held-start and drift stopping
 remain outside these contracts. Section 8.3's authored policy binding does not

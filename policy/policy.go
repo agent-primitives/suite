@@ -5,11 +5,14 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path"
+	"slices"
 	"sort"
 	"strings"
+	"unicode/utf16"
 	"unicode/utf8"
 
 	"github.com/agent-primitives/suite/internal/jsoncodec"
@@ -35,12 +38,20 @@ func DecodeSuitePolicy(data []byte) (SuitePolicy, error) {
 // DecodeAdministrativePolicy decodes the closed filesystem-only v1 administrative profile.
 func DecodeAdministrativePolicy(data []byte) (AdministrativePolicy, error) {
 	var wire struct {
-		DenyWritePaths []string `json:"denyWritePaths,omitempty"`
+		DenyWritePaths json.RawMessage `json:"denyWritePaths"`
 	}
 	if err := decodeStrict(data, &wire); err != nil {
 		return AdministrativePolicy{}, fmt.Errorf("decode administrative policy: %w", err)
 	}
-	p := AdministrativePolicy{DenyWritePaths: wire.DenyWritePaths}
+	p := AdministrativePolicy{}
+	if wire.DenyWritePaths != nil {
+		if bytes.Equal(bytes.TrimSpace(wire.DenyWritePaths), []byte("null")) {
+			return p, errors.New("denyWritePaths must not be null")
+		}
+		if err := json.Unmarshal(wire.DenyWritePaths, &p.DenyWritePaths); err != nil {
+			return p, fmt.Errorf("denyWritePaths: %w", err)
+		}
+	}
 	if len(p.DenyWritePaths) > 4096 {
 		return p, errors.New("too many administrative denyWritePaths")
 	}
@@ -114,11 +125,24 @@ func uniqueSorted(groups ...[]string) []string {
 			values[value] = struct{}{}
 		}
 	}
-	out := make([]string, 0, len(values))
-	for value := range values {
-		out = append(out, value)
+	type sortablePath struct {
+		value string
+		key   []uint16
 	}
-	sort.Strings(out)
+	sorted := make([]sortablePath, 0, len(values))
+	for value := range values {
+		sorted = append(sorted, sortablePath{
+			value: value,
+			key:   utf16.Encode([]rune(value)),
+		})
+	}
+	sort.Slice(sorted, func(i, j int) bool {
+		return slices.Compare(sorted[i].key, sorted[j].key) < 0
+	})
+	out := make([]string, len(sorted))
+	for i := range sorted {
+		out[i] = sorted[i].value
+	}
 	return out
 }
 

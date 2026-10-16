@@ -9,10 +9,12 @@ reserializing them. The normative contract is
 ## Versions
 
 `agentsuite.policy/v1` remains filesystem-only, with the unchanged
-`filesystem/deny-write/v1` capability and canonical vectors. It requires denial
-of create, writable open/write, truncate, rename effects, unlink, link, metadata
-and symlink mutation, including declared mount/path bypass coverage. A provider
-must reject when it cannot cover the full required operation set.
+`filesystem/deny-write/v1` capability. Its path sets use unsigned UTF-16
+code-unit ordering so Go and RFC 8785/JavaScript implementations produce the
+same canonical bytes. It requires denial of create, writable open/write,
+truncate, rename effects, unlink, link, metadata and symlink mutation,
+including declared mount/path bypass coverage. A provider must reject when it
+cannot cover the full required operation set.
 
 `agentsuite.policy/v2` is the explicit **network-only** successor:
 
@@ -46,7 +48,9 @@ a filesystem-only provider must still refuse v2/network requirements.
 
 Legacy `DecodeAdministrativePolicy` remains v1-only. Use
 `DecodeAdministrativePolicyForVersion(data, suite.Version)` for explicit version
-selection. V2 admin `{}` adds no restriction; supplying
+selection. For v1, omitted `denyWritePaths` and an explicit empty array add no
+restriction; explicit `null` refuses rather than becoming an absent overlay.
+V2 admin `{}` adds no restriction; supplying
 `{"network":{"egressAllow":[]}}` denies all. A supplied tuple set intersects the
 suite's tuple set, never unions or grants extra endpoints. Restrictions from the
 other profile refuse rather than being dropped. Lists are bounded at 4096
@@ -66,7 +70,8 @@ claimed boundary; no target is qualified by this package.
 ## Language-neutral vectors
 
 `testdata/effective-policy-v1.json` and its `.sha256` preserve the original v1
-vector. `testdata/effective-policy-v2.json` and
+vector. `testdata/effective-policy-ordering-v1.json` distinguishes unsigned
+UTF-16 ordering from Go code-point ordering. `testdata/effective-policy-v2.json` and
 `testdata/effective-policy-v2-deny-all.json`, each with a `.sha256` companion,
 cover the v2 nonempty and deny-all cases. Read the JSON file bytes directly,
 without adding a newline or parsing/reserializing them before digest verification.

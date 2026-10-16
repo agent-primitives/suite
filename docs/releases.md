@@ -16,9 +16,13 @@ filesystem policy package.
 
 - Opt into `agentsuite.policy/v2` / `SchemaVersionV2` for exact IPv4/TCP/port
   allowances. An empty list denies all; admin restrictions intersect.
-- V1 remains supported: no v1 vector, canonical bytes, digest framing, schema
-  identifier or existing artifact media type is rewritten. `SchemaVersion`
-  deliberately continues to mean `agentsuite.policy/v1`.
+- V1 remains supported. Administrative `denyWritePaths: null` now refuses
+  instead of being treated as an omitted overlay; omission and `[]` remain
+  valid. V1 path sets now explicitly use unsigned UTF-16 code-unit ordering,
+  with a language-neutral vector. This can change canonical bytes and digests
+  for affected non-BMP paths, so it ships in this next-minor change. The digest
+  framing, schema identifier and existing artifact media type are unchanged.
+  `SchemaVersion` deliberately continues to mean `agentsuite.policy/v1`.
 - Policy structs gain optional network fields. Use keyed Go composite literals;
   added fields can affect consumers that used unkeyed literals.
 - Legacy administrative decoding remains v1-only. Select the policy version

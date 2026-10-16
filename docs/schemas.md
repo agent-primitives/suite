@@ -24,17 +24,30 @@ from the repository's schema directory, not rendered as HTML.
 
 - [eval-evidence.schema.json](../schema/eval-evidence.schema.json): external, suite-bound evaluation records.
 
+## Standalone network-only policies
+
+- [policy-v2.schema.json](../schema/policy-v2.schema.json): authored/effective IPv4 TCP egress allowances.
+- [administrative-policy-v2.schema.json](../schema/administrative-policy-v2.schema.json): optional intersecting restrictions.
+
+These development additions do not add an Agent descriptor or OCI graph edge.
+See the [normative policy contract](../spec.md#appendix-b-standalone-policy-contracts-normative).
+
 ## Validation and identity
 
-All use JSON Schema 2020-12. The frozen schema identifiers remain
+All use JSON Schema 2020-12. Existing artifact schema identifiers remain
 `https://kaimahi.dev/schemas/agentsuite/v1/<file>.schema.json`; downloading a
-schema here does not change its identifier. The kaimahi.dev endpoints for schemas
+schema here does not change its identifier. The standalone policy v2 additions
+use `https://kaimahi.dev/schemas/agentsuite/policy/v2/` identifiers; they do not
+rename any existing schema. The kaimahi.dev endpoints for schemas
 included in v0.1.0 serve those immutable copies, independently of these main-branch
 downloads. The new portable evidence schema is a main-branch addition, not part
 of v0.1.0; its identifier's hosting is separate from this raw download.
+Hosting of the new policy identifiers is likewise separate from the raw downloads.
 
 Schemas validate document shapes. The [Go validator](go.md) additionally checks
 cross-document references, canonical bytes, descriptors and the closed content graph.
+Standalone policy decoding and payload verification use the separate `policy`
+package, not automatic discovery by `ValidatePath`.
 
 For release-pinned schemas, use the
 [v0.1.0 schema directory](https://github.com/agent-primitives/suite/tree/v0.1.0/schema).

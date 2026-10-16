@@ -1749,6 +1749,136 @@ This draft does not specify:
 - a new OCI Distribution endpoint or registry authentication mechanism;
 - byte-identical gzip output across arbitrary compressor implementations.
 
+## Appendix B. Standalone policy contracts (normative)
+
+These standalone contracts are owned by the `policy` package. Policy format
+versions are independent of the Go module version and the AgentSuite artifact
+schema version. This appendix does not add an Agent policy descriptor or OCI
+graph edge. Per-Agent descriptor binding and graph validation are separate work;
+a standalone policy is not automatically committed by an Agent or suite digest.
+
+### B.1 Versions and closed inputs
+
+`agentsuite.policy/v1` remains the filesystem-only contract. Its nonempty set of
+clean absolute UTF-8 `denyWritePaths` excludes `/`, its required capability is
+exactly `["filesystem/deny-write/v1"]`, and administrative denied paths are
+unioned with requested denied paths. Duplicate paths collapse and paths sort
+lexicographically. Existing v1 canonical bytes and digest vectors are unchanged.
+That capability covers create, writable open/write, truncate, rename effects,
+unlink, link, metadata and symlink mutation, including declared mount/path bypass
+coverage; a provider unable to cover the required boundary MUST refuse.
+
+The explicit successor, **`agentsuite.policy/v2`**, is network-only. Its authored
+and effective document shape is defined by
+[`policy-v2.schema.json`](schema/policy-v2.schema.json):
+
+```json
+{
+  "version": "agentsuite.policy/v2",
+  "network": {
+    "egressAllow": [
+      {"address": "192.0.2.10", "protocol": "TCP", "port": 443}
+    ]
+  },
+  "requiredCapabilities": ["network/egress-allow/v1"]
+}
+```
+
+All three root fields, the network object and its `egressAllow` array are
+required and MUST NOT be null. An explicit empty array is valid and means
+**deny all egress**, not unrestricted access or an omitted requirement. V2 MUST
+NOT contain `denyWritePaths`, even as null or an empty array. V1 MUST NOT contain
+`network`, even as null. Neither version is silently upgraded or rewritten.
+
+Each v2 endpoint MUST have exactly `address`, `protocol` and `port`:
+
+- `address` is one canonical dotted-decimal IPv4 literal: four decimal octets
+  from 0 to 255, with no leading zeroes except the single digit `0`.
+- `protocol` is exactly `TCP` (case-sensitive).
+- `port` is an integer from 1 through 65535, explicitly supplied. There is no
+  default port or named port. Equivalent integral JSON number representations
+  may normalize through JCS; fractional or lossy numbers MUST refuse.
+
+CIDR (including `/32`), hostnames, IPv6 and IPv4-mapped IPv6, UDP and other
+protocols, wildcards, address/port ranges, and unknown fields MUST refuse, never
+be ignored or converted into a broader grant. No DNS resolution or hostname-to-IP
+snapshot is part of this format. An address literal never denotes a wildcard;
+providers MUST refuse address classes or translated/aliased routes they cannot
+mediate with the declared exact meaning. Syntax validity is not target qualification.
+
+The required capability list is exactly `["network/egress-allow/v1"]`; absent,
+empty, duplicate or unknown capabilities MUST refuse. V2 does not combine
+filesystem or Tool capabilities. Duplicate endpoint tuples are permitted in
+authored input, but MUST collapse during resolution/canonicalization. Sort by
+canonical dotted-decimal address strings lexicographically using their ASCII
+bytes (not numeric IPv4 order), then by numeric port; TCP is constant. For example, `10.0.0.2` precedes `9.0.0.1`, and port 80 precedes 443 for
+the same address. Normalization MUST NOT mutate or alias caller-owned rule sets.
+
+### B.2 Administrative intersection and the network ceiling
+
+The closed v2 administrative shape is defined by
+[`administrative-policy-v2.schema.json`](schema/administrative-policy-v2.schema.json).
+An omitted `network` (`{}`) imposes no additional restriction. If `network` is
+supplied, its nonnull `egressAllow` array is required. An explicit empty array
+denies all. Null does not mean omission. Filesystem and unknown administrative
+fields MUST refuse in v2; network restrictions MUST refuse when resolving v1.
+
+Treat the requested and administrative allowances as sets of exact
+`(address, TCP, port)` tuples. The effective set is the requested set when admin
+network restrictions are omitted, otherwise their intersection. Administrative
+entries absent from the requested set cannot grant access. Deduplicate and sort
+both inputs as above; an empty intersection remains an explicit empty array.
+Each supplied rule set is limited to 4096 entries before deduplication, following
+the v1 resource-bound rule. Effective lists are subject to the same bound.
+
+`network/egress-allow/v1` authorizes only initiation of outbound TCP connections
+to the listed destination tuples within the provider's claimed network boundary. There are **no implicit allowances** for
+DNS, loopback, model inference, fallbacks, controller/results services or control
+planes. A model endpoint MUST be listed like any other destination. Other new outbound
+traffic is not authorized, including protocols/families that cannot be expressed
+as grants in this version. A provider unable to cover that boundary or deny
+unauthorized paths MUST refuse, not claim partial enforcement. This egress-only contract does not define ingress permissions or promise
+handling of pre-existing/in-flight connections. It does not select a CNI or
+certify host, NAT, privilege or routing coverage.
+
+### B.3 Canonical bytes, digest and payload
+
+Effective policy bytes MUST be JCS-canonical UTF-8 JSON, with normalized endpoint
+sets and the exact required capability list. Empty lists encode as `[]`, not
+`null`; no dummy filesystem field is emitted for v2. Canonical output is limited
+to 4 MiB, as in v1, and input uses the strict JSON profile: duplicate/unknown
+fields, invalid UTF-8 or unpaired surrogate escapes, trailing values and unsafe numbers
+MUST refuse. Reference schemas validate structure, not all byte-level constraints.
+
+For **both** policy versions, the existing digest algorithm is unchanged:
+
+```text
+SHA-256("agentsuite-effective-policy\x00v1\x00" ||
+        uint64-big-endian(byte-length(canonical-policy-bytes)) ||
+        canonical-policy-bytes)
+```
+
+The displayed `\x00` denotes one NUL byte, not four printable characters. Prefix
+the lowercase hexadecimal result with `sha256:`. The domain's `v1` identifies
+this digest framing, not the policy format version; the policy's own `version`
+is already committed by its canonical bytes. Do not substitute a new domain or
+use the root artifact content-digest function in place of this policy digest.
+
+A provider payload carries the exact policy bytes, their policy digest, the
+policy format version and the required capabilities. Its outer version MUST
+match the version inside the bytes. Capabilities MUST match exactly, and the
+bytes MUST verify both their digest and exact canonical representation. A digest
+of noncanonical bytes is insufficient. Consumers MUST preserve and verify the
+bytes rather than decode and reserialize them before use. Carrier transport
+encoding is not a new policy representation.
+
+Language-neutral vectors live in `policy/testdata/`: the unchanged v1 JSON/digest
+pair, plus v2 nonempty and deny-all JSON/digest pairs. Read JSON fixture bytes
+directly without adding a newline. Installation, observed activation and lifetime
+safety are distinct runtime claims; neither valid policy bytes nor a provider
+payload establishes any of them. Runtime wiring, held-start, drift stopping and
+per-Agent artifact binding are outside this standalone contract change.
+
 ## 18. Normative references
 
 - [BCP 14: Requirement-level key words][bcp14]

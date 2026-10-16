@@ -1,12 +1,12 @@
 <template>
-  <article class="suite-home" aria-labelledby="suite-title">
+  <main class="suite-home" aria-labelledby="suite-title">
     <header class="suite-intro">
       <div class="suite-intro-copy">
         <p class="suite-family">agent-primitives / suite</p>
         <h1 id="suite-title">AgentSuite</h1>
         <p class="suite-lead">A content-addressed format for agent definitions.</p>
         <p class="suite-summary">Package agents, their instructions and exact tool dependencies as an open OCI artifact. One format for the definition, independent of the runtime.</p>
-        <a class="suite-primary" href="/spec">Read the specification <span aria-hidden="true">↗</span></a>
+        <a class="suite-primary" href="/spec">Read the specification <span aria-hidden="true">→</span></a>
         <p class="suite-status"><a href="https://github.com/agent-primitives/suite/tree/v0.1.0">v0.1.0</a><span aria-hidden="true">·</span><a href="/releases">docs track main</a></p>
       </div>
 
@@ -37,7 +37,7 @@
         <p>Manifest identities use SHA-256 over RFC 8785 canonical JSON. Regular files are identified by their exact bytes. References bind the graph together with digests and sizes.</p>
         <a class="suite-text-link" href="/spec#6-identity">Read the identity rules <span aria-hidden="true">→</span></a>
       </div>
-      <div class="suite-identity-flow" aria-label="Manifest identity: canonical JSON, then SHA-256, then content digest">
+      <div class="suite-identity-flow" role="img" aria-label="Manifest identity: canonical JSON, then SHA-256, then content digest">
         <span>Manifest</span><span aria-hidden="true">↓</span><code>RFC 8785 · canonical JSON</code><span aria-hidden="true">↓</span><code>SHA-256 → content digest</code>
       </div>
     </section>
@@ -61,5 +61,5 @@
         <p>These pages track main and may include unreleased changes. Use the <a href="https://github.com/agent-primitives/suite/tree/v0.1.0">v0.1.0 tag</a> for a fixed contract.</p>
       </div>
     </footer>
-  </article>
+  </main>
 </template>

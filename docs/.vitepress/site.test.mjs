@@ -25,7 +25,7 @@ test('all documentation pages render with root-based navigation and assets', asy
 
 test('the landing page exposes the format and release-first reading paths without JavaScript', async () => {
   const home = await html('index')
-  const article = home.match(/<article class="suite-home"[\s\S]*?<\/article>/)?.[0]
+  const article = home.match(/<main class="suite-home"[\s\S]*?<\/main>/)?.[0]
   assert.ok(article, 'the format overview must be server-rendered')
   assert.match(article, /href="https:\/\/github.com\/agent-primitives\/suite\/tree\/v0\.1\.0"[^>]*>v0\.1\.0<\/a>/)
   assert.match(article, /docs track main/)
@@ -34,6 +34,21 @@ test('the landing page exposes the format and release-first reading paths withou
   }
   for (const term of ['agentsuite.json', 'ToolProviders', 'canonical', 'exact bytes', 'does not execute']) {
     assert.ok(article.includes(term), `missing format boundary: ${term}`)
+  }
+})
+
+test('the geometric mark ships as nav logo, favicon and correctly sized PNG exports', async () => {
+  const home = await html('index')
+  assert.match(home, /rel="icon"[^>]*href="\/brand\/agentsuite.svg"/)
+  assert.match(home, /class="[^\"]*logo[^\"]*"[^>]*src="\/brand\/agentsuite.svg"/)
+  const mark = await readFile(path.join(dist, 'brand/agentsuite.svg'), 'utf8')
+  assert.match(mark, /viewBox="0 0 64 64"/)
+  assert.doesNotMatch(mark, /<script|https?:\/\/(?!www\.w3\.org)/)
+  for (const [file, width, height] of [['agentsuite.png', 512, 512], ['social-preview.png', 1280, 640]]) {
+    const png = await readFile(path.join(dist, 'brand', file))
+    assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
+    assert.equal(png.readUInt32BE(16), width, file)
+    assert.equal(png.readUInt32BE(20), height, file)
   }
 })
 

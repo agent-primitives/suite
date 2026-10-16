@@ -18,6 +18,8 @@ export default defineConfig({
   cleanUrls: true,
   useWebFonts: false,
   head: [
+    ['link', { rel: 'icon', href: '/brand/agentsuite.svg', type: 'image/svg+xml' }],
+    ['link', { rel: 'icon', href: '/brand/agentsuite.png', type: 'image/png', sizes: '512x512' }],
     ['link', { rel: 'preload', href: '/fonts/PublicSans-Regular.woff2', as: 'font', type: 'font/woff2', crossorigin: '' }]
   ],
   rewrites: Object.fromEntries(pages.map(page => [`docs/${page}.md`, `${page}.md`])),
@@ -58,6 +60,7 @@ export default defineConfig({
     await cp(path.join(root, 'schema'), path.join(config.outDir, 'schema'), { recursive: true })
   },
   themeConfig: {
+    logo: { src: '/brand/agentsuite.svg', alt: '', width: '32', height: '32' },
     mobileMenuLabel: 'Site navigation',
     sidebarMenuLabel: 'Documentation',
     nav: [

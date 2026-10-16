@@ -64,7 +64,11 @@ Use Node.js 22.12 or newer. Run `npm --prefix docs ci --ignore-scripts`, then
 `npm --prefix docs run docs:check` to build and test the rendered site. Use
 `npm --prefix docs run docs:dev` for a loopback-only preview. Keep generated HTML,
 cache and node_modules untracked; spec.md and schema/ remain authoritative.
-The required **Documentation** job includes this build and its rendered checks.
+The required **Documentation** job includes this build, its rendered checks and
+Chromium browser regressions. After building, run `npm --prefix docs exec playwright install chromium`
+and `npm --prefix docs run docs:test-browser` to check mobile navigation, keyboard
+focus, themes, local search, raw schema downloads and the JavaScript-free landing page.
+CI installs Chromium's system dependencies with `--with-deps` as well.
 See [site hosting](docs/hosting.md) for owner-only Pages/domain setup and
 publication boundaries. Lint both workflows with `actionlint .github/workflows/*.yml`.
 

@@ -58,6 +58,16 @@ The small offline docs checker covers local links and Markdown heading anchors
 rejected inputs. It does not fetch external URLs or implement a complete
 Markdown renderer. Review external links and rendered Markdown manually too.
 
+## Documentation site
+
+Use Node.js 22.12 or newer. Run `npm --prefix docs ci --ignore-scripts`, then
+`npm --prefix docs run docs:check` to build and test the rendered site. Use
+`npm --prefix docs run docs:dev` for a loopback-only preview. Keep generated HTML,
+cache and node_modules untracked; spec.md and schema/ remain authoritative.
+The required **Documentation** job includes this build and its rendered checks.
+See [site hosting](docs/hosting.md) for owner-only Pages/domain setup and
+publication boundaries. Lint both workflows with `actionlint .github/workflows/*.yml`.
+
 ## Local development across repositories
 
 Use an outside-tree, uncommitted workspace with both suite and its consumer.

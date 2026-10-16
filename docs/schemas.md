@@ -24,6 +24,11 @@ from the repository's schema directory, not rendered as HTML.
 
 - [eval-evidence.schema.json](../schema/eval-evidence.schema.json): external, suite-bound evaluation records.
 
+## Experimental execution and inference contracts
+
+- [execution.schema.json](../schema/execution.schema.json): a built image's execution interface (experimental).
+- [inference.schema.json](../schema/inference.schema.json): inference requirements (experimental).
+
 ## Standalone network-only policies
 
 - [policy-v2.schema.json](../schema/policy-v2.schema.json): authored/effective IPv4 TCP egress allowances.
@@ -42,9 +47,10 @@ schema here does not change its identifier. The standalone policy v2 additions
 use `https://kaimahi.dev/schemas/agentsuite/policy/v2/` identifiers; they do not
 rename any existing schema. The kaimahi.dev endpoints for schemas
 included in v0.1.0 serve those immutable copies, independently of these main-branch
-downloads. The new portable evidence schema is a main-branch addition, not part
-of v0.1.0; its identifier's hosting is separate from this raw download.
-Hosting of the new policy identifiers is likewise separate from the raw downloads.
+downloads. The portable evidence schema and the experimental execution and
+inference schemas are main-branch additions, not part of v0.1.0; their
+identifiers' hosting is separate from these raw downloads. Hosting of the new
+policy identifiers is likewise separate from the raw downloads.
 
 Schemas validate document shapes. The [Go validator](go.md) additionally checks
 cross-document references, canonical bytes, descriptors and the closed content graph.

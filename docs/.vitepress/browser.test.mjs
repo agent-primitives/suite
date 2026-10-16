@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
-import { mkdir, readFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { after, before, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -8,6 +8,8 @@ import { chromium } from 'playwright'
 import { latestRelease } from './release.mjs'
 
 const root = fileURLToPath(new URL('dist/', import.meta.url))
+// Every published schema must be linked from /schemas; derive the count so adding one can't silently skip the check.
+const schemaCount = (await readdir(fileURLToPath(new URL('../../schema/', import.meta.url)))).filter(name => name.endsWith('.schema.json')).length
 let browser, server, origin
 
 before(async () => {
@@ -117,7 +119,7 @@ for (const colorScheme of ['light', 'dark']) {
         }
         if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, `after-spec-${device}-${colorScheme}.png`), fullPage: true })
         await ready(page, '/schemas')
-        assert.equal(await page.locator('.vp-doc a[href^="/schema/"]').count(), 11)
+        assert.equal(await page.locator('.vp-doc a[href^="/schema/"]').count(), schemaCount)
         for (const [name, id] of [
           ['agent.schema.json', 'https://kaimahi.dev/schemas/agentsuite/v1/agent.schema.json'],
           ['policy-v2.schema.json', 'https://kaimahi.dev/schemas/agentsuite/policy/v2/policy.schema.json'],

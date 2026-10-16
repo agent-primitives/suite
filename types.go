@@ -217,10 +217,42 @@ type FileRef struct {
 }
 
 type ModelRequirement struct {
-	Protocol    string   `json:"protocol"`
-	Model       string   `json:"model"`
-	EndpointEnv string   `json:"endpointEnv,omitempty"`
-	SecretRefs  []string `json:"secretRefs,omitempty"`
+	Protocol     string                 `json:"protocol"`
+	Model        string                 `json:"model,omitempty"`
+	Capabilities *InferenceRequirements `json:"capabilities,omitempty"`
+	EndpointEnv  string                 `json:"endpointEnv,omitempty"`
+	SecretRefs   []string               `json:"secretRefs,omitempty"`
+}
+
+// UnmarshalJSON checks property presence before optional zero values can erase
+// the model schema's exclusive selection and deployment-binding restrictions.
+func (m *ModelRequirement) UnmarshalJSON(data []byte) error {
+	type wire ModelRequirement
+	var decoded wire
+	if err := Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	_, hasModel := fields["model"]
+	_, hasCapabilities := fields["capabilities"]
+	if hasModel == hasCapabilities {
+		return fmt.Errorf("model requires exactly one of model or capabilities")
+	}
+	if hasCapabilities && isJSONNull(fields["capabilities"]) {
+		return fmt.Errorf("model capabilities must not be null")
+	}
+	if hasCapabilities {
+		for _, name := range []string{"endpointEnv", "secretRefs"} {
+			if _, present := fields[name]; present {
+				return fmt.Errorf("capability-based inference forbids %s", name)
+			}
+		}
+	}
+	*m = ModelRequirement(decoded)
+	return nil
 }
 
 type ToolProviderRequirement struct {
@@ -409,10 +441,30 @@ type ToolProviderComposition struct {
 }
 
 type BuildProfile struct {
-	SchemaVersion string          `json:"schemaVersion"`
-	MediaType     string          `json:"mediaType"`
-	ID            string          `json:"id"`
-	RuntimeBase   []PlatformImage `json:"runtimeBase"`
-	Harness       []PlatformImage `json:"harness"`
-	SourceEpoch   int64           `json:"sourceEpoch"`
+	Execution     *ExecutionContract `json:"execution,omitempty"`
+	SchemaVersion string             `json:"schemaVersion"`
+	MediaType     string             `json:"mediaType"`
+	ID            string             `json:"id"`
+	RuntimeBase   []PlatformImage    `json:"runtimeBase"`
+	Harness       []PlatformImage    `json:"harness"`
+	SourceEpoch   int64              `json:"sourceEpoch"`
+}
+
+// UnmarshalJSON rejects a null execution property; a pointer decoder would
+// otherwise treat it as omission without invoking the contract's decoder.
+func (p *BuildProfile) UnmarshalJSON(data []byte) error {
+	type wire BuildProfile
+	var decoded wire
+	if err := Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if raw, present := fields["execution"]; present && isJSONNull(raw) {
+		return fmt.Errorf("build profile execution must not be null")
+	}
+	*p = BuildProfile(decoded)
+	return nil
 }

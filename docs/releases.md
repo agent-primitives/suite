@@ -37,6 +37,9 @@ filesystem policy package.
   exact ordinary content descriptors and closed policy graph membership in both
   extracted and OCI content. A changed policy requires rebinding its Agent and
   suite ancestors. Framed effective-policy identity is not an OCI descriptor hash.
+- The top-level `policies/` namespace is now reserved and closed. Suites that
+  previously stored unrelated or unreferenced files there must move them outside
+  that namespace or bind valid owned policy files. An empty directory is allowed.
 - The JSON codec moves unchanged to `internal/jsoncodec` behind the existing root
   public wrappers. Existing strict-decoding and canonical-byte behavior is retained.
 - Neither standalone nor graph validation establishes runtime enforcement or

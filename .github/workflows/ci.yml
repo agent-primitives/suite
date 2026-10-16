@@ -53,6 +53,9 @@ jobs:
               "TestToolProviderCompositionSchemaDefinesStandaloneSandboxInput",
               "TestEmbeddedEvaluationsAcceptDirectoryAndOCI",
               "TestEvaluationReferenceSchemas",
+              "TestPolicyBindingFixtureConformance",
+              "TestAgentPolicyReferenceSchema",
+              "TestPolicyBindingDigestPropagationAndStaleAncestors",
               "TestValidatePathAcceptsOCILayout",
               "TestDiffPathsTreatsExtractedSuiteAndOCILayoutAsEquivalent",
           }

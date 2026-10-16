@@ -48,6 +48,13 @@ func (c *ExecutionContract) UnmarshalJSON(data []byte) error {
 	if err := decodeRequiredContract(data, &decoded, "kind", "protocol", "port", "healthPath", "inputs"); err != nil {
 		return err
 	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if _, present := fields["configuration"]; present && decoded.Configuration == "" {
+		return errors.New("execution configuration must not be empty when present")
+	}
 	*c = ExecutionContract(decoded)
 	return nil
 }

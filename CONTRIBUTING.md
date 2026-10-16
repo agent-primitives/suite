@@ -104,6 +104,11 @@ Before a release:
    green, plus an independent `GOWORK=off` verification.
 2. Publish the reviewed immutable root tag. Consumers then pin that version and
    verify clean-checkout `GOWORK=off` tests against the published module.
+3. Update `latestRelease` in `docs/.vitepress/release.mjs` to the published tag,
+   then run `npm --prefix docs run docs:check` and
+   `npm --prefix docs run docs:test-browser`. The site test requires the home-page
+   status and footer labels and tag links to agree with this single constant;
+   verify it against the latest published tag when reviewing a release.
 
 ## Pull requests
 

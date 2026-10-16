@@ -5,6 +5,7 @@ import path from 'node:path'
 import { after, before, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
+import { latestRelease } from './release.mjs'
 
 const root = fileURLToPath(new URL('dist/', import.meta.url))
 let browser, server, origin
@@ -53,7 +54,7 @@ test('landing content and release links remain available without JavaScript', as
   try {
     await page.goto(origin)
     assert.equal(await page.getByRole('heading', { level: 1, name: 'AgentSuite' }).count(), 1)
-    assert.equal(await page.getByRole('link', { name: 'v0.1.0', exact: true }).getAttribute('href'), 'https://github.com/agent-primitives/suite/tree/v0.1.0')
+    assert.equal(await page.getByRole('link', { name: latestRelease, exact: true }).getAttribute('href'), `https://github.com/agent-primitives/suite/tree/${latestRelease}`)
     assert.equal(await page.getByRole('link', { name: 'docs track main', exact: true }).getAttribute('href'), '/releases')
     assert.equal(await page.getByRole('link', { name: /Read the specification/ }).getAttribute('href'), '/spec')
   } finally { await page.close() }

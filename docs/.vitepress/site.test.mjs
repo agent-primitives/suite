@@ -3,6 +3,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { latestRelease } from './release.mjs'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const dist = path.join(root, 'docs/.vitepress/dist')
@@ -27,7 +28,6 @@ test('the landing page exposes the format and release-first reading paths withou
   const home = await html('index')
   const article = home.match(/<main class="suite-home"[\s\S]*?<\/main>/)?.[0]
   assert.ok(article, 'the format overview must be server-rendered')
-  assert.match(article, /href="https:\/\/github.com\/agent-primitives\/suite\/tree\/v0\.1\.0"[^>]*>v0\.1\.0<\/a>/)
   assert.match(article, /docs track main/)
   for (const route of ['spec', 'schemas', 'go', 'conformance']) {
     assert.ok(article.includes(`href="/${route}"`), `missing ${route} entry point`)
@@ -35,6 +35,23 @@ test('the landing page exposes the format and release-first reading paths withou
   for (const term of ['agentsuite.json', 'ToolProviders', 'canonical', 'exact bytes', 'does not execute']) {
     assert.ok(article.includes(term), `missing format boundary: ${term}`)
   }
+})
+
+test('status and footer labels and links agree with the latest release constant', async () => {
+  const home = await html('index')
+  const links = [...home.matchAll(/<a href="([^"]+)"[^>]*>(v\d+\.\d+\.\d+(?: tag)?)<\/a>/g)]
+    .map(([, href, text]) => ({ href, text }))
+  const href = `https://github.com/agent-primitives/suite/tree/${latestRelease}`
+  assert.deepEqual(links, [{ href, text: latestRelease }, { href, text: `${latestRelease} tag` }])
+})
+
+test('the validation section links the portable evidence verifier to its spec section', async () => {
+  const home = await html('index')
+  const section = home.match(/<section class="suite-validation"[\s\S]*?<\/section>/)?.[0] || ''
+  assert.ok(section.includes('v0.2.0 adds portable evaluation evidence with an offline verifier'))
+  assert.ok(section.includes('href="/spec#824-portable-evaluation-evidence"'))
+  assert.ok(section.includes('VerifyEvaluation'))
+  assert.ok((await html('spec')).includes('id="824-portable-evaluation-evidence"'))
 })
 
 test('the geometric mark ships as nav logo, favicon and correctly sized PNG exports', async () => {

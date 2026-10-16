@@ -1,3 +1,9 @@
+<script setup>
+import { latestRelease } from '../release.mjs'
+
+const releaseUrl = `https://github.com/agent-primitives/suite/tree/${latestRelease}`
+</script>
+
 <template>
   <main class="suite-home" aria-labelledby="suite-title">
     <header class="suite-intro">
@@ -7,7 +13,7 @@
         <p class="suite-lead">A content-addressed format for agent definitions.</p>
         <p class="suite-summary">Package agents, their instructions and exact tool dependencies as an open OCI artifact. One format for the definition, independent of the runtime.</p>
         <a class="suite-primary" href="/spec">Read the specification <span aria-hidden="true">→</span></a>
-        <p class="suite-status"><a href="https://github.com/agent-primitives/suite/tree/v0.1.0">v0.1.0</a><span aria-hidden="true">·</span><a href="/releases">docs track main</a></p>
+        <p class="suite-status"><a :href="releaseUrl">{{ latestRelease }}</a><span aria-hidden="true">·</span><a href="/releases">docs track main</a></p>
       </div>
 
       <figure class="suite-specimen" aria-labelledby="suite-contents-caption">
@@ -47,6 +53,7 @@
       <div>
         <p>JSON schemas check document shapes. The Go validator also checks canonical content, descriptors, references and the closed graph, from an extracted directory or OCI image layout.</p>
         <p class="suite-boundary">Validation does not execute agents, tools or evaluations. Packaged evaluation cases are requirements, not evidence of a passing run.</p>
+        <p>v0.2.0 adds portable evaluation evidence with an offline verifier, <a class="suite-evidence-link" href="/spec#824-portable-evaluation-evidence"><code>VerifyEvaluation</code></a>.</p>
         <a class="suite-text-link" href="/conformance">See what conformance means <span aria-hidden="true">→</span></a>
       </div>
     </section>
@@ -58,7 +65,7 @@
       </div>
       <div class="suite-source">
         <a href="https://github.com/agent-primitives/suite">Source on GitHub <span aria-hidden="true">↗</span></a>
-        <p>These pages track main and may include unreleased changes. Use the <a href="https://github.com/agent-primitives/suite/tree/v0.1.0">v0.1.0 tag</a> for a fixed contract.</p>
+        <p>These pages track main and may include unreleased changes. Use the <a :href="releaseUrl">{{ latestRelease }} tag</a> for a fixed contract.</p>
       </div>
     </footer>
   </main>

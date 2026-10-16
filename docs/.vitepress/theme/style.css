@@ -145,6 +145,9 @@ a, button { -webkit-tap-highlight-color: var(--vp-c-brand-soft); }
 .suite-identity-flow > span { color: var(--vp-c-text-2); }
 .suite-identity-flow code { font-size: 0.875rem; overflow-wrap: anywhere; }
 .suite-validation { display: grid; grid-template-columns: 1fr 1.3fr; gap: 2rem 5rem; padding: 2.5rem 0; border-top: 1px solid var(--vp-c-divider); border-bottom: 1px solid var(--vp-c-divider); }
+.suite-validation > * { min-width: 0; }
+.suite-evidence-link { color: var(--vp-c-brand-1); text-decoration: underline; text-underline-offset: 0.2em; }
+.suite-evidence-link code { overflow-wrap: anywhere; }
 .suite-validation .suite-boundary { margin-top: 1.25rem; color: var(--vp-c-text-1); }
 .suite-context { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem 5rem; padding-top: 3rem; }
 .suite-context h2 { font-size: 1rem; letter-spacing: -0.02em; }

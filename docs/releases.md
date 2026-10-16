@@ -13,7 +13,9 @@ The OCI loader refuses special files and symlinks in layout metadata and
 referenced blobs before opening them, including FIFO inputs that previously
 could hang offline validation or evidence verification. Blob directories must
 also be real directories. Unix reads use nonblocking, no-follow opens; Windows
-reads open reparse points rather than following them. Other platforms retain
+reads open reparse points rather than following them; layouts on specialized
+Windows reparse-backed storage (for example cloud placeholders) may refuse and
+should be materialized as ordinary local files. Other platforms retain
 pre-open type and opened-file checks where native flags are unavailable.
 
 This is a compatible fix for malformed filesystem envelopes: regular layouts,

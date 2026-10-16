@@ -166,8 +166,12 @@ func checkOCISpecialFile(t *testing.T, target, kind string) {
 	}
 	if kind == "dangling" {
 		// Auto-detection must recognize the entry, not fall back to loose content.
-		if content, err := loadPathContent(layout); err == nil || content != nil {
+		content, err := loadPathContent(layout)
+		if err == nil || content != nil {
 			t.Errorf("dangling OCI metadata fell back to content: content=%+v error=%v", content, err)
+		}
+		if target == "oci-layout" && (err == nil || !strings.HasPrefix(err.Error(), "read oci-layout: ")) {
+			t.Errorf("dangling OCI marker did not select the OCI loader: %v", err)
 		}
 	}
 }

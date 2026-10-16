@@ -205,8 +205,8 @@ their semantic role; descriptors establish that role.
 The layout metadata (`oci-layout` and `index.json`) and every referenced blob
 MUST be regular filesystem files, not symlinks, FIFOs, devices or sockets. The
 `blobs/` and `blobs/sha256/` entries MUST be directories, not symlinks or special
-files. Loaders MUST refuse non-regular file entries before opening them and must
-not follow a final file symlink. These envelope rules do not change the content
+files. Loaders MUST refuse non-regular file entries before opening them and MUST
+NOT follow a final file symlink. These envelope rules do not change the content
 layer's separately defined symlink rules. A caller-selected alias of the layout
 root directory may still resolve normally.
 

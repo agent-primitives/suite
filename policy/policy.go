@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path"
@@ -35,12 +36,20 @@ func DecodeSuitePolicy(data []byte) (SuitePolicy, error) {
 // DecodeAdministrativePolicy decodes the closed filesystem-only v1 administrative profile.
 func DecodeAdministrativePolicy(data []byte) (AdministrativePolicy, error) {
 	var wire struct {
-		DenyWritePaths []string `json:"denyWritePaths,omitempty"`
+		DenyWritePaths json.RawMessage `json:"denyWritePaths"`
 	}
 	if err := decodeStrict(data, &wire); err != nil {
 		return AdministrativePolicy{}, fmt.Errorf("decode administrative policy: %w", err)
 	}
-	p := AdministrativePolicy{DenyWritePaths: wire.DenyWritePaths}
+	p := AdministrativePolicy{}
+	if wire.DenyWritePaths != nil {
+		if bytes.Equal(bytes.TrimSpace(wire.DenyWritePaths), []byte("null")) {
+			return p, errors.New("denyWritePaths must not be null")
+		}
+		if err := json.Unmarshal(wire.DenyWritePaths, &p.DenyWritePaths); err != nil {
+			return p, fmt.Errorf("denyWritePaths: %w", err)
+		}
+	}
 	if len(p.DenyWritePaths) > 4096 {
 		return p, errors.New("too many administrative denyWritePaths")
 	}

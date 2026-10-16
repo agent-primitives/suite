@@ -46,7 +46,9 @@ a filesystem-only provider must still refuse v2/network requirements.
 
 Legacy `DecodeAdministrativePolicy` remains v1-only. Use
 `DecodeAdministrativePolicyForVersion(data, suite.Version)` for explicit version
-selection. V2 admin `{}` adds no restriction; supplying
+selection. For v1, omitted `denyWritePaths` and an explicit empty array add no
+restriction; explicit `null` refuses rather than becoming an absent overlay.
+V2 admin `{}` adds no restriction; supplying
 `{"network":{"egressAllow":[]}}` denies all. A supplied tuple set intersects the
 suite's tuple set, never unions or grants extra endpoints. Restrictions from the
 other profile refuse rather than being dropped. Lists are bounded at 4096

@@ -1763,7 +1763,9 @@ a standalone policy is not automatically committed by an Agent or suite digest.
 clean absolute UTF-8 `denyWritePaths` excludes `/`, its required capability is
 exactly `["filesystem/deny-write/v1"]`, and administrative denied paths are
 unioned with requested denied paths. Duplicate paths collapse and paths sort
-lexicographically. Existing v1 canonical bytes and digest vectors are unchanged.
+lexicographically. An omitted administrative `denyWritePaths` field and an
+explicit empty array add no restrictions; explicit `null` MUST fail closed.
+Existing v1 canonical bytes and digest vectors are otherwise unchanged.
 That capability covers create, writable open/write, truncate, rename effects,
 unlink, link, metadata and symlink mutation, including declared mount/path bypass
 coverage; a provider unable to cover the required boundary MUST refuse.

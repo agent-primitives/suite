@@ -82,12 +82,34 @@ func TestSuitePolicyDecodeIsClosed(t *testing.T) {
 
 func TestAdministrativePolicyDecodeIsClosed(t *testing.T) {
 	valid := `{"denyWritePaths":["/admin"]}`
+	validEmpty := []string{
+		`{}`,
+		`{"denyWritePaths":[]}`,
+	}
 	bad := []string{
 		`null`,
+		`{"denyWritePaths":null}`,
+		`{"denyWritePaths":"admin"}`,
+		`{"denyWritePaths":{}}`,
+		`{"denyWritePaths":[1]}`,
 		`{"denyWritePaths":["/admin"],"denyWritePaths":["/other"]}`,
 		`{"denyWritePaths":["/admin"],"extra":true}`,
 		valid + ` {}`,
 		valid + ` trailing`,
+	}
+	if got, err := DecodeAdministrativePolicy([]byte(valid)); err != nil {
+		t.Fatalf("rejected valid administrative policy: %v", err)
+	} else if !equalStrings(got.DenyWritePaths, []string{"/admin"}) {
+		t.Fatalf("decoded denyWritePaths = %q, want [/admin]", got.DenyWritePaths)
+	}
+	for _, input := range validEmpty {
+		got, err := DecodeAdministrativePolicy([]byte(input))
+		if err != nil {
+			t.Errorf("rejected %q: %v", input, err)
+		}
+		if got.DenyWritePaths == nil && input != `{}` {
+			t.Errorf("decoded %q as omitted rather than an explicit empty set", input)
+		}
 	}
 	for _, input := range bad {
 		if _, err := DecodeAdministrativePolicy([]byte(input)); err == nil {

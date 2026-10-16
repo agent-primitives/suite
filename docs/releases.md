@@ -7,6 +7,26 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
+## Unreleased — optional runtime profiles (minor release required)
+
+Suites may bind runtime profiles and select multiple compositions for one
+member/platform by explicit profile ID. New readers retain the legacy path;
+omitting new fields preserves existing bytes, digests and report/diff output.
+No migration or implicit fallback is performed. Older strict readers reject the
+new fields. Use keyed Go literals for the extended public types.
+
+Profile documents bind runtime/harness/renderer identities, an opaque consumer-owned
+configuration ABI and an explicit image requirement. Validation checks declarations
+and graph consistency, not runtime support. Evidence v1 is unchanged: two profiles
+require separate passes against the same OCI manifest, with independent execution
+expectations. No offline fixture establishes runtime execution or qualification.
+Diff adds profile records and profile-aware composition keys with selective impact.
+
+This format/API, validation and semantic-diff addition requires a **minor** Go
+module release. Existing schema IDs, media types, spec version and canonicalization
+remain unchanged; a new runtime-profile media type/schema is added. No tag or
+publication is created here. Consumers must pin a published version before rollout.
+
 ## Unreleased — OCI filesystem safety fix
 
 The OCI loader refuses special files and symlinks in layout metadata and

@@ -17,7 +17,11 @@ absent-policy compatibility, closed policy namespaces, malformed/stale reference
 semantic refusals and policy-to-suite identity propagation. An artifact policy
 hash is ordinary content SHA-256; it is not the framed effective-policy digest.
 CI requires named conformance tests
-to pass and rejects skipped tests.
+to pass and rejects skipped tests. Generated two-profile conformance tests extend
+the minimal evaluation fixture without duplicating stored member/case files:
+they check schema/decoder parity, profile selections and separate detached passes
+against one exact OCI manifest. These are offline consistency tests, not execution
+or cross-runtime qualification.
 
 ## What a pass means
 

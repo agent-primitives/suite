@@ -288,6 +288,11 @@ func loadDiffSnapshot(value string) (diffSnapshot, error) {
 		}
 		snapshot.agents[ref.ID] = agent
 	}
+	for _, ref := range suite.RuntimeProfiles {
+		if err := snapshot.addRecord(content, "runtimeProfile", ref.ID, ref.Path, ref.Descriptor.Digest, nil); err != nil {
+			return diffSnapshot{}, err
+		}
+	}
 	for _, ref := range suite.BuildProfiles {
 		if err := snapshot.addRecord(content, "buildProfile", ref.ID, ref.Path, ref.Descriptor.Digest, nil); err != nil {
 			return diffSnapshot{}, err
@@ -307,7 +312,7 @@ func loadDiffSnapshot(value string) (diffSnapshot, error) {
 		}
 	}
 	for _, ref := range suite.Compositions {
-		id := ref.Agent + "@" + ref.Platform.String()
+		id := compositionKey(ref.Agent, ref.Platform, ref.RuntimeProfile)
 		var composition Composition
 		if err := snapshot.addRecord(content, "composition", id, ref.Path, ref.Descriptor.Digest, &composition); err != nil {
 			return diffSnapshot{}, err
@@ -921,6 +926,9 @@ func affectedAgents(before, after diffSnapshot, changed map[diffRecordKey]string
 			}
 			if changeType, ok := changed[diffRecordKey{kind: "buildProfile", id: composition.BuildProfile}]; ok {
 				addReason(composition.Agent, "build profile "+composition.BuildProfile+" "+changeType)
+			}
+			if changeType, ok := changed[diffRecordKey{kind: "runtimeProfile", id: composition.RuntimeProfile}]; ok {
+				addReason(composition.Agent, "runtime profile "+composition.RuntimeProfile+" "+changeType)
 			}
 			for _, provider := range composition.ToolProviders {
 				providerID := provider.ID + "@" + provider.Version

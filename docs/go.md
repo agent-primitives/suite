@@ -47,6 +47,27 @@ Validation does not execute evaluations or establish a passing result.
 Builders, registry transfer and runtime execution belong to consumers, not this
 package.
 
+## Optional runtime profiles
+
+`Suite.RuntimeProfiles` references digest-bound `RuntimeProfile` documents.
+`CompositionRef.RuntimeProfile` and `Composition.RuntimeProfile` must agree.
+Select the exact member/platform/profile tuple, not the first composition.
+Reports preserve both selections while deduplicating `AgentPlatforms`.
+`DiffPaths` emits `runtimeProfile` records and profile-aware composition IDs.
+
+`VerifyEvaluation` retains evidence v1 and resolves the composition digest to
+its profile before checking runtime/harness/renderer and profile identities.
+Two profiles need two detached passes against the exact same OCI manifest;
+passing one never qualifies the other. Expectations must be independently resolved.
+Image identity belongs in the caller/producer non-secret execution configuration
+digest; this offline verifier cannot inspect its preimage or execute a runtime.
+Runtime and configuration ABI support are consumer-owned, not library catalogs.
+
+Use keyed literals for the extended public structs. Omitted fields retain legacy
+serialization and identity. Older strict readers reject profiled suites; the
+addition requires a minor module release before consumers pin it. See
+[runtime profiles](../spec.md#111-runtime-profiles) and [compatibility](releases.md#compatibility).
+
 ## Standalone policy contracts
 
 The `github.com/agent-primitives/suite/policy` package owns policy resolution,

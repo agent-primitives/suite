@@ -86,13 +86,27 @@ func VerifyEvaluation(layoutPath string, expected ExpectedEvaluation, evidenceRe
 		}
 	}
 	platform := Platform{OS: e.Subject.Platform.OS, Architecture: e.Subject.Platform.Architecture, Variant: e.Subject.Platform.Variant}
-	composition, ok := v.compositions[agent.ID+"@"+platform.String()]
-	if !ok {
-		return nil, evidenceRefuse("subject")
-	}
+	var composition Composition
 	for _, ref := range v.suite.Compositions {
 		if ref.Agent == agent.ID && ref.Platform == platform && ref.Descriptor.Digest == e.Subject.CompositionDigest {
+			if compositionMatched {
+				return nil, evidenceRefuse("subject")
+			}
+			composition = v.compositions[compositionKey(ref.Agent, ref.Platform, ref.RuntimeProfile)]
 			compositionMatched = true
+		}
+	}
+	if composition.RuntimeProfile != "" {
+		profile := v.runtimes[composition.RuntimeProfile]
+		var digest string
+		for _, ref := range v.suite.RuntimeProfiles {
+			if ref.ID == profile.ID {
+				digest = ref.Descriptor.Digest
+			}
+		}
+		if e.Execution.Runtime != profile.Runtime || e.Execution.Harness != profile.Harness || e.Execution.Renderer != profile.Renderer ||
+			e.Execution.Profile != (EvidenceImplementation{ID: profile.ID, Version: SpecVersion, Digest: digest}) {
+			return nil, evidenceRefuse("subject")
 		}
 	}
 	for _, ref := range v.suite.BuildProfiles {

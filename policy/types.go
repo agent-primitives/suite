@@ -1,4 +1,4 @@
-// Copyright (c) Kaimahi contributors. Licensed under the MIT License.
+// Copyright (c) Microsoft Corporation. Licensed under the MIT License.
 // Package policy defines AgentSuite enforcement policy contracts.
 package policy
 

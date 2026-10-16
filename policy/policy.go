@@ -10,6 +10,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	agentsuite "github.com/agent-primitives/suite"
 )
@@ -82,6 +83,9 @@ func validateCapabilities(capabilities []string) error {
 }
 
 func validatePath(value string) error {
+	if !utf8.ValidString(value) {
+		return fmt.Errorf("path %q must be valid UTF-8", value)
+	}
 	if value == "" || !strings.HasPrefix(value, "/") || strings.ContainsRune(value, 0) || path.Clean(value) != value {
 		return fmt.Errorf("path %q must be clean and absolute", value)
 	}

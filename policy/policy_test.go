@@ -129,6 +129,54 @@ func TestPolicyPathLimitsApplyAtEveryBoundary(t *testing.T) {
 	}
 }
 
+func TestTypedPolicyPathsRequireUTF8(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		path  string
+		valid bool
+	}{
+		{"invalid byte", "/safe/\xff", false},
+		{"truncated encoding", "/safe/\xc3", false},
+		{"encoded surrogate", "/safe/\xed\xa0\x80", false},
+		{"Unicode", "/safe/é", true},
+		{"replacement character", "/safe/\ufffd", true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			suite := sample()
+			suite.DenyWritePaths = []string{tc.path}
+			effective := EffectivePolicy{
+				Version:              SchemaVersion,
+				DenyWritePaths:       []string{tc.path},
+				RequiredCapabilities: []string{FilesystemDenyWrite},
+			}
+			checks := map[string]func() error{
+				"Validate": func() error { return Validate(suite) },
+				"Resolve suite": func() error {
+					_, err := Resolve(suite, AdministrativePolicy{})
+					return err
+				},
+				"Resolve administrative": func() error {
+					_, err := Resolve(sample(), AdministrativePolicy{DenyWritePaths: []string{tc.path}})
+					return err
+				},
+				"CanonicalBytes": func() error {
+					_, err := CanonicalBytes(effective)
+					return err
+				},
+				"Payload": func() error {
+					_, err := Payload(effective)
+					return err
+				},
+			}
+			for name, check := range checks {
+				if err := check(); (err == nil) != tc.valid {
+					t.Errorf("%s: valid = %v, error = %v", name, tc.valid, err)
+				}
+			}
+		})
+	}
+}
+
 func TestCanonicalBytesUseJCSStringEncoding(t *testing.T) {
 	policy := EffectivePolicy{
 		Version:              SchemaVersion,

@@ -20,6 +20,9 @@ The normative format and conformance requirements are defined in
 [spec.md](spec.md). Examples and conformance fixtures live in
 [testdata/](testdata/).
 
+The [documentation site](https://suite.agent-primitives.dev/) renders the
+specification, schema downloads, conformance overview and Go usage from main.
+
 ## Go package
 
 Use Go 1.26.0 or newer. The module path ends in `suite`, but the Go package

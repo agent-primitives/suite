@@ -28,7 +28,9 @@ to source rather than becoming another maintained content tree.
 These are owner actions, not actions performed by the publishing workflow.
 
 1. **Verify the apex domain for the organization before enabling the custom
-   domain.** Open the `agent-primitives` organization's **Settings > Pages**,
+   domain.** An organization owner must perform this step; organization
+   membership alone is insufficient. Open the `agent-primitives` organization's
+   **Settings > Pages**,
    choose **Add a domain**, and enter `agent-primitives.dev`. Add the exact TXT
    name/value GitHub provides at the DNS provider, then click **Verify**.
    The challenge name is

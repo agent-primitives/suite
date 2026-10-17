@@ -133,6 +133,43 @@ test('strict parser and all explicit refusal/acceptance expectations', () => {
   }
 });
 
+test('long compensated port spelling preserves canonical Go identity', async t => {
+  const ask = await oracle(t);
+  const ordinary = encode(v2([{ address: '192.0.2.1', protocol: 'TCP', port: 1 }]));
+  const text = new TextDecoder().decode(ordinary);
+  const exact = '1' + '0'.repeat(800) + 'e-800';
+  const raw = encode(text.replace('"port":1', '"port":' + exact));
+  assert.equal(decodePolicy(raw).network.egressAllow[0].port, 1);
+  const normalized = canonicalize(raw);
+  const result = await payload(raw);
+  assert.deepEqual(result.policyBytes, normalized);
+  await verifyPayload(result);
+
+  const go = await ask(ordinary, result);
+  assert.equal(go.accepted, true, 'Go accepts the ordinary integer spelling');
+  assert.equal(go.verified, true, 'Go verifies the TS canonical payload');
+  assert.deepEqual(normalized, new Uint8Array(Buffer.from(go.canonical, 'base64')));
+  assert.equal(result.policyDigest, go.digest);
+  assert.equal(await digest(normalized), go.digest);
+
+  const fractional = '1' + '0'.repeat(799) + '1e-800';
+  const rounded = encode(text.replace('"port":1', '"port":' + fractional));
+  assert.throws(() => decodePolicy(rounded), 'A fraction rounding to 1 must refuse');
+  assert.throws(() => canonicalize(rounded));
+  await assert.rejects(payload(rounded));
+
+  // Go 1.26.0's float precheck misreads this exact integer (golang/go#42436).
+  // Do not require that bug to persist when the Go toolchain is upgraded.
+  const rawGo = await ask(raw);
+  if (rawGo.accepted) {
+    assert.deepEqual(normalized, new Uint8Array(Buffer.from(rawGo.canonical, 'base64')));
+    assert.equal(result.policyDigest, rawGo.digest);
+    t.diagnostic('Go accepts the compensated spelling with matching canonical identity');
+  } else {
+    t.diagnostic('Known Go raw-number refusal; canonical payload interoperability passed');
+  }
+});
+
 test('payload verification snapshots mutable bytes before awaiting SHA-256', async () => {
   const result = await payload(encode(v1(['/x'])));
   const promise = verifyPayload(result);

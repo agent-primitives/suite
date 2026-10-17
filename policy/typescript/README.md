@@ -96,6 +96,24 @@ JavaScript's unsigned UTF-16 default ordering, **not** `localeCompare` or Unicod
 code-point ordering; v2 sorts address strings lexicographically then port
 numerically. No filesystem or DNS APIs are involved.
 
+### Known Go numeric-spelling difference
+
+All shared canonical vectors match exactly, but universal raw-input
+acceptance/refusal parity is not claimed. With Go 1.26.0, a port token formed
+as `'1' + '0'.repeat(800) + 'e-800'` is rejected by the reference decoder even
+though it is exactly integer 1: its floating-point range precheck reads 0.1.
+This is consistent with [golang/go#42436](https://github.com/golang/go/issues/42436).
+TypeScript retains the exact value and emits canonical `"port":1`, and Go
+successfully verifies the resulting canonical payload. This is not an observed
+canonical-byte/digest mismatch or demonstrated enforcement bypass.
+
+A focused regression checks the exact port-1 result, canonical bytes/digest
+against Go, payload verification in both implementations, and refusal of a
+nearby true fraction that IEEE-754 rounds to 1. Go's decision on the original
+long spelling is diagnostic: if a future toolchain accepts it, canonical
+identity must still match. The test does not require Go's bug to persist.
+No Go correction or emulation of that runtime bug is included.
+
 ## Build and tests
 
 From the repository root, with Node.js 22 and Go as required by `go.mod`:

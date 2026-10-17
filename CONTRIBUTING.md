@@ -74,6 +74,22 @@ CI installs Chromium's system dependencies with `--with-deps` as well.
 See [site hosting](docs/hosting.md) for owner-only Pages/domain setup and
 publication boundaries. Lint both workflows with `actionlint .github/workflows/*.yml`.
 
+## TypeScript policy checks
+
+The [TypeScript policy package](policy/typescript/README.md) uses Node.js 22
+and the repository's Go toolchain for differential tests. From the root:
+
+```bash
+npm --prefix policy/typescript ci --ignore-scripts
+npm --prefix policy/typescript test
+npm --prefix policy/typescript exec playwright install --with-deps chromium
+npm --prefix policy/typescript run test:browser
+```
+
+The **TypeScript policy parity** CI job runs build/typecheck, all shared policy
+vectors, deterministic Go differential tests and actual Chromium runtime tests.
+This adds no runtime dependency or publication step to the Go module.
+
 ## Local development across repositories
 
 Use an outside-tree, uncommitted workspace with both suite and its consumer.

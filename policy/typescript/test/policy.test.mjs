@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { once } from 'node:events';
-import test from 'node:test';
+import test, { after } from 'node:test';
 import { canonicalize, decodePolicy, digest, payload, verifyPayload } from '../dist/index.js';
 import { cases, generatedCases, encode, v1, v2 } from './cases.mjs';
 import { fixtures } from './fixtures.mjs';
@@ -16,25 +16,29 @@ async function accepts(action) {
   catch { return false; } // Deliberate: the test compares refusal, not error wording.
 }
 
+let oracleBuild;
+let oracleDirectory;
+after(async () => {
+  if (oracleDirectory) await rm(oracleDirectory, { recursive: true, force: true });
+});
+
 async function oracle(t) {
-  const dir = await mkdtemp(join(tmpdir(), 'suite-policy-'));
-  const binary = join(dir, 'oracle');
-  try {
+  oracleBuild ??= (async () => {
+    oracleDirectory = await mkdtemp(join(tmpdir(), 'suite-policy-'));
+    const binary = join(oracleDirectory, 'oracle');
     execFileSync('go', ['build', '-o', binary, 'test/oracle/main.go'], {
       cwd: new URL('../', import.meta.url), stdio: 'pipe', timeout: 120_000,
       env: { ...process.env, GOWORK: 'off' },
     });
-  } catch (error) {
-    await rm(dir, { recursive: true, force: true });
-    throw error;
-  }
+    return binary;
+  })();
+  const binary = await oracleBuild;
   const child = spawn(binary, [], { stdio: ['pipe', 'pipe', 'inherit'] });
   const lines = createInterface({ input: child.stdout })[Symbol.asyncIterator]();
   t.after(async () => {
     const exit = once(child, 'exit');
     child.stdin.end();
     const [code] = await exit;
-    await rm(dir, { recursive: true, force: true });
     assert.equal(code, 0, 'Go oracle exit');
   });
   return async (data, envelope) => {

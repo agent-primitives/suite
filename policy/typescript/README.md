@@ -136,11 +136,13 @@ npm --prefix policy/typescript run test:browser
 Every `.json` in the shared `policy/testdata` directory is discovered and its
 companion `.sha256` is required. Expected bytes/digests are never copied into TS
 fixtures. A bounded deterministic suite compares accept/refuse, canonical bytes,
-digests and verification with the **actual Go package**, using one test-only Go
-process with a line protocol. The oracle is built in a temporary directory and
-is excluded from ordinary `go test ./...` package discovery; its subprocess is
-never part of production code. Missing Go or Chromium fails the respective test,
-not a silent skip.
+digests and verification with the **actual Go package**, using a test-only Go
+oracle with a line protocol. The current oracle is compiled once when first
+needed in a test-file run; each differential test gets its own process.
+The suite removes its temporary build directory after the tests finish.
+The oracle is excluded from ordinary `go test ./...` package discovery; its
+subprocesses are never part of production code. Missing Go or Chromium fails
+the respective test, not a silent skip.
 
 Explicit tests include duplicate/escaped keys; unknown/case-mismatched fields;
 missing/null/empty and cross-version fields; numeric spelling, rounding,

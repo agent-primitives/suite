@@ -82,3 +82,11 @@ framing; the bytes already commit to the policy version. Do not substitute the
 root artifact digest function. Payload outer/inner versions and capabilities
 must match, and the policy bytes must be exactly canonical, not merely have a
 matching digest.
+
+## TypeScript implementation
+
+The small [TypeScript policy package](typescript/README.md) implements strict
+v1/v2 wire decoding, canonicalization, framed digests and payload verification
+without runtime dependencies. Its tests read these same shared vectors and
+compare bounded malformed/boundary inputs directly with Go. It does not provide
+administrative composition, enforcement or a new policy schema.

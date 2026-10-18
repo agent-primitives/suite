@@ -79,6 +79,26 @@ jobs:
           go install honnef.co/go/tools/cmd/staticcheck@2026.2.1
           "$(go env GOPATH)/bin/staticcheck" ./...
 
+  typescript:
+    name: TypeScript policy parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: policy/typescript/package-lock.json
+      - name: Build, typecheck and compare with Go
+        run: |
+          npm --prefix policy/typescript ci --ignore-scripts
+          npm --prefix policy/typescript test
   docs:
     name: Documentation
     runs-on: ubuntu-latest

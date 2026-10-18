@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -131,15 +132,25 @@ type markdownJSONFence struct {
 	raw, annotation string
 }
 
+var markdownListPrefix = regexp.MustCompile(`^(?:[-+*]|[0-9]{1,9}[.)])[ \t]+`)
+
 func scanMarkdownJSON(markdown string) ([]markdownJSONFence, error) {
 	var fences []markdownJSONFence
 	lines := strings.Split(markdown, "\n")
 	for i := 0; i < len(lines); i++ {
 		line := strings.TrimSpace(lines[i])
 		quoteDepth := 0
-		for strings.HasPrefix(line, ">") {
-			quoteDepth++
-			line = strings.TrimSpace(line[1:])
+		inList := false
+		for {
+			if strings.HasPrefix(line, ">") {
+				quoteDepth++
+				line = strings.TrimSpace(line[1:])
+			} else if prefix := markdownListPrefix.FindString(line); prefix != "" {
+				inList = true
+				line = strings.TrimSpace(line[len(prefix):])
+			} else {
+				break
+			}
 		}
 		if !strings.HasPrefix(line, "```") && !strings.HasPrefix(line, "~~~") {
 			continue
@@ -151,6 +162,9 @@ func scanMarkdownJSON(markdown string) ([]markdownJSONFence, error) {
 		}
 		info := strings.Fields(line[width:])
 		isJSON := len(info) > 0 && strings.EqualFold(info[0], "json")
+		if isJSON && inList {
+			return nil, fmt.Errorf("line %d: unsupported list-container JSON fence; put the fence on a separate line", i+1)
+		}
 		start := i
 		var content []string
 		for i++; i < len(lines); i++ {
@@ -159,7 +173,9 @@ func scanMarkdownJSON(markdown string) ([]markdownJSONFence, error) {
 				if isJSON {
 					return nil, fmt.Errorf("line %d: JSON fence requires %d blockquote prefixes", i+1, quoteDepth)
 				}
-				continue
+				// The quote container ended. Let the outer loop scan this line.
+				i--
+				break
 			}
 			close := strings.TrimSpace(text)
 			if len(close) >= width && strings.Trim(close, string(marker)) == "" {
@@ -202,6 +218,35 @@ func stripMarkdownQuote(line string, depth int) (string, bool) {
 		line = strings.TrimPrefix(line[1:], " ")
 	}
 	return line, true
+}
+
+func TestScanMarkdownJSONRejectsListOpeners(t *testing.T) {
+	for _, prefix := range []string{"- ", "+ ", "* ", "1. ", "2) ", "- 1. ", "> - ", "- > "} {
+		t.Run(prefix, func(t *testing.T) {
+			markdown := "```json\n{}\n```\n" + prefix + "```json\n  {broken}\n  ```"
+			_, err := scanMarkdownJSON(markdown)
+			if err == nil || !strings.Contains(err.Error(), "line 4: unsupported list-container JSON fence") {
+				t.Fatalf("expected explicit rejection of the list JSON fence, got %v", err)
+			}
+		})
+	}
+}
+
+func TestScanMarkdownJSONAfterQuoteEnds(t *testing.T) {
+	markdown := "```json\n{}\n```\n> ```text\n> example\n```json\n{broken}\n```"
+	fences, err := scanMarkdownJSON(markdown)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(fences) != 2 {
+		t.Fatalf("found %d JSON fences, want 2", len(fences))
+	}
+	for i, wantValid := range []bool{true, false} {
+		_, err := decodeMarkdownJSON(fences[i].raw)
+		if valid := err == nil; valid != wantValid {
+			t.Fatalf("fence %d: JSON validity = %v, want %v; content: %q", i, valid, wantValid, fences[i].raw)
+		}
+	}
 }
 
 func TestScanMarkdownJSON(t *testing.T) {

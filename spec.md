@@ -266,6 +266,8 @@ application/vnd.oci.empty.v1+json
 
 It MUST reference a blob containing exactly these two bytes:
 
+<!-- json-example: oci-empty-config -->
+
 ```json
 {}
 ```
@@ -523,6 +525,8 @@ are outside this draft.
 For example, this agent-manifest fragment permits `coordinator` to invoke
 `writer` and `reviewer`:
 
+<!-- json-example: partial -->
+
 ```json
 {
   "id": "coordinator",
@@ -562,7 +566,10 @@ directory MAY be empty.
 
 The agent manifest's optional `evals` is an array of content references, each
 pairing a content-root `path` with a [JCS-canonical descriptor](#12-content-references-and-descriptors),
-containing at most one reference in this draft:
+containing at most one reference in this draft. This agent-manifest fragment
+shows only `evals`:
+
+<!-- json-example: partial -->
 
 ```json
 {
@@ -873,7 +880,10 @@ fields. Its path MUST be exactly `policies/<agent-id>.json`, where `<agent-id>`
 is the owning Agent's `id`. Shared or cross-Agent paths MUST refuse; identical
 bytes MAY be stored separately under each owning Agent's path.
 
-For example, the [policy-binding fixture](testdata/policy-binding/) contains:
+For example, this agent-manifest fragment from the
+[policy-binding fixture](testdata/policy-binding/) shows only `policy`:
+
+<!-- json-example: partial -->
 
 ```json
 {
@@ -1148,7 +1158,9 @@ duplicates.
 
 The complete fixture is
 [`testdata/remote-mcp/`](testdata/remote-mcp/).
-Its ToolProvider manifest includes:
+This ToolProvider manifest fragment shows only `remote`:
+
+<!-- json-example: partial -->
 
 ```json
 {
@@ -1210,7 +1222,9 @@ document, Rego policy, and query, and returns an allow decision and violations.
 
 A writer can evaluate its document before handoff. A reviewer can independently
 evaluate the same document. Both agents request the same ToolProvider contract
-in their `toolProviders` arrays:
+in their `toolProviders` arrays (one requirement entry, not a complete manifest):
+
+<!-- json-example: partial -->
 
 ```json
 {
@@ -1244,7 +1258,10 @@ UTC time. It does not execute `/bin/date`, depend on distribution userland,
 access the network, use secrets, or require writable paths. The executable is
 part of the suite payload and is selected by digest.
 
-An agent requests the tool provider by exact identity and execution mode:
+An agent requests the tool provider by exact identity and execution mode
+(one `toolProviders` requirement entry, not a complete manifest):
+
+<!-- json-example: partial -->
 
 ```json
 {
@@ -1391,37 +1408,42 @@ The complete fixture is
 [`testdata/remote-mcp/`](testdata/remote-mcp/).
 Its ToolProvider manifest exposes a read-only `search` Tool and a
 mutating `flag_result` Tool against the same external `search` service and
-the same unresolved binding slot:
+the same unresolved binding slot. The following `tools` array excerpt omits
+required `inputSchema` references; these are not complete Tool records:
+
+<!-- json-example: partial -->
 
 ```json
-{
-  "name": "search",
-  "effects": ["remote-read"],
-  "effect": "read-only",
-  "approval": "policy-controlled",
-  "delegatedAuthorization": {
-    "service": "search",
-    "scope": "results.read",
-    "credential": {
-      "resolution": "runtime-brokered",
-      "bindingRef": "search-delegated-connection"
+[
+  {
+    "name": "search",
+    "effects": ["remote-read"],
+    "effect": "read-only",
+    "approval": "policy-controlled",
+    "delegatedAuthorization": {
+      "service": "search",
+      "scope": "results.read",
+      "credential": {
+        "resolution": "runtime-brokered",
+        "bindingRef": "search-delegated-connection"
+      }
+    }
+  },
+  {
+    "name": "flag_result",
+    "effects": ["remote-write"],
+    "effect": "mutating",
+    "approval": "required",
+    "delegatedAuthorization": {
+      "service": "search",
+      "scope": "results.flag",
+      "credential": {
+        "resolution": "runtime-brokered",
+        "bindingRef": "search-delegated-connection"
+      }
     }
   }
-},
-{
-  "name": "flag_result",
-  "effects": ["remote-write"],
-  "effect": "mutating",
-  "approval": "required",
-  "delegatedAuthorization": {
-    "service": "search",
-    "scope": "results.flag",
-    "credential": {
-      "resolution": "runtime-brokered",
-      "bindingRef": "search-delegated-connection"
-    }
-  }
-}
+]
 ```
 
 Neither declaration names a token, a consent record, or a particular person's

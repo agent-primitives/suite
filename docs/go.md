@@ -3,7 +3,7 @@
 Use Go 1.26.0 or newer. Pin a published module version:
 
 ```bash
-go get github.com/agent-primitives/suite@v0.1.0
+go get github.com/agent-primitives/suite@v0.4.0
 ```
 
 The module path ends in `suite`; the package name is `agentsuite`. Use an
@@ -64,8 +64,9 @@ digest; this offline verifier cannot inspect its preimage or execute a runtime.
 Runtime and configuration ABI support are consumer-owned, not library catalogs.
 
 Use keyed literals for the extended public structs. Omitted fields retain legacy
-serialization and identity. Older strict readers reject profiled suites; the
-addition requires a minor module release before consumers pin it. See
+serialization and identity. Runtime profiles were released in v0.4.0. Older
+strict readers reject profiled suites; consumers using them must pin v0.4.0 or
+later. See
 [runtime profiles](../spec.md#111-runtime-profiles) and [compatibility](releases.md#compatibility).
 
 ## Standalone policy contracts
@@ -75,8 +76,8 @@ canonical bytes and the policy-specific framed digest. `ValidatePath` validates
 optional `Agent.Policy` FileRefs and reuses the same policy semantic decoder.
 The root artifact content digest and policy-specific framed digest stay distinct.
 
-The network-only v2 API is available from v0.3.0; pin that version or later
-before using it. V1 filesystem policies remain supported without conversion.
+The network-only v2 API was introduced in v0.3.0 and is included in the v0.4.0
+pin above. V1 filesystem policies remain supported without conversion.
 
 Use `DecodeSuitePolicy` to read the explicit version, then
 `DecodeAdministrativePolicyForVersion(data, suite.Version)`, `Resolve` and

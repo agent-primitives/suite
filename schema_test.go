@@ -403,6 +403,11 @@ func compileReferenceSchema(t *testing.T, name string) *jsonschema.Resolved {
 	if err != nil {
 		t.Fatal(err)
 	}
+	return compileReferenceSchemaJSON(t, data)
+}
+
+func compileReferenceSchemaJSON(t *testing.T, data []byte) *jsonschema.Resolved {
+	t.Helper()
 	var schema jsonschema.Schema
 	if err := json.Unmarshal(data, &schema); err != nil {
 		t.Fatal(err)

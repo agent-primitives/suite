@@ -61,6 +61,9 @@ func (s *Suite) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &fields); err != nil {
 		return err
 	}
+	if err := requireExtensionCritical(fields["extensions"]); err != nil {
+		return err
+	}
 	if raw, present := fields["runtimeProfiles"]; present {
 		if isJSONNull(raw) || len(value.RuntimeProfiles) == 0 {
 			return errors.New("runtimeProfiles must be a nonempty array")

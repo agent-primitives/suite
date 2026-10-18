@@ -127,6 +127,24 @@ type Extension struct {
 	Digest   string `json:"digest,omitempty"`
 }
 
+// requireExtensionCritical is used only at boundaries whose schemas constrain
+// extension records. Agent extensions intentionally retain their existing rules.
+func requireExtensionCritical(raw json.RawMessage) error {
+	if len(raw) == 0 {
+		return nil
+	}
+	var extensions []map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &extensions); err != nil {
+		return err
+	}
+	for i, extension := range extensions {
+		if critical, present := extension["critical"]; !present || isJSONNull(critical) {
+			return fmt.Errorf("extension %d requires non-null critical", i)
+		}
+	}
+	return nil
+}
+
 type Suite struct {
 	SchemaVersion            string                       `json:"schemaVersion"`
 	MediaType                string                       `json:"mediaType"`
@@ -290,6 +308,39 @@ type ToolProvider struct {
 	Variants      []ToolProviderVariant `json:"variants,omitempty"`
 	Remote        *RemoteToolProvider   `json:"remote,omitempty"`
 	Extensions    []Extension           `json:"extensions,omitempty"`
+}
+
+// UnmarshalJSON preserves presence-sensitive provider constraints before slices
+// and pointers can turn explicit empty/null properties into omitted values.
+func (p *ToolProvider) UnmarshalJSON(data []byte) error {
+	type wire ToolProvider
+	var value wire
+	if err := Unmarshal(data, &value); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if err := requireExtensionCritical(fields["extensions"]); err != nil {
+		return err
+	}
+	if _, present := fields["variants"]; present && len(value.Variants) == 0 {
+		return fmt.Errorf("variants must be a nonempty array")
+	}
+	var tools []map[string]json.RawMessage
+	if raw, present := fields["tools"]; present {
+		if err := json.Unmarshal(raw, &tools); err != nil {
+			return err
+		}
+	}
+	for i, tool := range tools {
+		if raw, present := tool["outputSchema"]; present && isJSONNull(raw) {
+			return fmt.Errorf("tool %d outputSchema must not be null", i)
+		}
+	}
+	*p = ToolProvider(value)
+	return nil
 }
 
 // Tool is one model-callable function exposed by a ToolProvider.

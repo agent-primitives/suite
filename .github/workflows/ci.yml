@@ -59,6 +59,7 @@ jobs:
               "TestPolicyBindingFixtureConformance",
               "TestAgentPolicyReferenceSchema",
               "TestPolicyBindingDigestPropagationAndStaleAncestors",
+              "TestSharedDecodeCases",
               "TestValidatePathAcceptsOCILayout",
               "TestDiffPathsTreatsExtractedSuiteAndOCILayoutAsEquivalent",
           }

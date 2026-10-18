@@ -7,6 +7,27 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
+## Unreleased — presence-sensitive validation (minor release required)
+
+Validation now rejects Suite and ToolProvider extensions missing `critical`,
+present empty or null ToolProvider `variants`, and explicitly null tool
+`outputSchema` properties. These malformed documents could previously be accepted
+after decoding erased property presence. Explicit `critical: false` remains valid;
+the existing refusals of null `critical` and unknown `critical: true` extensions
+are preserved. Agent extension acceptance is unchanged. Remote providers may omit
+`variants` or combine remote metadata with nonempty bundled variants. Tools may
+omit `outputSchema`; present objects still require valid file descriptors.
+
+`ToolProvider` now implements `UnmarshalJSON` using the strict decoder, so plain
+`encoding/json.Unmarshal` also rejects unknown or duplicate properties and other
+malformed provider input previously accepted by that decoder.
+
+This validation-acceptance change requires a **minor** Go module release under
+the v0 policy. To migrate, explicitly declare extension criticality, omit absent
+variants/output schemas instead of writing empty or null values, and rebind
+changed documents and all ancestor descriptors. Public type shapes, schema IDs,
+media types and canonical identity rules are unchanged. Validation remains offline.
+
 ## Unreleased — TypeScript policy identity
 
 A [TypeScript policy package](https://github.com/agent-primitives/suite/tree/main/policy/typescript) is merged on main

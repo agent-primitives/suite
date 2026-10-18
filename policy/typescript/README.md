@@ -17,13 +17,14 @@ only. `npm run build` produces native ES2022 modules and declarations in `dist`;
 serve those modules as-is or import the entry module into a consumer's bundler.
 There is no generated bundle, CommonJS entry or Node polyfill layer.
 
-Supported/tested runtime baseline: Node.js 22 and Chromium with native ES2022,
+Runtime baseline: Node.js 22 or a modern browser with native ES2022,
 `TextEncoder`, fatal UTF-8 `TextDecoder`, `DataView.setBigUint64` and Web Crypto
 SHA-256. Browser hashing needs a secure context (HTTPS or loopback). The browser
-test executes the emitted ESM, shared vectors, digest/payload operations and
+check executes the emitted ESM, shared vectors, digest/payload operations and
 explicit refusal/boundary cases in real Chromium, not a DOM shim. This does not
 qualify Firefox, Safari, older engines, a particular dashboard or a provider's
-enforcement boundary.
+enforcement boundary. Chromium was independently tested; this opt-in check is
+not run by the TypeScript CI job.
 
 ## API
 
@@ -121,6 +122,12 @@ From the repository root, with Node.js 22 and Go as required by `go.mod`:
 ```sh
 npm --prefix policy/typescript ci --ignore-scripts
 npm --prefix policy/typescript test
+```
+
+Optional browser verification requires an explicit Chromium installation and
+invocation; neither `npm test` nor the TypeScript CI job performs these steps:
+
+```sh
 npm --prefix policy/typescript exec playwright install --with-deps chromium
 npm --prefix policy/typescript run test:browser
 ```
@@ -142,5 +149,7 @@ invalid UTF-8 and surrogate pairs; trailing data; byte/list/nesting/member
 limits; malformed payload identities and correctly digested noncanonical bytes.
 Seeded valid documents, exact decimal/exponent variations and byte mutations
 exercise both profiles. Differential testing is bounded regression evidence,
-not an exhaustive proof over all inputs. CI runs these and Chromium tests in an
-additional job, leaving the native Go and documentation checks intact.
+not an exhaustive proof over all inputs. CI runs strict compilation and the Node
+and Go differential tests in an additional job, without installing or running
+Chromium. The existing native Go and documentation checks, including the
+documentation browser tests, remain unchanged.

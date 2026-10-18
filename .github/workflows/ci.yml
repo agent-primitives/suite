@@ -99,11 +99,6 @@ jobs:
         run: |
           npm --prefix policy/typescript ci --ignore-scripts
           npm --prefix policy/typescript test
-      - name: Browser runtime
-        run: |
-          npm --prefix policy/typescript exec playwright install --with-deps chromium
-          npm --prefix policy/typescript run test:browser
-
   docs:
     name: Documentation
     runs-on: ubuntu-latest

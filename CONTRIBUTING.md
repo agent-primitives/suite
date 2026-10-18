@@ -82,13 +82,21 @@ and the repository's Go toolchain for differential tests. From the root:
 ```bash
 npm --prefix policy/typescript ci --ignore-scripts
 npm --prefix policy/typescript test
+```
+
+The **TypeScript policy parity** CI job runs build/typecheck, all shared policy
+vectors and deterministic Go differential tests. It does not install or run a
+browser. This adds no runtime dependency or publication step to the Go module.
+
+For an optional real-browser check, run explicitly:
+
+```bash
 npm --prefix policy/typescript exec playwright install --with-deps chromium
 npm --prefix policy/typescript run test:browser
 ```
 
-The **TypeScript policy parity** CI job runs build/typecheck, all shared policy
-vectors, deterministic Go differential tests and actual Chromium runtime tests.
-This adds no runtime dependency or publication step to the Go module.
+This opt-in check uses Chromium; the existing documentation browser CI is
+separate and unchanged.
 
 ## Local development across repositories
 

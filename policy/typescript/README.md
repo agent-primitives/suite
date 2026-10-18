@@ -133,6 +133,7 @@ npm --prefix policy/typescript run test:browser
 ```
 
 `npm test` first compiles with strict typechecking, then runs Node's test runner.
+`decode-cases.test.mjs` runs every case in `policy/testdata/decode-cases.jsonl`.
 Every `.json` in the shared `policy/testdata` directory is discovered and its
 companion `.sha256` is required. Expected bytes/digests are never copied into TS
 fixtures. A bounded deterministic suite compares accept/refuse, canonical bytes,

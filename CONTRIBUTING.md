@@ -23,6 +23,18 @@ Do not include credentials, private endpoints, customer data or unsanitized logs
 in code, fixtures, issues or pull requests. Explain intent and constraints in
 comments; keep change history in commit messages and release notes.
 
+## Specification decisions
+
+Sajay ([@sajayantony](https://github.com/sajayantony)) owns the specification.
+Discuss proposed public contract changes before implementation, then request
+review from the spec owner and the `@agent-primitives/suite-maintainers` team
+identified in [CODEOWNERS](.github/CODEOWNERS).
+
+Proposals should explain compatibility and canonical-identity effects and
+include migration guidance for breaking changes. Update the spec, schemas,
+documentation and conformance tests together, and follow the
+[release policy](#release-policy) for version effects.
+
 ## Local verification
 
 Use Go 1.26.0 or newer, Python 3.10 or newer, and actionlint.

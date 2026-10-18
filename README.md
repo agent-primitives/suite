@@ -5,6 +5,37 @@ agents and the exact ToolProviders used to construct their runnable sandboxes.
 Suites are distributed as OCI artifacts and contain a closed graph of agent,
 ToolProvider, composition, and build-profile manifests.
 
+## Why AgentSuite?
+
+OCI supplies the distribution format; AgentSuite adds the agent-definition
+contract: instructions, exact ToolProviders, compositions, canonical identity
+and optional evaluation requirements. The aim is to let producers and consumers
+exchange one defined content graph rather than inventing those bindings for
+each integration. Portability here is of definitions, not demonstrated equivalent
+execution across runtimes.
+
+## Status and implementations
+
+The [specification](spec.md) is a draft. The module is pre-1.0; see the
+[compatibility and release policy](CONTRIBUTING.md#release-policy) before adopting
+or changing the contract. [Execution and inference contracts](docs/schemas.md#experimental-execution-and-inference-contracts)
+are experimental; validation does not establish runtime support.
+
+- [kmx](https://kaimahi.dev/) uses AgentSuite for
+  [packaging and validation](https://github.com/kaimahi-agents/kaimahi/tree/1617117e6b73fc00403ba59e6edecbe05fa58dc1/internal/kmx/agentsuite/oras);
+  [Kaimahi's go.mod](https://github.com/kaimahi-agents/kaimahi/blob/1617117e6b73fc00403ba59e6edecbe05fa58dc1/go.mod)
+  pins this module at v0.4.0.
+- [agentsessions](https://github.com/agent-primitives/sessions) is related runtime
+  ecosystem work, not a direct AgentSuite implementation.
+- The [documentation site](https://suite.agent-primitives.dev/) lists an
+  [Orka](https://github.com/orka-agents/orka) dashboard integration as planned,
+  not provided by this library.
+
+The [documentation site](https://suite.agent-primitives.dev/) tracks main and
+may include unreleased changes.
+
+## Go package
+
 This standalone Go module, `github.com/agent-primitives/suite`, provides:
 
 - public types for suites, agents, ToolProviders, callable Tools, compositions,
@@ -19,11 +50,6 @@ This standalone Go module, `github.com/agent-primitives/suite`, provides:
 The normative format and conformance requirements are defined in
 [spec.md](spec.md). Examples and conformance fixtures live in
 [testdata/](testdata/).
-
-The [documentation site](https://suite.agent-primitives.dev/) renders the
-specification, schema downloads, conformance overview and Go usage from main.
-
-## Go package
 
 Use Go 1.26.0 or newer. The module path ends in `suite`, but the Go package
 remains `agentsuite`; use an explicit import alias:

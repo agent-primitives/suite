@@ -76,6 +76,14 @@ UTF-16 ordering from Go code-point ordering. `testdata/effective-policy-v2.json`
 cover the v2 nonempty and deny-all cases. Read the JSON file bytes directly,
 without adding a newline or parsing/reserializing them before digest verification.
 
+`testdata/decode-cases.jsonl` holds one canonical JSON case per line: a `name`, an
+`input` (or `inputHex` for byte-level input such as a BOM or malformed UTF-8),
+whether `DecodeSuitePolicy` accepts it, and for accepted cases the canonical
+bytes and digest. `TestSharedDecodeCases` runs every case and is today the only
+test that reads this file. The format needs no Go, so another implementation can
+run the same refusal, canonical-bytes and digest expectations; add new
+wire-format edge cases there.
+
 Both versions use the **unchanged** `agentsuite-effective-policy\0v1\0` domain,
 uint64 big-endian byte-length framing and SHA-256. Here `v1` identifies the digest
 framing; the bytes already commit to the policy version. Do not substitute the

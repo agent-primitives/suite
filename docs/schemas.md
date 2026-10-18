@@ -60,4 +60,4 @@ reuses its semantic decoder for explicitly bound authored policy files; unrefere
 files in the policy namespace refuse rather than being silently discovered or applied.
 
 For release-pinned schemas, use the
-[v0.1.0 schema directory](https://github.com/agent-primitives/suite/tree/v0.1.0/schema).
+[v0.4.0 schema directory](https://github.com/agent-primitives/suite/tree/v0.4.0/schema).

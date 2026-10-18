@@ -7,7 +7,15 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
-## Unreleased — optional runtime profiles (minor release required)
+## Unreleased — TypeScript policy identity
+
+A [TypeScript policy package](https://github.com/agent-primitives/suite/tree/main/policy/typescript) is merged on main
+for filesystem v1 and network-only v2 canonicalization, digests and payload
+verification. It is a private, unpublished ESM package, not part of v0.4.0 or an
+npm release. It does not implement administrative-policy composition or runtime
+enforcement.
+
+## [v0.4.0](https://github.com/agent-primitives/suite/releases/tag/v0.4.0) — 2026-10-16 — optional runtime profiles
 
 Suites may bind runtime profiles and select multiple compositions for one
 member/platform by explicit profile ID. New readers retain the legacy path;
@@ -28,12 +36,12 @@ require separate passes against the same OCI manifest, with independent executio
 expectations. No offline fixture establishes runtime execution or qualification.
 Diff adds profile records and profile-aware composition keys with selective impact.
 
-This format/API, validation and semantic-diff addition requires a **minor** Go
-module release. Existing schema IDs, media types, spec version and canonicalization
-remain unchanged; a new runtime-profile media type/schema is added. No tag or
-publication is created here. Consumers must pin a published version before rollout.
+This format/API, validation and semantic-diff addition shipped in the **minor**
+Go module release v0.4.0. Existing schema IDs, media types, spec version and
+canonicalization remain unchanged; a new runtime-profile media type/schema is
+added. Consumers using these additions must pin v0.4.0 or later before rollout.
 
-## Unreleased — OCI filesystem safety fix
+## [v0.3.1](https://github.com/agent-primitives/suite/releases/tag/v0.3.1) — 2026-10-16 — OCI filesystem safety fix
 
 The OCI loader refuses special files and symlinks in layout metadata and
 referenced blobs before opening them, including FIFO inputs that previously
@@ -48,9 +56,9 @@ This is a compatible fix for malformed filesystem envelopes: regular layouts,
 public APIs, schema/media types, canonical bytes and descriptor digests are
 unchanged. Previously followed layout-entry symlinks now refuse; materialize
 regular files instead. Caller-selected root directory aliases and the content
-layer's symlink semantics remain unchanged. No release tag is created here.
+layer's symlink semantics remain unchanged.
 
-## v0.3.0 — policies, Agent binding and inference contracts
+## [v0.3.0](https://github.com/agent-primitives/suite/releases/tag/v0.3.0) — 2026-10-16 — policies, Agent binding and inference contracts
 
 v0.3.0 combines standalone network-only policy v2, optional per-Agent policy
 descriptor binding with graph validation, and experimental inference and
@@ -62,7 +70,7 @@ execution contracts. v0.2.0 introduced the filesystem policy package.
   instead of being treated as an omitted overlay; omission and `[]` remain
   valid. V1 path sets now explicitly use unsigned UTF-16 code-unit ordering,
   with a language-neutral vector. This can change canonical bytes and digests
-  for affected non-BMP paths, so it ships in this next-minor change. The digest
+  for affected non-BMP paths, so it shipped in the v0.3.0 minor release. The digest
   framing, schema identifier and existing artifact media type are unchanged.
   `SchemaVersion` deliberately continues to mean `agentsuite.policy/v1`.
 - Policy structs gain optional network fields. Use keyed Go composite literals;
@@ -89,8 +97,7 @@ execution contracts. v0.2.0 introduced the filesystem policy package.
 - The JSON codec moves unchanged to `internal/jsoncodec` behind the existing root
   public wrappers. Existing strict-decoding and canonical-byte behavior is retained.
 - Neither standalone nor graph validation establishes runtime enforcement or
-  provider support. No runtime wiring, installed/active claim or release publication
-  is included.
+  provider support. No runtime wiring or installed/active claim is included.
 
 See the [normative policy contract](../spec.md#appendix-b-standalone-policy-contracts-normative)
 and [reference schemas](schemas.md).

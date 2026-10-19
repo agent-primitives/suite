@@ -1710,6 +1710,15 @@ func mustWriteMode(t *testing.T, root, name string, data []byte, mode os.FileMod
 	if err := os.WriteFile(path, data, mode); err != nil {
 		t.Fatal(err)
 	}
+	// Inventories and packaged evidence bind exact modes, not umask-filtered ones.
+	if err := os.Chmod(path, mode); err != nil {
+		t.Fatal(err)
+	}
+	for dir := filepath.Dir(path); dir != filepath.Clean(root); dir = filepath.Dir(dir) {
+		if err := os.Chmod(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
 }
 
 func writeOCIBlob(t *testing.T, root, mediaType string, data []byte) ociDescriptor {

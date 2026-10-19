@@ -267,9 +267,7 @@ func TestDiffPathsReportsSupplementalMetadataAlongsideOtherChanges(t *testing.T)
 	before := writeMinimalSuite(t)
 	after := writeMinimalSuite(t)
 	for _, root := range []string{before, after} {
-		if err := os.WriteFile(filepath.Join(root, "same.txt"), []byte("same"), 0o644); err != nil {
-			t.Fatal(err)
-		}
+		mustWrite(t, root, "same.txt", []byte("same"))
 		if err := os.WriteFile(filepath.Join(root, "other.txt"), []byte("before"), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -826,6 +824,22 @@ func copyAgentSuiteDirectory(t *testing.T, source string) string {
 	t.Helper()
 	destination := t.TempDir()
 	if err := os.CopyFS(destination, os.DirFS(source)); err != nil {
+		t.Fatal(err)
+	}
+	// CopyFS applies the caller's umask; a fixture copy must preserve mode identity.
+	if err := filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if path == source {
+			return nil
+		}
+		relative, err := filepath.Rel(source, path)
+		if err != nil {
+			return err
+		}
+		return os.Chmod(filepath.Join(destination, relative), info.Mode().Perm())
+	}); err != nil {
 		t.Fatal(err)
 	}
 	return destination

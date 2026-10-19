@@ -80,6 +80,35 @@ jobs:
           go install honnef.co/go/tools/cmd/staticcheck@2026.2.1
           "$(go env GOPATH)/bin/staticcheck" ./...
 
+  go-umask:
+    name: Go tests (umask 077)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: go.mod
+      - name: Tests with private default permissions (no skips)
+        env:
+          TEST_RESULTS: ${{ runner.temp }}/suite-tests-umask-077.jsonl
+        run: |
+          set -euo pipefail
+          umask 077
+          go test -count=1 -json ./... | tee "$TEST_RESULTS"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          events = [json.loads(line) for line in Path(os.environ["TEST_RESULTS"]).read_text().splitlines()]
+          skipped = [event.get("Test", event.get("Package")) for event in events if event.get("Action") == "skip"]
+          if skipped:
+              raise SystemExit(f"Tests skipped under umask 077: {skipped}")
+          PY
+
   typescript:
     name: TypeScript policy parity
     runs-on: ubuntu-latest

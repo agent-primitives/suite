@@ -27,10 +27,9 @@ comments; keep change history in commit messages and release notes.
 
 ## Specification decisions
 
-Tom ([@gambtho](https://github.com/gambtho)) owns the specification.
 Discuss proposed public contract changes before implementation, then request
-review from the spec owner and the `@agent-primitives/suite-maintainers` team
-identified in [CODEOWNERS](.github/CODEOWNERS).
+review from the `@agent-primitives/suite-maintainers` team identified in
+[CODEOWNERS](.github/CODEOWNERS).
 
 Proposals should explain compatibility and canonical-identity effects and
 include migration guidance for breaking changes. Update the spec, schemas,

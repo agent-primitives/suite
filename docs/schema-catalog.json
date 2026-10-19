@@ -1,5 +1,73 @@
 {
   "version": 1,
-  "bundles": [],
-  "releases": {}
+  "bundles": [
+    {
+      "path": "v0.5",
+      "release": "v0.5.0",
+      "sourceCommit": "e13c69ca25ee272cdeaeb497499d08c4967b345a",
+      "assetUrl": "https://github.com/agent-primitives/suite/releases/download/v0.5.0/schemas-v0.5.0.json",
+      "sha256": "2335118d30d56b01d6b9216ac59971df1605ac9c1dd30bcab973d3acce8097ab",
+      "schemas": {
+        "administrative-policy-v2.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/administrative-policy-v2.schema.json",
+          "sha256": "e2ad4b9b5db673373f7bf4451a425c691705ec0a4a3df07262e3de7e94f999be"
+        },
+        "agent.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/agent.schema.json",
+          "sha256": "224409759c4aa52d54c5d81103db7fc36e30d03c2714117c74b997269232b6a9"
+        },
+        "build-profile.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/build-profile.schema.json",
+          "sha256": "d156e8955a8fa84d60f787cd95f113b0d643871e540d60af30267324f4aa63b1"
+        },
+        "composition.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/composition.schema.json",
+          "sha256": "f35cdeb76079d3db2ed6ed4b2286bc415ec35002a65013f41244a28e78c7e422"
+        },
+        "eval-case.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/eval-case.schema.json",
+          "sha256": "acf6b756e87348d5212317f8d04e61efa183c65c31a15ef54b20904d37479faf"
+        },
+        "eval-evidence.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/eval-evidence.schema.json",
+          "sha256": "7c35edef384659e46f13590448002407a02b74cc59bae7717af3e375cc160a9a"
+        },
+        "eval-index.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/eval-index.schema.json",
+          "sha256": "57a18c030b4fdbf5d53b5e1be79a746bb8b2123fd610e897446199183598a6a7"
+        },
+        "execution.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/execution.schema.json",
+          "sha256": "3460904678b8c5608e79537c176181787e48dc291055fb5f7d7df24e559c3952"
+        },
+        "inference.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/inference.schema.json",
+          "sha256": "07e09fada65295c9d345266e553d9ac4c9c30e33ef045d206fe3b1d33ef8b306"
+        },
+        "policy-v2.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/policy-v2.schema.json",
+          "sha256": "600e7b2411ae0b1e20bb616bc1f22fe87a968928a0f2b1c94ae5ac92225fb620"
+        },
+        "runtime-profile.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/runtime-profile.schema.json",
+          "sha256": "d7d18b769b6016603459f98179a51ed044048fa7e0776fcda4fcd9c92f105c0f"
+        },
+        "suite.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/suite.schema.json",
+          "sha256": "902e9e335c8b7ad317fa02953a718d5a03a79f52240ba7cd11466b387fcbdbfd"
+        },
+        "tool-provider-composition.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/tool-provider-composition.schema.json",
+          "sha256": "597387e53a27f27e1f27d04989487142361242349f674330f68c831f7dc511c0"
+        },
+        "tool-provider.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.5/tool-provider.schema.json",
+          "sha256": "0935f9285be64236af6156d11b78b818a697c0a8bea8eeea58199e8aeef3ecb8"
+        }
+      }
+    }
+  ],
+  "releases": {
+    "v0.5.0": "v0.5"
+  }
 }

@@ -7,7 +7,9 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
-## Unreleased — v0.5.0 schema namespace preparation
+## [v0.5.0](https://github.com/agent-primitives/suite/releases/tag/v0.5.0) — 2026-10-19 — schema namespace and stricter validation
+
+### Schema namespace
 
 All 14 reference schema IDs move to `https://suite.agent-primitives.dev/schema/v0.5/`
 plus the actual filename, including both `-v2` policy filenames. This is a minor
@@ -15,11 +17,11 @@ release identity migration, not a wire-format or validation-constraint change.
 Select the whole release-local bundle and update editor/validator registries;
 keep historical bundles separate, without global old-to-latest aliases. Schema
 bytes differ only in `$id`; instance bytes, versions, media types and canonical
-digests are unchanged by this migration. URL availability requires the separate
-asset workflow, reviewed catalog and verified site deployment. v0.5.0 is not yet
-published; the other unreleased changes below retain their own compatibility effects.
+digests are unchanged by this migration. Canonical URLs must be verified after
+the asset workflow, reviewed catalog update and site deployment. The validation
+changes below have separate compatibility effects.
 
-## Unreleased — presence-sensitive validation (minor release required)
+### Presence-sensitive validation
 
 Validation now rejects Suite and ToolProvider extensions missing `critical`,
 present empty or null ToolProvider `variants`, and explicitly null tool
@@ -40,12 +42,12 @@ variants/output schemas instead of writing empty or null values, and rebind
 changed documents and all ancestor descriptors. Public type shapes, schema IDs,
 media types and canonical identity rules are unchanged. Validation remains offline.
 
-## Unreleased — TypeScript policy identity
+### TypeScript policy identity
 
 A [TypeScript policy package](https://github.com/agent-primitives/suite/tree/main/policy/typescript) is merged on main
 for filesystem v1 and network-only v2 canonicalization, digests and payload
-verification. It is a private, unpublished ESM package, not part of v0.4.0 or an
-npm release. It does not implement administrative-policy composition or runtime
+verification. Its source is included in v0.5.0; it remains a private, unpublished
+ESM package, not an npm release. It does not implement administrative-policy composition or runtime
 enforcement.
 
 ## [v0.4.0](https://github.com/agent-primitives/suite/releases/tag/v0.4.0) — 2026-10-16 — optional runtime profiles

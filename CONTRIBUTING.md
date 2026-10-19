@@ -145,8 +145,10 @@ new wire-format version or every behavior of a validator/library release.
 
 The [schema identity contract](spec.md#54-schema-identity-and-contract-selection)
 defines the target `https://suite.agent-primitives.dev/schema/v0.N/` namespace.
-The initial namespace move requires a minor release; existing historical IDs and
-hosting remain unchanged until that migration is ready.
+The initial namespace move is prepared for v0.5.0, a minor release. Historical
+release bytes, IDs and hosting remain unchanged; the current release-preparation
+commit carries `/schema/v0.5/` IDs until main returns to drafts before further
+schema development.
 
 After migration, each minor release freezes a complete schema bundle. A patch
 release MUST NOT change any schema bytes or inventory, including IDs, relative
@@ -165,7 +167,7 @@ a catalogued ID to match its catalogued bytes exactly. The Documentation and
 Pages jobs enforce the catalog/source guards; the separate manual
 [schema-asset workflow](docs/hosting.md#schema-release-assets-and-retained-history)
 prepares release assets. Neither creating a tag nor uploading an asset updates
-the catalog automatically. Schema IDs remain unchanged until a separate migration.
+the catalog automatically. Changing IDs in source does not publish their URLs.
 
 Release publication must create assets from the exact tagged schema bytes.
 A reviewed catalog records each bundle's asset URL, source commit and checksum,

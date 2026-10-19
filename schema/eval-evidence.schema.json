@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kaimahi.dev/schemas/agentsuite/v1/eval-evidence.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/v0.5/eval-evidence.schema.json",
   "title": "AgentSuite unsigned public evaluation evidence",
   "type": "object",
   "additionalProperties": false,

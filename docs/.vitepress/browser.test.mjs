@@ -157,9 +157,9 @@ for (const colorScheme of ['light', 'dark']) {
           }
         }
         for (const [name, id] of [
-          ['agent.schema.json', 'https://kaimahi.dev/schemas/agentsuite/v1/agent.schema.json'],
-          ['policy-v2.schema.json', 'https://kaimahi.dev/schemas/agentsuite/policy/v2/policy.schema.json'],
-          ['administrative-policy-v2.schema.json', 'https://kaimahi.dev/schemas/agentsuite/policy/v2/administrative-policy.schema.json']
+          ['agent.schema.json', 'https://suite.agent-primitives.dev/schema/v0.5/agent.schema.json'],
+          ['policy-v2.schema.json', 'https://suite.agent-primitives.dev/schema/v0.5/policy-v2.schema.json'],
+          ['administrative-policy-v2.schema.json', 'https://suite.agent-primitives.dev/schema/v0.5/administrative-policy-v2.schema.json']
         ]) {
           const response = await page.request.get(`${origin}/schema/${name}`)
           assert.equal(response.status(), 200)

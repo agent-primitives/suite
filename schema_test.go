@@ -3,14 +3,78 @@ package agentsuite
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/google/jsonschema-go/jsonschema"
 )
+
+const referenceSchemaPrefix = "https://suite.agent-primitives.dev/schema/v0.5/"
+
+var referenceSchemaNames = []string{
+	"administrative-policy-v2.schema.json", "agent.schema.json", "build-profile.schema.json",
+	"composition.schema.json", "eval-case.schema.json", "eval-evidence.schema.json",
+	"eval-index.schema.json", "execution.schema.json", "inference.schema.json",
+	"policy-v2.schema.json", "runtime-profile.schema.json", "suite.schema.json",
+	"tool-provider-composition.schema.json", "tool-provider.schema.json",
+}
+
+func TestReferenceSchemaIdentityInventory(t *testing.T) {
+	entries, err := os.ReadDir("schema")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, entry := range entries {
+		names = append(names, entry.Name())
+	}
+	if !slices.Equal(names, referenceSchemaNames) {
+		t.Fatalf("schema inventory = %v; want %v", names, referenceSchemaNames)
+	}
+	for _, name := range referenceSchemaNames {
+		t.Run(name, func(t *testing.T) {
+			resolved := compileReferenceSchema(t, name)
+			if got := resolved.Schema().ID; got != referenceSchemaPrefix+name {
+				t.Errorf("schema ID = %q; want %q", got, referenceSchemaPrefix+name)
+			}
+			if _, err := resolveReferenceSchemaJSON([]byte(fmt.Sprintf(`{"$ref":%q}`, referenceSchemaPrefix+name))); err != nil {
+				t.Fatalf("absolute local reference: %v", err)
+			}
+		})
+	}
+}
+
+func TestReferenceSchemaResolutionRefusesUnknownResourcesOffline(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		requests.Add(1)
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+	for _, uri := range []string{
+		server.URL + "/schema.json",
+		"https://kaimahi.dev/schemas/agentsuite/v1/suite.schema.json",
+		"https://suite.agent-primitives.dev/schema/v0.4/suite.schema.json",
+		"https://suite.agent-primitives.dev.evil.invalid/schema/v0.5/suite.schema.json",
+		referenceSchemaPrefix + "unknown.schema.json",
+		referenceSchemaPrefix + "suite.schema.json?other=1",
+		"file:///schema/suite.schema.json",
+	} {
+		if _, err := resolveReferenceSchemaJSON([]byte(fmt.Sprintf(`{"$ref":%q}`, uri))); err == nil || !strings.Contains(err.Error(), "unsupported schema reference") {
+			t.Errorf("reference %q: want unsupported resource, got %v", uri, err)
+		}
+	}
+	if got := requests.Load(); got != 0 {
+		t.Fatalf("offline resolver made %d HTTP requests", got)
+	}
+}
 
 func TestToolProviderSchemaDefinesBundledImplementation(t *testing.T) {
 	schema := compileReferenceSchema(t, "tool-provider.schema.json")
@@ -408,13 +472,21 @@ func compileReferenceSchema(t *testing.T, name string) *jsonschema.Resolved {
 
 func compileReferenceSchemaJSON(t *testing.T, data []byte) *jsonschema.Resolved {
 	t.Helper()
-	var schema jsonschema.Schema
-	if err := json.Unmarshal(data, &schema); err != nil {
+	resolved, err := resolveReferenceSchemaJSON(data)
+	if err != nil {
 		t.Fatal(err)
 	}
-	resolved, err := schema.Resolve(&jsonschema.ResolveOptions{Loader: func(uri *url.URL) (*jsonschema.Schema, error) {
+	return resolved
+}
+
+func resolveReferenceSchemaJSON(data []byte) (*jsonschema.Resolved, error) {
+	var schema jsonschema.Schema
+	if err := json.Unmarshal(data, &schema); err != nil {
+		return nil, err
+	}
+	return schema.Resolve(&jsonschema.ResolveOptions{Loader: func(uri *url.URL) (*jsonschema.Schema, error) {
 		name := filepath.Base(uri.Path)
-		if uri.String() != "https://kaimahi.dev/schemas/agentsuite/v1/"+name || name != "inference.schema.json" && name != "execution.schema.json" && name != "suite.schema.json" && name != "eval-evidence.schema.json" {
+		if uri.String() != referenceSchemaPrefix+name || !slices.Contains(referenceSchemaNames, name) {
 			return nil, fmt.Errorf("unsupported schema reference")
 		}
 		data, err := os.ReadFile(filepath.Join("schema", name))
@@ -425,10 +497,6 @@ func compileReferenceSchemaJSON(t *testing.T, data []byte) *jsonschema.Resolved 
 		err = json.Unmarshal(data, &referenced)
 		return &referenced, err
 	}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	return resolved
 }
 
 func validateSchemaJSON(t *testing.T, schema *jsonschema.Resolved, document string, valid bool) {

@@ -32,21 +32,23 @@ some serve immutable v0.1.0 copies and others are not hosted. For example, the
 v0.1.0 Agent schema does not accept the policy binding added in v0.3.0. Fetching
 that historical ID cannot validate a v0.4.0 Agent with a policy binding.
 The [schema identity contract](../spec.md#54-schema-identity-and-contract-selection)
-defines a minor-scoped replacement namespace. The migration has not happened:
-the files and downloads below still carry historical IDs. Manual tags do not
-publish schema assets; maintainers prepare them with the separate
+defines the minor-scoped namespace. This release preparation assigns all 14
+schemas `/schema/v0.5/` IDs for the planned v0.5.0 minor release. An ID in source
+does not mean its URL is published: the asset workflow, reviewed catalog update
+and site deployment are separate steps. Manual tags do not publish schema
+assets; maintainers prepare them with the separate
 [release-asset workflow](hosting.md#schema-release-assets-and-retained-history).
 
 ## Minor-scoped identity and migration
 
-New stable IDs will use
-`https://suite.agent-primitives.dev/schema/v0.N/<filename>.schema.json`,
+The current release-preparation IDs use
+`https://suite.agent-primitives.dev/schema/v0.5/<filename>.schema.json`,
 with one immutable bundle per minor release. Patches MUST keep that minor's
 entire schema inventory and bytes unchanged; schema changes require a minor.
-Main will use explicitly unstable `/schema/draft/` IDs, never catalogued as
-released contracts. Minor-release preparation rewrites them to `/schema/v0.N/`;
-main returns to drafts before further schema development. CI guards must reject
-changes to catalogued bytes and patch bundles differing from their minor.
+After release preparation, main returns to explicitly unstable `/schema/draft/`
+IDs before further schema development; drafts are never catalogued as released
+contracts. Minor-release preparation rewrites them to `/schema/v0.N/`. CI guards
+must reject changes to catalogued bytes and patch bundles differing from their minor.
 
 The first namespace move ships in a minor release. The reviewed
 [catalog source](https://github.com/agent-primitives/suite/blob/main/docs/schema-catalog.json) pins release assets by URL, source commit,
@@ -55,7 +57,8 @@ or mutation of existing entries, changed catalogued stable IDs, and patch
 inventory/byte changes. Legacy reused IDs remain archive-scoped, not global
 aliases. Pages downloads every catalogued asset only at build time; missing,
 corrupt or mismatched assets fail the build rather than dropping history.
-No namespace or schema bytes change until a separately reviewed migration.
+This migration changes only schema IDs, not validation constraints. Canonical
+URLs become available only after asset publication, cataloguing and a verified deployment.
 
 ## Published schema bundles
 
@@ -124,16 +127,14 @@ See the [normative policy contract](../spec.md#appendix-b-standalone-policy-cont
 
 ## Validation and identity
 
-All use JSON Schema 2020-12. Existing artifact schema identifiers remain
-`https://kaimahi.dev/schemas/agentsuite/v1/<file>.schema.json`; downloading a
-schema here does not change its identifier. The standalone policy v2 additions
-use `https://kaimahi.dev/schemas/agentsuite/policy/v2/` identifiers; they do not
-rename any existing schema. The kaimahi.dev endpoints for schemas
-included in v0.1.0 serve those immutable copies, independently of these main-branch
-downloads. The portable evidence schema and the experimental execution and
-inference schemas are main-branch additions, not part of v0.1.0; their
-identifiers' hosting is separate from these raw downloads. Hosting of the new
-policy identifiers is likewise separate from the raw downloads.
+All use JSON Schema 2020-12. Each current schema ID is
+`https://suite.agent-primitives.dev/schema/v0.5/` plus its actual filename,
+including `policy-v2.schema.json` and `administrative-policy-v2.schema.json`.
+Only the IDs change: relative references, validation constraints, instance
+versions, media types and artifact digests are unchanged. The unversioned
+main downloads do not establish canonical URL availability. Historical
+kaimahi.dev IDs and hosted v0.1.0 bytes remain unchanged; older releases must
+still be selected with their own complete schema bundle.
 
 Schemas validate document shapes. The [Go validator](go.md) additionally checks
 cross-document references, canonical bytes, descriptors and the closed content graph.

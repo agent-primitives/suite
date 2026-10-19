@@ -1,0 +1,42 @@
+name: schema-assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Existing root release tag (v0.N.P)
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: schema-assets-${{ inputs.release }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.release }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+      - name: Check retained catalog and source bytes
+        run: node scripts/schema-release.mjs check
+      - name: Prepare exact tagged schema bytes without executing tagged code
+        run: node scripts/schema-release.mjs pack --release "$RELEASE_TAG" --out "$RUNNER_TEMP/schema-assets"
+      - name: Upload without replacing existing assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/schema-release.mjs upload --dir "$RUNNER_TEMP/schema-assets"
+      - name: Show proposed catalog for a separate reviewed PR
+        run: cat "$RUNNER_TEMP/schema-assets/catalog-candidate.json"

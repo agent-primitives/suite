@@ -161,9 +161,11 @@ release catalog. Minor-release preparation rewrites them to `/schema/v0.N/` in
 the reviewed release commit; restore main's draft IDs before further schema
 development.
 CI MUST verify patch inventory/byte equality and require every schema bearing
-a catalogued ID to match its catalogued bytes exactly. Establish these guards
-and immutable publishing before moving IDs; neither is implemented by the
-current manual tag process.
+a catalogued ID to match its catalogued bytes exactly. The Documentation and
+Pages jobs enforce the catalog/source guards; the separate manual
+[schema-asset workflow](docs/hosting.md#schema-release-assets-and-retained-history)
+prepares release assets. Neither creating a tag nor uploading an asset updates
+the catalog automatically. Schema IDs remain unchanged until a separate migration.
 
 Release publication must create assets from the exact tagged schema bytes.
 A reviewed catalog records each bundle's asset URL, source commit and checksum,
@@ -186,7 +188,10 @@ Do not redirect historical IDs to current contracts.
 
 Before a release:
 1. Review the exact source commit and compatibility notes; both CI jobs must be
-   green, plus an independent `GOWORK=off` verification.
+   green, plus an independent `GOWORK=off` verification. Before tagging, use the
+   [pre-tag schema check](docs/hosting.md#schema-release-assets-and-retained-history)
+   against the reviewed commit and main's catalog. Stable patches must reuse the
+   catalogued minor's exact schemas; a missing minor is an error.
 2. Publish the reviewed immutable root tag. Consumers then pin that version and
    verify clean-checkout `GOWORK=off` tests against the published module.
 3. Update `latestRelease` in `docs/.vitepress/release.mjs` to the published tag,

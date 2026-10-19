@@ -1,8 +1,9 @@
-import { cp } from 'node:fs/promises'
+import { cp, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { slug } from 'github-slugger'
 import { defineConfig } from 'vitepress'
+import { publishCatalog } from '../../scripts/schema-bundles.mjs'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const repository = 'https://github.com/agent-primitives/suite'
@@ -58,6 +59,8 @@ export default defineConfig({
   async buildEnd(config) {
     // Copy bytes, not parsed JSON: schema IDs and release provenance are immutable.
     await cp(path.join(root, 'schema'), path.join(config.outDir, 'schema'), { recursive: true })
+    const catalog = JSON.parse(await readFile(path.join(root, 'docs/schema-catalog.json'), 'utf8'))
+    await publishCatalog(catalog, config.outDir)
   },
   themeConfig: {
     logo: { src: '/brand/agentsuite.svg', alt: '', width: '32', height: '32' },

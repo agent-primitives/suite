@@ -23,6 +23,63 @@ The root specification is rendered in place, with GitHub-compatible heading
 anchors. Schemas are copied unchanged into the build output. Fixtures link back
 to source rather than becoming another maintained content tree.
 
+## Schema release assets and retained history
+
+The main-only `schema-assets` workflow is manually dispatched for an existing
+root tag and GitHub Release. It never creates tags/releases, rewrites schemas,
+executes tagged code, changes DNS, or edits the catalog. Its trusted main-branch
+script reads ordinary schema blobs from the tagged commit. No npm install is
+needed; write credentials are exposed only to the upload step.
+
+Before tagging, fetch main and tags and run the pre-tag check from the trusted
+main checkout against the reviewed release commit. For example,
+`node scripts/schema-release.mjs check --release v0.5.1 --ref <reviewed-commit> --catalog-ref refs/remotes/origin/main`
+uses an illustrative patch tag; substitute the exact commit. A stable patch
+without a catalogued minor fails closed. Patch commits must retain that minor's
+complete schema inventory and bytes, not main's drafts.
+
+After maintainer tag/release approval, an operator can dispatch, for example:
+
+```bash
+gh workflow run schema-assets.yml -R agent-primitives/suite --ref main -f release=v0.4.0
+```
+
+The workflow rechecks the remote tag before upload. An existing identical asset
+is left untouched; a different asset refuses rather than being overwritten.
+Assets are deterministic `schemas-v0.N.P.json` bundles containing the source
+commit, release and original schema text. Each schema's UTF-8 bytes are preserved.
+Stable patches reuse the minor asset and propose only a new release mapping.
+Old releases become full-release archives without changing their historical IDs.
+A backfill needs an existing Release object: v0.1.0 needs separate owner setup.
+This workflow targets existing published, mutable releases. If GitHub immutable
+releases are enabled, stop: supporting a draft/upload/publish sequence needs a
+separate workflow change. This workflow never changes the immutability setting.
+
+The job prints `catalog-candidate.json` for a separate reviewed catalog PR.
+For local preparation, run `node scripts/schema-release.mjs pack --release v0.4.0 --out ../schema-assets`;
+this writes local files only. Merge the candidate additively into
+`docs/schema-catalog.json`, never replace newer entries. Every entry pins the
+asset URL, source commit, archive checksum and per-schema ID/checksum inventory.
+CI checks the tag/source inventory too. The catalog starts empty; no historical
+asset or canonical minor URL is implied until an operator publishes and catalogs it.
+
+Both CI and Pages guard the catalog against the trusted Git baseline. PR checks
+use the merge commit's first parent; pushes use the previous ancestor commit,
+refusing zero/missing/non-ancestor values. Manual/local checks use `HEAD^` or an
+explicit `--base` commit. Existing entries and release mappings cannot be deleted,
+changed or retargeted. Release-line CI also checks stable schemas against main's
+catalog. Full Git history/tags are needed for these checks; ordinary local
+`docs:check` needs only the current catalog and its assets.
+
+Every site build downloads **all** catalogued release assets, verifies checksums,
+release/commit metadata and exact schema inventories, then copies them into
+`/schema/v0.N/` or `/schema/archive/v0.N.P/`. Downloads are build-time only and
+bounded; only the repository's GitHub release URLs and HTTPS release-asset CDN
+redirects are accepted. No credentials are sent. Missing or corrupt assets fail
+the build, preventing Pages upload/deployment and leaving the previous live
+site intact. The existing unversioned main downloads stay unchanged. Verify
+published URLs and checksums before announcing schema availability.
+
 ## Owner setup, in order
 
 These are owner actions, not actions performed by the publishing workflow.

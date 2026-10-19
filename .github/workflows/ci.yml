@@ -107,12 +107,20 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: docs/package-lock.json
+      - name: Guard catalog history and schema immutability
+        env:
+          SCHEMA_EVENT: ${{ github.event_name }}
+          SCHEMA_BEFORE: ${{ github.event.before }}
+        run: |
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          node scripts/schema-release.mjs check --catalog-ref refs/remotes/origin/main
       - name: Build and test documentation site
         run: |
           npm --prefix docs ci --ignore-scripts

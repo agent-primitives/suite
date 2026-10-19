@@ -8,7 +8,7 @@
   "scripts": {
     "docs:brand": "node ../scripts/export-site-brand.mjs",
     "docs:build": "vitepress build .",
-    "docs:check": "vitepress build . && node --test .vitepress/site.test.mjs",
+    "docs:check": "node --test ../scripts/schema-bundles.test.mjs ../scripts/schema-release.test.mjs && vitepress build . && node --test .vitepress/site.test.mjs",
     "docs:dev": "vitepress dev . --host 127.0.0.1",
     "docs:test-browser": "node --test .vitepress/browser.test.mjs",
     "docs:preview": "vitepress preview . --host 127.0.0.1"

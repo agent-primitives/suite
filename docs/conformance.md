@@ -27,7 +27,7 @@ or cross-runtime qualification.
 
 Validation establishes format and content-graph conformance. It does **not**
 execute agents, assertions, tools or models; attest a sandbox; or prove runtime
-conformance. See [specification §15](../spec.md#15-conformance) for the distinct
+conformance. See [specification §7](../spec.md#15-conformance) for the distinct
 validator, sandbox-image and runtime responsibilities.
 
 Run the fixtures with Go 1.26.0 or newer:

@@ -4,7 +4,7 @@ This package owns AgentSuite policy meaning: strict intent validation,
 non-weakening administrative composition, exact canonical effective bytes and
 a domain-separated digest. Consumers preserve the bytes rather than
 reserializing them. The normative contract is
-[specification Appendix B](../spec.md#appendix-b-standalone-policy-contracts-normative).
+[specification Section 5.2](../spec.md#appendix-b-standalone-policy-contracts-normative).
 
 ## Versions
 

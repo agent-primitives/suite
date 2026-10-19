@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kaimahi.dev/schemas/agentsuite/policy/v2/policy.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/v0.5/policy-v2.schema.json",
   "title": "AgentSuite standalone network-only policy v2",
   "description": "Structural schema for authored and effective v2 policy. Effective payloads additionally require exact canonical bytes and digest verification.",
   "type": "object",

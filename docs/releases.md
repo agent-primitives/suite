@@ -7,6 +7,18 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
+## Unreleased — v0.5.0 schema namespace preparation
+
+All 14 reference schema IDs move to `https://suite.agent-primitives.dev/schema/v0.5/`
+plus the actual filename, including both `-v2` policy filenames. This is a minor
+release identity migration, not a wire-format or validation-constraint change.
+Select the whole release-local bundle and update editor/validator registries;
+keep historical bundles separate, without global old-to-latest aliases. Schema
+bytes differ only in `$id`; instance bytes, versions, media types and canonical
+digests are unchanged by this migration. URL availability requires the separate
+asset workflow, reviewed catalog and verified site deployment. v0.5.0 is not yet
+published; the other unreleased changes below retain their own compatibility effects.
+
 ## Unreleased — presence-sensitive validation (minor release required)
 
 Validation now rejects Suite and ToolProvider extensions missing `critical`,

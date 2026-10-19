@@ -40,6 +40,8 @@ Unless stated otherwise:
 
 ## 1. Format and identity
 
+The artifact's scope, envelope, content graph and identity rules are grouped below.
+
 <a id="2-scope"></a>
 
 ### 1.1 Scope
@@ -550,6 +552,8 @@ concerns; credentials are never AgentSuite content.
 
 ## 2. Agents and tools
 
+Agent and ToolProvider definitions lead into composition, profiles and sandbox-image construction.
+
 <a id="11-tool-terminology"></a>
 
 ### 2.1 Tool terminology
@@ -574,6 +578,8 @@ has already been deployed. An inference provider is a separate concept.
 <a id="8-agents"></a>
 
 ### 2.2 Agents
+
+For capability-based inference requirements, see [Capability-based inference](#61-capability-based-inference).
 
 An agent manifest defines:
 
@@ -1338,6 +1344,8 @@ deploy the resulting image.
 
 ### 2.5 Build profiles
 
+For the optional experimental `execution` record, see [Image execution contract](#62-image-execution-contract).
+
 A build profile MUST contain non-empty `runtimeBase` and `harness` arrays and
 one positive, profile-wide `sourceEpoch`. Each array contains one image entry
 per platform:
@@ -1673,6 +1681,8 @@ configuration, and authored requirements before treating a score as evidence.
 
 ## 4. Evidence
 
+Authored cases are defined in [Evaluations](#3-evaluations). The following sections describe separate evaluation results and portable evidence.
+
 <a id="823-results-and-oci-association"></a>
 
 ### 4.1 Results and OCI association
@@ -1863,6 +1873,8 @@ able to write the document can forge a consistent pass. Unsigned evidence MUST
 NOT be presented as authenticated provenance.
 
 ## 5. Policy
+
+Agent-bound authored policy and standalone policy resolution are specified separately below.
 
 <a id="83-agent-policy-binding"></a>
 
@@ -2083,6 +2095,8 @@ remain outside these contracts. Section 5.1's authored policy binding does not
 establish any runtime guarantee.
 
 ## 6. Experimental contracts
+
+This section collects the experimental inference and image-execution contracts referenced by Agents and Build profiles.
 
 ### 6.1 Capability-based inference
 

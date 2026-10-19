@@ -134,6 +134,13 @@ export function run(command, opt) {
     const meta = JSON.parse(readFileSync(path.join(dir, 'metadata.json'), 'utf8'))
     if (!tagPattern.test(meta.release || '') || !shaPattern.test(meta.sourceCommit || '')) fail('invalid prepared release metadata')
     if (meta.asset !== null && meta.asset !== `schemas-${meta.release}.json`) fail('invalid prepared asset filename')
+    const trusted = catalog()
+    verifySources(trusted)
+    const recreated = createBundle(meta.release, meta.sourceCommit, schemasAt(meta.sourceCommit), trusted)
+    const candidate = readCatalog(JSON.parse(readFileSync(path.join(dir, 'catalog-candidate.json'), 'utf8')))
+    if (!isDeepStrictEqual(candidate, recreated.catalog)) fail('prepared catalog differs from tagged source and trusted catalog')
+    if ((meta.asset === null) !== (recreated.asset === null)) fail('prepared metadata does not match stable patch reuse')
+    if (meta.asset !== null && !recreated.asset.equals(readFileSync(path.join(dir, meta.asset)))) fail('prepared asset integrity mismatch')
     const gh = (...args) => execFileSync('gh', args, { maxBuffer: 2 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] })
     // Re-resolve annotated or lightweight tags remotely immediately before upload.
     let object = JSON.parse(gh('api', `repos/${repository}/git/ref/tags/${meta.release}`)).object
@@ -147,14 +154,6 @@ export function run(command, opt) {
     if (meta.asset === null) { console.log('Patch reuses its existing minor asset; no upload'); return }
     const target = path.join(dir, meta.asset)
     const bytes = readFileSync(target)
-    const candidate = readCatalog(JSON.parse(readFileSync(path.join(dir, 'catalog-candidate.json'), 'utf8')))
-    const entry = candidate.bundles.find(bundle => bundle.release === meta.release)
-    const packed = JSON.parse(bytes)
-    if (!entry || packed.sourceCommit !== meta.sourceCommit || packed.release !== meta.release || !isDeepStrictEqual(schemaInventory(packed.schemas), entry.schemas)) fail('prepared asset metadata mismatch')
-    if (!isDeepStrictEqual(schemaInventory(schemasAt(meta.sourceCommit)), entry.schemas)) fail('prepared bytes differ from tagged source')
-    // Recreate exact deterministic bytes before granting the upload side effect.
-    const recreated = createBundle(meta.release, meta.sourceCommit, packed.schemas, empty)
-    if (!recreated.asset?.equals(bytes) || recreated.entry.sha256 !== entry.sha256) fail('prepared asset integrity mismatch')
     const existing = release.assets.find(asset => asset.name === meta.asset)
     if (existing) {
       const temp = mkdtempSync(path.join(os.tmpdir(), 'suite-existing-'))

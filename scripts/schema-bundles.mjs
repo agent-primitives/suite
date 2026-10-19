@@ -50,6 +50,24 @@ function namespace(inventory) {
   return [...namespaces][0];
 }
 
+function parseSchema(text) {
+  const value = JSON.parse(text); // Establish JSON grammar before scanning key boundaries.
+  const stack = [];
+  for (const [token] of text.matchAll(/"(?:\\[\s\S]|[^"\\])*"|[{}\[\],]/g)) {
+    const frame = stack.at(-1);
+    if (token[0] === '"' && frame?.keys && frame.expectKey) {
+      const key = JSON.parse(token);
+      requireThat(!frame.keys.has(key), 'Duplicate JSON name in schema');
+      frame.keys.add(key);
+      frame.expectKey = false;
+    } else if (token === '{') stack.push({ keys: new Set(), expectKey: true });
+    else if (token === '[') stack.push({});
+    else if (token === '}' || token === ']') stack.pop();
+    else if (token === ',' && frame?.keys) frame.expectKey = true;
+  }
+  return value;
+}
+
 export function schemaInventory(schemaTextMap) {
   requireThat(record(schemaTextMap), 'Invalid schema text map');
   const inventory = {};
@@ -57,7 +75,7 @@ export function schemaInventory(schemaTextMap) {
     const text = schemaTextMap[filename];
     requireThat(typeof text === 'string', `Schema text must be UTF-8: ${filename}`);
     requireThat(Buffer.from(text).toString('utf8') === text, `Invalid UTF-8 schema: ${filename}`);
-    const schema = JSON.parse(text);
+    const schema = parseSchema(text);
     requireThat(record(schema), `Invalid schema object: ${filename}`);
     inventory[filename] = { id: schema.$id, sha256: digest(text) };
   }

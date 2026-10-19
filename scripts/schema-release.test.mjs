@@ -131,14 +131,21 @@ test('release-line checks use the trusted main catalog before tagging a patch', 
   assert.match(result.stderr, /changed|minor/)
 })
 
-function publisher(t) {
-  const f = fixture(t)
-  assert.equal(f.run('pack', '--release', 'v0.4.0', '--out', f.out).status, 0)
+function publisher(t, patch = false) {
+  const f = fixture(t, patch)
+  assert.equal(f.run('pack', '--release', patch ? 'v0.5.0' : 'v0.4.0', '--out', f.out).status, 0)
+  if (patch) {
+    writeFileSync(path.join(f.root, 'docs/schema-catalog.json'), readFileSync(path.join(f.out, 'catalog-candidate.json')))
+    f.git('add', 'docs/schema-catalog.json'); f.git('commit', '-qm', 'catalog'); f.git('tag', 'v0.5.1')
+    f.out = path.join(f.root, 'patch-output')
+    assert.equal(f.run('pack', '--release', 'v0.5.1', '--out', f.out).status, 0)
+  }
+  const release = patch ? 'v0.5.1' : 'v0.4.0'
   const bin = path.join(f.root, 'bin')
   mkdirSync(bin)
   const statePath = path.join(f.root, 'remote-state.json')
   const remote = path.join(f.root, 'remote-asset.json')
-  const state = { sourceCommit: f.git('rev-parse', 'v0.4.0^{commit}'), tag_name: 'v0.4.0', assets: [] }
+  const state = { sourceCommit: f.git('rev-parse', `${release}^{commit}`), tag_name: release, assets: [] }
   const save = () => writeFileSync(statePath, JSON.stringify(state))
   save()
   writeFileSync(path.join(bin, 'gh'), `#!/usr/bin/env node
@@ -172,6 +179,36 @@ test('publisher uploads absent assets, accepts identical retries, and refuses re
   result = f.upload()
   assert.notEqual(result.status, 0)
   assert.match(result.stderr, /remote tag changed/)
+})
+
+test('publisher refuses fake patch reuse for a non-patch release', t => {
+  const f = publisher(t)
+  const metadataPath = path.join(f.out, 'metadata.json')
+  const metadata = JSON.parse(readFileSync(metadataPath))
+  metadata.asset = null
+  writeFileSync(metadataPath, JSON.stringify(metadata))
+  const result = f.upload()
+  assert.notEqual(result.status, 0)
+  assert.match(result.stderr, /stable.patch|reuse/)
+  assert.throws(() => readFileSync(f.remote), /ENOENT/)
+})
+
+test('genuine patch reuse verifies its prepared candidate and tagged source without uploading', t => {
+  const f = publisher(t, true)
+  let result = f.upload()
+  assert.equal(result.status, 0, result.stderr)
+  assert.throws(() => readFileSync(f.remote), /ENOENT/)
+  const candidatePath = path.join(f.out, 'catalog-candidate.json')
+  const candidate = JSON.parse(readFileSync(candidatePath))
+  delete candidate.releases['v0.5.1']
+  writeFileSync(candidatePath, JSON.stringify(candidate))
+  result = f.upload()
+  assert.notEqual(result.status, 0)
+  assert.match(result.stderr, /catalog.*tagged source|candidate/)
+  rmSync(candidatePath)
+  result = f.upload()
+  assert.notEqual(result.status, 0)
+  assert.match(result.stderr, /catalog-candidate/)
 })
 
 test('publisher rejects self-consistent prepared bytes that differ from the tagged source', t => {

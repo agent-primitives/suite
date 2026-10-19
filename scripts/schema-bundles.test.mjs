@@ -38,6 +38,20 @@ test('inventory records exact UTF-8 bytes and IDs, independent of filename order
     schemaInventory({ 'agent.schema.json': stable()['agent.schema.json'] + ' ' })['agent.schema.json'].sha256);
 });
 
+test('inventory rejects duplicate decoded names at the root and in nested schemas', () => {
+  const id = 'https://suite.agent-primitives.dev/schema/v0.2/agent.schema.json';
+  for (const text of [
+    `{"$id":"https://evil.test/schema","$id":"${id}"}`,
+    `{"$id":"${id}","type":"string","type":"object"}`,
+    `{"$id":"${id}","type":"string","\\u0074ype":"object"}`,
+    `{"$id":"${id}","properties":{"field":{"type":"string","type":"object"}}}`,
+    `{"$id":"${id}","allOf":[{"type":"string","type":"object"}]}`,
+  ]) assert.throws(() => schemaInventory({ 'agent.schema.json': text }), /Duplicate JSON name/);
+  const text = schema(id, { description: '{ "type": "string", "type": "object" }',
+    allOf: [{ type: 'object' }, { type: 'object' }] });
+  assert.equal(schemaInventory({ 'agent.schema.json': text })['agent.schema.json'].sha256, hash(text));
+});
+
 test('catalog accepts stable patch mappings and archive-scoped legacy reused IDs', () => {
   const first = fixture();
   first.catalog.releases['v0.2.1'] = 'v0.2';

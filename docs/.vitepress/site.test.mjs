@@ -94,7 +94,7 @@ test('the authoritative specification keeps every GitHub heading anchor', async 
   assert.ok(content.includes(`https://github.com/agent-primitives/suite/tree/${ref}/testdata/coordinator-workers/`))
 })
 
-test('every downloadable schema is raw source JSON with its frozen ID', async () => {
+test('schema downloads preserve published bundles and current draft source', async () => {
   const historyRoots = [...new Set(catalog.bundles.map(bundle => bundle.path.split('/')[0]))]
   assert.deepEqual((await readdir(path.join(dist, 'schema'))).sort(), [...schemas, 'catalog.json', ...historyRoots].sort())
   assert.deepEqual(JSON.parse(await readFile(path.join(dist, 'schema/catalog.json'), 'utf8')), catalog)
@@ -110,7 +110,7 @@ test('every downloadable schema is raw source JSON with its frozen ID', async ()
   for (const name of schemas) {
     const source = await readFile(path.join(root, 'schema', name))
     assert.deepEqual(await readFile(path.join(dist, 'schema', name)), source, name)
-    assert.equal(JSON.parse(source).$id, `https://suite.agent-primitives.dev/schema/v0.5/${name}`)
+    assert.equal(JSON.parse(source).$id, `https://suite.agent-primitives.dev/schema/draft/${name}`)
     assert.ok(downloads.includes(`/schema/${name}`), `missing download ${name}`)
   }
   assert.equal(await readFile(path.join(dist, 'CNAME'), 'utf8'), 'suite.agent-primitives.dev\n')

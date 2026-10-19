@@ -24,6 +24,7 @@ diagnostic API is required.
 | v0.2.0 | [v0.2.0/schema](https://github.com/agent-primitives/suite/tree/v0.2.0/schema) | Portable evaluation evidence |
 | v0.3.0 / v0.3.1 | [v0.3.0/schema](https://github.com/agent-primitives/suite/tree/v0.3.0/schema) / [v0.3.1/schema](https://github.com/agent-primitives/suite/tree/v0.3.1/schema) | Agent policy binding, policy v2, experimental execution and inference |
 | v0.4.0 | [v0.4.0/schema](https://github.com/agent-primitives/suite/tree/v0.4.0/schema) | Runtime profiles |
+| v0.5.0 | [v0.5.0/schema](https://github.com/agent-primitives/suite/tree/v0.5.0/schema) | Frozen minor-scoped schema IDs |
 | main (development) | [schema/](https://github.com/agent-primitives/suite/tree/main/schema) | Moving development contract; downloads below |
 
 The site downloads track main, not the latest release. The historical
@@ -32,25 +33,25 @@ some serve immutable v0.1.0 copies and others are not hosted. For example, the
 v0.1.0 Agent schema does not accept the policy binding added in v0.3.0. Fetching
 that historical ID cannot validate a v0.4.0 Agent with a policy binding.
 The [schema identity contract](../spec.md#54-schema-identity-and-contract-selection)
-defines the minor-scoped namespace. This release preparation assigns all 14
-schemas `/schema/v0.5/` IDs for the planned v0.5.0 minor release. An ID in source
-does not mean its URL is published: the asset workflow, reviewed catalog update
-and site deployment are separate steps. Manual tags do not publish schema
-assets; maintainers prepare them with the separate
+defines the minor-scoped namespace. The released v0.5.0 bundle uses frozen
+`/schema/v0.5/` IDs and is listed in the published catalog below. Main uses
+unstable `/schema/draft/` IDs; its downloads are not a released contract.
+An ID in source does not mean its URL is published: the asset workflow,
+reviewed catalog update and site deployment are separate steps. Manual tags
+do not publish schema assets; maintainers prepare them with the separate
 [release-asset workflow](hosting.md#schema-release-assets-and-retained-history).
 
 ## Minor-scoped identity and migration
 
-The current release-preparation IDs use
-`https://suite.agent-primitives.dev/schema/v0.5/<filename>.schema.json`,
+Released IDs use `https://suite.agent-primitives.dev/schema/v0.N/<filename>.schema.json`,
 with one immutable bundle per minor release. Patches MUST keep that minor's
 entire schema inventory and bytes unchanged; schema changes require a minor.
-After release preparation, main returns to explicitly unstable `/schema/draft/`
-IDs before further schema development; drafts are never catalogued as released
-contracts. Minor-release preparation rewrites them to `/schema/v0.N/`. CI guards
+Main uses explicitly unstable `/schema/draft/` IDs; drafts are never catalogued
+as released contracts. Minor-release preparation rewrites them to `/schema/v0.N/`,
+then main returns to draft IDs before further schema development. CI guards
 must reject changes to catalogued bytes and patch bundles differing from their minor.
 
-The first namespace move ships in a minor release. The reviewed
+The first namespace move shipped in v0.5.0. The reviewed
 [catalog source](https://github.com/agent-primitives/suite/blob/main/docs/schema-catalog.json) pins release assets by URL, source commit,
 checksum and schema inventory and maps releases to bundles. CI rejects deletion
 or mutation of existing entries, changed catalogued stable IDs, and patch
@@ -128,11 +129,12 @@ See the [normative policy contract](../spec.md#appendix-b-standalone-policy-cont
 ## Validation and identity
 
 All use JSON Schema 2020-12. Each current schema ID is
-`https://suite.agent-primitives.dev/schema/v0.5/` plus its actual filename,
+`https://suite.agent-primitives.dev/schema/draft/` plus its actual filename,
 including `policy-v2.schema.json` and `administrative-policy-v2.schema.json`.
-Only the IDs change: relative references, validation constraints, instance
-versions, media types and artifact digests are unchanged. The unversioned
-main downloads do not establish canonical URL availability. Historical
+These unstable IDs select main's development contract; use a released bundle
+for stable validation constraints. Schema-document identity is separate from
+instance versions, media types and artifact digests. The unversioned main
+downloads do not establish canonical URL availability. Historical
 kaimahi.dev IDs and hosted v0.1.0 bytes remain unchanged; older releases must
 still be selected with their own complete schema bundle.
 

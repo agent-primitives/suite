@@ -90,9 +90,9 @@ func TestMarkdownJSONExamples(t *testing.T) {
 					    "schemaVersion": {"const": "1.0.0-draft"},
 					    "mediaType": {"const": "application/vnd.agentsuite.tool.provider.catalog.v1+json"},
 					    "toolProviders": {"type": "array", "items": {"allOf": [
-					      {"$ref": "https://suite.agent-primitives.dev/schema/v0.5/suite.schema.json#/$defs/ref"},
+					      {"$ref": "https://suite.agent-primitives.dev/schema/draft/suite.schema.json#/$defs/ref"},
 					      {"required": ["version"], "properties": {"version": {
-					        "$ref": "https://suite.agent-primitives.dev/schema/v0.5/suite.schema.json#/$defs/version"
+					        "$ref": "https://suite.agent-primitives.dev/schema/draft/suite.schema.json#/$defs/version"
 					      }}}
 					    ]}}
 					  }

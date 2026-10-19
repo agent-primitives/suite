@@ -79,8 +79,8 @@ without adding a newline or parsing/reserializing them before digest verificatio
 `testdata/decode-cases.jsonl` holds one canonical JSON case per line: a `name`, an
 `input` (or `inputHex` for byte-level input such as a BOM or malformed UTF-8),
 whether `DecodeSuitePolicy` accepts it, and for accepted cases the canonical
-bytes and digest. `TestSharedDecodeCases` runs every case and is today the only
-test that reads this file. The format needs no Go, so another implementation can
+bytes and digest. Both the Go and TypeScript tests run every case in this corpus.
+The format needs no Go, so another implementation can
 run the same refusal, canonical-bytes and digest expectations; add new
 wire-format edge cases there.
 

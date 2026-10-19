@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
@@ -13,6 +14,7 @@ const policySchemaIDs = {
   'administrative-policy-v2.schema.json': 'https://kaimahi.dev/schemas/agentsuite/policy/v2/administrative-policy.schema.json'
 }
 const html = name => readFile(path.join(dist, `${name}.html`), 'utf8')
+const catalog = JSON.parse(await readFile(path.join(root, 'docs/schema-catalog.json'), 'utf8'))
 
 test('all documentation pages render with root-based navigation and assets', async () => {
   const pages = ['404', 'index', 'spec', 'schemas', 'conformance', 'go', 'releases', 'hosting']
@@ -97,7 +99,17 @@ test('the authoritative specification keeps every GitHub heading anchor', async 
 })
 
 test('every downloadable schema is raw source JSON with its frozen ID', async () => {
-  assert.deepEqual((await readdir(path.join(dist, 'schema'))).sort(), schemas)
+  const historyRoots = [...new Set(catalog.bundles.map(bundle => bundle.path.split('/')[0]))]
+  assert.deepEqual((await readdir(path.join(dist, 'schema'))).sort(), [...schemas, 'catalog.json', ...historyRoots].sort())
+  assert.deepEqual(JSON.parse(await readFile(path.join(dist, 'schema/catalog.json'), 'utf8')), catalog)
+  for (const bundle of catalog.bundles) {
+    assert.deepEqual((await readdir(path.join(dist, 'schema', bundle.path))).sort(), Object.keys(bundle.schemas).sort())
+    for (const [name, expected] of Object.entries(bundle.schemas)) {
+      const bytes = await readFile(path.join(dist, 'schema', bundle.path, name))
+      assert.equal(createHash('sha256').update(bytes).digest('hex'), expected.sha256)
+      assert.equal(JSON.parse(bytes).$id, expected.id)
+    }
+  }
   const downloads = await html('schemas')
   for (const name of schemas) {
     const source = await readFile(path.join(root, 'schema', name))

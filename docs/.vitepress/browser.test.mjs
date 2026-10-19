@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { createServer } from 'node:http'
 import { mkdir, readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
@@ -10,6 +11,8 @@ import { latestRelease } from './release.mjs'
 const root = fileURLToPath(new URL('dist/', import.meta.url))
 // Every published schema must be linked from /schemas; derive the count so adding one can't silently skip the check.
 const schemaCount = (await readdir(fileURLToPath(new URL('../../schema/', import.meta.url)))).filter(name => name.endsWith('.schema.json')).length
+const catalog = JSON.parse(await readFile(new URL('../schema-catalog.json', import.meta.url), 'utf8'))
+const publishedCount = catalog.bundles.reduce((count, bundle) => count + Object.keys(bundle.schemas).length, 0)
 let browser, server, origin
 
 before(async () => {
@@ -119,7 +122,18 @@ for (const colorScheme of ['light', 'dark']) {
         }
         if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, `after-spec-${device}-${colorScheme}.png`), fullPage: true })
         await ready(page, '/schemas')
-        assert.equal(await page.locator('.vp-doc a[href^="/schema/"]').count(), schemaCount)
+        assert.equal(await page.locator('.vp-doc a[href^="/schema/"]').count(), schemaCount + publishedCount)
+        for (const bundle of catalog.bundles) {
+          for (const [name, expected] of Object.entries(bundle.schemas)) {
+            const href = `/schema/${bundle.path}/${name}`
+            assert.equal(await page.locator(`.vp-doc a[href="${href}"]`).count(), 1)
+            const response = await page.request.get(`${origin}${href}`)
+            assert.equal(response.status(), 200)
+            const bytes = await response.body()
+            assert.equal(createHash('sha256').update(bytes).digest('hex'), expected.sha256)
+            assert.equal(JSON.parse(bytes).$id, expected.id)
+          }
+        }
         for (const [name, id] of [
           ['agent.schema.json', 'https://kaimahi.dev/schemas/agentsuite/v1/agent.schema.json'],
           ['policy-v2.schema.json', 'https://kaimahi.dev/schemas/agentsuite/policy/v2/policy.schema.json'],

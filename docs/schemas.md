@@ -1,3 +1,7 @@
+<script setup>
+import catalog from './schema-catalog.json'
+</script>
+
 # JSON schemas
 
 Download the current main-branch schemas below. They are copied byte-for-byte
@@ -29,8 +33,9 @@ v0.1.0 Agent schema does not accept the policy binding added in v0.3.0. Fetching
 that historical ID cannot validate a v0.4.0 Agent with a policy binding.
 The [schema identity contract](../spec.md#54-schema-identity-and-contract-selection)
 defines a minor-scoped replacement namespace. The migration has not happened:
-the files and downloads below still carry historical IDs, and the current
-manual release process does not publish versioned schema assets.
+the files and downloads below still carry historical IDs. Manual tags do not
+publish schema assets; maintainers prepare them with the separate
+[release-asset workflow](hosting.md#schema-release-assets-and-retained-history).
 
 ## Minor-scoped identity and migration
 
@@ -43,13 +48,30 @@ released contracts. Minor-release preparation rewrites them to `/schema/v0.N/`;
 main returns to drafts before further schema development. CI guards must reject
 changes to catalogued bytes and patch bundles differing from their minor.
 
-The first namespace move ships in a minor release, after publication and
-immutability guards are ready. Its reviewed catalog will identify release
-assets by URL, source commit and checksum and map releases to bundles. Pages
-downloads assets only at build time and retains all catalogued history on every
-deployment. A missing or conflicting asset blocks deployment. These paths are
-a publication policy, not additional working downloads today; use the pinned
-source directories above until migrated assets are published and verified.
+The first namespace move ships in a minor release. The reviewed
+[catalog source](https://github.com/agent-primitives/suite/blob/main/docs/schema-catalog.json) pins release assets by URL, source commit,
+checksum and schema inventory and maps releases to bundles. CI rejects deletion
+or mutation of existing entries, changed catalogued stable IDs, and patch
+inventory/byte changes. Legacy reused IDs remain archive-scoped, not global
+aliases. Pages downloads every catalogued asset only at build time; missing,
+corrupt or mismatched assets fail the build rather than dropping history.
+No namespace or schema bytes change until a separately reviewed migration.
+
+## Published schema bundles
+
+<p v-if="catalog.bundles.length === 0">No schema assets are catalogued yet. Use the pinned source directories above.</p>
+<ul v-else>
+  <li v-for="bundle in catalog.bundles" :key="bundle.path">
+    <strong>{{ bundle.path }}</strong> (source release {{ bundle.release }})
+    <ul>
+      <li v-for="(_, name) in bundle.schemas" :key="name"><a :href="`/schema/${bundle.path}/${name}`">{{ name }}</a></li>
+    </ul>
+  </li>
+</ul>
+
+The site emits the verified catalog at `/schema/catalog.json`. Stable bundles
+use `/schema/v0.N/`; pre-migration archives use `/schema/archive/v0.N.P/` and
+retain their original IDs. The unversioned downloads below continue to track main.
 
 Wire-format versions remain independent of schema IDs: Suite `schemaVersion`,
 evidence `schemaVersion`, policy `version` and document media types do not change

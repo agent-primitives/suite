@@ -1,7 +1,7 @@
 # TypeScript policy identity
 
 Small, dependency-free runtime implementation of the [policy contract](../README.md)
-([normative Appendix B](../../spec.md#appendix-b-standalone-policy-contracts-normative)).
+([normative Section 5.2](../../spec.md#appendix-b-standalone-policy-contracts-normative)).
 It handles filesystem v1 and network-only v2, not policy enforcement or
 administrative composition. Go and the shared `policy/testdata` remain the
 behavior and fixture authority. No Go source, schema or expected vector changes

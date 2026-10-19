@@ -77,6 +77,27 @@ test('landing and specification reflow at narrow, tablet and enlarged-text width
   } finally { await page.close() }
 })
 
+test('legacy specification fragments land beside their relocated sections', async () => {
+  for (const [old, current] of [
+    ['822-case-documents-and-assertions', '32-case-documents-and-assertions'],
+    ['824-portable-evaluation-evidence', '42-portable-evaluation-evidence'],
+    ['appendix-b-standalone-policy-contracts-normative', '52-standalone-policy-contracts-normative']
+  ]) {
+    // Each incoming URL starts fresh, without same-document history restoration.
+    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
+    try {
+      await ready(page, `/spec#${old}`)
+      const alias = page.locator(`[id="${old}"]`)
+      assert.equal(await alias.evaluate(el => el.parentElement.nextElementSibling?.id), current)
+      await page.locator(`[id="${current}"]`).waitFor()
+      await page.waitForFunction(id => {
+        const bounds = document.getElementById(id)?.getBoundingClientRect()
+        return bounds && bounds.top >= 0 && bounds.top < innerHeight
+      }, current)
+    } finally { await page.close() }
+  }
+})
+
 for (const colorScheme of ['light', 'dark']) {
   for (const [device, viewport] of [['desktop', { width: 1440, height: 1000 }], ['mobile', { width: 390, height: 844 }]]) {
     test(`${device} reading paths, local search, raw downloads and theme (${colorScheme})`, async () => {
@@ -111,7 +132,8 @@ for (const colorScheme of ['light', 'dark']) {
         }
         await primary.click()
         await page.waitForURL(`${origin}/spec`)
-        await page.locator('[id="822-case-documents-and-assertions"]').waitFor()
+        await page.locator('[id="822-case-documents-and-assertions"]').waitFor({ state: 'attached' })
+        await page.locator('[id="32-case-documents-and-assertions"]').waitFor()
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
         if (device === 'mobile') {
           const code = page.locator('.vp-doc pre').first()

@@ -19,7 +19,9 @@ schemas, canonical identities, tool provider bundle model, sandbox-image binding
 validation rules, and conformance classes. It does not define session history,
 checkpoints, mutable memory, credentials, or a new registry protocol.
 
-## 1. Conventions
+<a id="1-conventions"></a>
+
+## Conventions
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
 **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and
@@ -36,7 +38,11 @@ Unless stated otherwise:
   empty segment, `.` segment, or `..` segment;
 - a consumer operates offline after all referenced OCI blobs are present.
 
-## 2. Scope
+## 1. Format and identity
+
+<a id="2-scope"></a>
+
+### 1.1 Scope
 
 This draft specifies:
 
@@ -56,7 +62,9 @@ This draft specifies:
   image;
 - suite, sandbox-image, and runtime conformance classes.
 
-## 3. Artifact model
+<a id="3-artifact-model"></a>
+
+### 1.2 Artifact model
 
 An **AgentSuite Artifact** is an immutable definition. It is not directly
 runnable.
@@ -74,7 +82,9 @@ materializes that provider's exact platform bundle independently. Registry
 deduplication MAY avoid storing identical blobs repeatedly, but reuse does not
 change the image-local closure.
 
-### 1.2 Content references and descriptors
+<a id="12-content-references-and-descriptors"></a>
+
+### 1.3 Content references and descriptors
 
 A **content reference** is a suite-local pointer to another file in the same
 content layout. It pairs the enclosing object's own selector fields (for
@@ -100,7 +110,7 @@ A **descriptor** is a closed object:
   document (agent, tool provider, tool provider catalog, composition, tool
   provider composition, build profile, runtime profile, evaluation index, evaluation case and
   authored policy manifests), `digest` and `size` describe the [RFC 8785 JCS canonical
-  representation](#61-canonical-json) of that document, and the referenced
+  representation](#161-canonical-json) of that document, and the referenced
   file itself MUST be stored on disk as those exact canonical bytes: a
   producer MUST write the canonical serialization, not merely compute
   `digest`/`size` from it while storing a differently formatted (for example
@@ -141,30 +151,36 @@ extension's optional `digest`, remain plain scalar digest strings: they do not
 name a separate referenced file with its own media type and size, so wrapping
 them in a descriptor would not add meaning.
 
-## 4. OCI envelope
+<a id="4-oci-envelope"></a>
 
-### 4.1 Media types
+### 1.4 OCI envelope
+
+<a id="41-media-types"></a>
+
+#### 1.4.1 Media types
 
 | Object | Media type |
 |---|---|
-| [Artifact type](#3-artifact-model) | `application/vnd.agentsuite.suite.v1` |
-| [Empty config](#43-empty-config) | `application/vnd.oci.empty.v1+json` |
-| [Content layer](#5-content-layer) | `application/vnd.agentsuite.content.v1.tar+gzip` |
-| [Suite manifest](#7-suite-manifest) | `application/vnd.agentsuite.manifest.v1+json` |
-| [Agent manifest](#8-agents) | `application/vnd.agentsuite.agent.v1+json` |
-| [Filesystem policy v1](#83-agent-policy-binding) | `application/vnd.agentsuite.policy.v1+json` |
-| [Network policy v2](#83-agent-policy-binding) | `application/vnd.agentsuite.policy.v2+json` |
-| [Evaluation index](#82-agent-evaluations) | `application/vnd.agentsuite.eval.index.v1+json` |
-| [Evaluation case](#822-case-documents-and-assertions) | `application/vnd.agentsuite.eval.case.v1+json` |
-| [ToolProvider catalog](#91-toolprovider-catalog) | `application/vnd.agentsuite.tool.provider.catalog.v1+json` |
-| [ToolProvider manifest](#9-tool-providers-and-tools) | `application/vnd.agentsuite.tool.provider.v1+json` |
-| [Composition manifest](#10-composition-manifests) | `application/vnd.agentsuite.composition.v1+json` |
-| [Runtime profile](#111-runtime-profiles) | `application/vnd.agentsuite.runtime.profile.v1+json` |
-| [ToolProvider composition](#101-toolprovider-compositions) | `application/vnd.agentsuite.tool.provider.composition.v1+json` |
-| [Build profile](#11-build-profiles) | `application/vnd.agentsuite.build.profile.v1+json` |
-| [Agent sandbox binding](#13-agent-sandbox-binding) | `application/vnd.agentsuite.sandbox.binding.v1+json` |
+| [Artifact type](#12-artifact-model) | `application/vnd.agentsuite.suite.v1` |
+| [Empty config](#143-empty-config) | `application/vnd.oci.empty.v1+json` |
+| [Content layer](#15-content-layer) | `application/vnd.agentsuite.content.v1.tar+gzip` |
+| [Suite manifest](#17-suite-manifest) | `application/vnd.agentsuite.manifest.v1+json` |
+| [Agent manifest](#22-agents) | `application/vnd.agentsuite.agent.v1+json` |
+| [Filesystem policy v1](#51-agent-policy-binding) | `application/vnd.agentsuite.policy.v1+json` |
+| [Network policy v2](#51-agent-policy-binding) | `application/vnd.agentsuite.policy.v2+json` |
+| [Evaluation index](#3-evaluations) | `application/vnd.agentsuite.eval.index.v1+json` |
+| [Evaluation case](#32-case-documents-and-assertions) | `application/vnd.agentsuite.eval.case.v1+json` |
+| [ToolProvider catalog](#231-toolprovider-catalog) | `application/vnd.agentsuite.tool.provider.catalog.v1+json` |
+| [ToolProvider manifest](#23-tool-providers-and-tools) | `application/vnd.agentsuite.tool.provider.v1+json` |
+| [Composition manifest](#24-composition-manifests) | `application/vnd.agentsuite.composition.v1+json` |
+| [Runtime profile](#26-runtime-profiles) | `application/vnd.agentsuite.runtime.profile.v1+json` |
+| [ToolProvider composition](#241-toolprovider-compositions) | `application/vnd.agentsuite.tool.provider.composition.v1+json` |
+| [Build profile](#25-build-profiles) | `application/vnd.agentsuite.build.profile.v1+json` |
+| [Agent sandbox binding](#28-agent-sandbox-binding) | `application/vnd.agentsuite.sandbox.binding.v1+json` |
 
-### 4.2 OCI image layout
+<a id="42-oci-image-layout"></a>
+
+#### 1.4.2 OCI image layout
 
 An on-disk form conforming to the [OCI Image Layout
 Specification][oci-image-layout] MUST contain:
@@ -235,7 +251,9 @@ self-contained validation boundary. Later revisions may profile multiple
 content-addressed layers for cross-suite deduplication without changing the
 logical manifests.
 
-### 4.3 Empty config
+<a id="43-empty-config"></a>
+
+#### 1.4.3 Empty config
 
 Following the [OCI artifact and empty-descriptor
 guidance][oci-artifact-guidance], the OCI manifest `config` descriptor MUST
@@ -273,9 +291,13 @@ AgentSuite identity comes from the JCS-digested graph rooted at
 `agentsuite.json`, rather than from a second config document or a digest of tar
 serialization details.
 
-## 5. Content layer
+<a id="5-content-layer"></a>
 
-### 5.1 Logical layout
+### 1.5 Content layer
+
+<a id="51-logical-layout"></a>
+
+#### 1.5.1 Logical layout
 
 ```text
 .
@@ -314,7 +336,9 @@ Paths stored in manifests MUST be interpreted from the content root. Consumers
 MUST NOT resolve host paths, environment-variable substitutions, or URLs while
 validating content.
 
-### 5.2 Archive safety
+<a id="52-archive-safety"></a>
+
+#### 1.5.2 Archive safety
 
 A conforming validator MUST reject:
 
@@ -337,7 +361,9 @@ GiB. OCI indexes contain at most 1,000 descriptors referencing at most 1 GiB
 in aggregate. It retains at most 256 MiB of JSON metadata while validating an
 artifact.
 
-### 5.3 JSON profile
+<a id="53-json-profile"></a>
+
+#### 1.5.3 JSON profile
 
 All normative JSON documents:
 
@@ -360,7 +386,9 @@ cross-field rules require semantic validation after schema validation (standard
 JSON Schema cannot compare sibling numbers or enforce uniqueness by a property).
 Reserved input environments and non-normalized health paths are refused by both.
 
-### 5.4 Schema identity and contract selection
+<a id="54-schema-identity-and-contract-selection"></a>
+
+#### 1.5.4 Schema identity and contract selection
 
 Schema identity is separate from content identity and wire-format versions.
 Suite documents use `schemaVersion: "1.0.0-draft"`, evidence uses
@@ -413,9 +441,13 @@ their original bytes and MUST NOT redirect to a newer contract. See
 [schema selection and current downloads](https://suite.agent-primitives.dev/schemas) and the
 [release policy](CONTRIBUTING.md#release-policy) for migration and publication.
 
-## 6. Identity
+<a id="6-identity"></a>
 
-### 6.1 Canonical JSON
+### 1.6 Identity
+
+<a id="61-canonical-json"></a>
+
+#### 1.6.1 Canonical JSON
 
 Manifest identities use the [RFC 8785 JSON Canonicalization Scheme
 (JCS)][rfc8785]:
@@ -428,12 +460,16 @@ Manifest identities use the [RFC 8785 JSON Canonicalization Scheme
 Whitespace and object member order therefore do not change a document's
 identity. Duplicate names are rejected before canonicalization.
 
-### 6.2 Files
+<a id="62-files"></a>
+
+#### 1.6.2 Files
 
 A regular file digest is SHA-256 over its exact bytes. An inventory records
 type, mode, numeric owner, size, digest or link target, and component.
 
-### 6.3 ToolProvider variants
+<a id="63-toolprovider-variants"></a>
+
+#### 1.6.3 ToolProvider variants
 
 To compute `variantDigest`, take the complete variant object as represented in
 the tool provider manifest, replace only the value of its `variantDigest` member with the
@@ -442,7 +478,9 @@ identity commits to platform, install root, entrypoint, runtime requirements,
 file inventory, dependencies, SBOM, provenance descriptors, and the presence
 of optional members.
 
-### 6.4 Compositions
+<a id="64-compositions"></a>
+
+#### 1.6.4 Compositions
 
 An agent composition resolves:
 
@@ -466,7 +504,9 @@ profile MUST NOT repackage S. One suite may require several images.
 The digest in a suite `toolProviderCompositions` reference is the JCS digest of the
 complete ToolProvider composition manifest.
 
-## 7. Suite manifest
+<a id="7-suite-manifest"></a>
+
+### 1.7 Suite manifest
 
 `agentsuite.json` is the graph root. It contains:
 
@@ -492,7 +532,9 @@ derived from tool provider declarations:
 Unknown critical extensions MUST be rejected. Non-critical extensions MAY be
 retained or ignored.
 
-## 14. Distribution
+<a id="14-distribution"></a>
+
+### 1.8 Distribution
 
 Registries are used through [OCI Distribution Specification
 v1.1.1][oci-distribution-spec] operations.
@@ -506,7 +548,11 @@ Clients MUST verify every received descriptor before parsing or extracting its
 content. Registry transport security and authentication are deployment
 concerns; credentials are never AgentSuite content.
 
-### 1.1 Tool terminology
+## 2. Agents and tools
+
+<a id="11-tool-terminology"></a>
+
+### 2.1 Tool terminology
 
 The hierarchy is **AgentSuite → ToolProvider → Tool**:
 
@@ -525,7 +571,9 @@ only; CLI binaries are implementation details behind an MCP adapter. Naming a
 provider does not imply that its implementation is a network server or that it
 has already been deployed. An inference provider is a separate concept.
 
-## 8. Agents
+<a id="8-agents"></a>
+
+### 2.2 Agents
 
 An agent manifest defines:
 
@@ -557,7 +605,9 @@ For every agent, the suite MUST contain at least one composition, including an
 empty composition for an agent that uses no tool providers. This makes the target
 platform and build profile explicit.
 
-### 8.1 Agent invocation relationships
+<a id="81-agent-invocation-relationships"></a>
+
+#### 2.2.1 Agent invocation relationships
 
 The optional `invokes` element declares which other agents an agent is
 permitted to invoke. It is an array of invocation relationship objects:
@@ -611,7 +661,9 @@ permission to invoke the coordinator or each other.
 The complete conformant example is checked in at
 [`testdata/coordinator-workers/`](testdata/coordinator-workers/).
 
-## 9. Tool providers and tools
+<a id="9-tool-providers-and-tools"></a>
+
+### 2.3 Tool providers and tools
 
 A ToolProvider is an immutable, versioned contract exposing one or more tools,
 with bundled platform variants, a remote declaration, or both. It is not merely
@@ -653,7 +705,9 @@ The provider contract and bundled variants serve different purposes:
 The complete machine-readable shape is
 [`tool-provider.schema.json`](schema/tool-provider.schema.json).
 
-### 9.1 ToolProvider catalog
+<a id="91-toolprovider-catalog"></a>
+
+#### 2.3.1 ToolProvider catalog
 
 The tool provider catalog is the closed, suite-level index of available provider manifests.
 Each entry MUST bind one exact provider identifier and semantic version to a
@@ -695,7 +749,9 @@ the referenced tool provider manifest, and `descriptor.size` is the byte length
 of that same canonical representation, not the digest or size of its original
 whitespace or object-member ordering.
 
-### 9.2 Callable tools
+<a id="92-callable-tools"></a>
+
+#### 2.3.2 Callable tools
 
 A ToolProvider manifest separates the provider process or endpoint from the
 model-callable tools it offers. Each entry in `tools` defines `name`, optional
@@ -711,7 +767,7 @@ their use as model tools.
 
 A Tool whose call requires a specific person's delegated authorization
 declares that requirement through `delegatedAuthorization`
-([Section 9.9](#99-delegated-user-connector-authorization)). A connector-backed
+([Section 2.3.9](#239-delegated-user-connector-authorization)). A connector-backed
 capability remains an ordinary callable Tool exposed by its ToolProvider; this
 draft does not define a second, connector-specific Tool hierarchy.
 
@@ -733,9 +789,11 @@ approval for a read-only Tool. Approval does not replace requester verification,
 authorization, or account consent. A runtime unable to satisfy a required approval
 MUST refuse dispatch.
 
-### 9.3 Execution modes
+<a id="93-execution-modes"></a>
 
-This draft supports only the `shared-sandbox` mode defined in [Section 8](#8-agents).
+#### 2.3.3 Execution modes
+
+This draft supports only the `shared-sandbox` mode defined in [Section 2.2](#22-agents).
 
 The bundled tool provider has one or more exact platform variants. The selected variant is
 copied into the derived Agent Sandbox Image and executes in the same sandbox
@@ -758,7 +816,9 @@ sandbox. They are not independent security boundaries. A requirement for
 distinct privilege, network, secret, or filesystem isolation cannot be met by
 this mode.
 
-### 9.4 Bundled variants
+<a id="94-bundled-variants"></a>
+
+#### 2.3.4 Bundled variants
 
 A bundled variant includes:
 
@@ -807,7 +867,9 @@ model access or cause network resolution or installer execution.
 A variant MUST include private runtimes required by its provider. This draft
 does not define standalone runtime bundles.
 
-### 9.5 Remote MCP declarations
+<a id="95-remote-mcp-declarations"></a>
+
+#### 2.3.5 Remote MCP declarations
 
 A remote ToolProvider's `remote` object defines:
 
@@ -864,7 +926,9 @@ provider does not authorize an agent to call its tools and does not resolve any 
 When the same ToolProvider also declares `variants`, a ToolProvider composition MAY select one
 variant for standalone sandbox construction.
 
-### 9.6 CLI-backed providers
+<a id="96-cli-backed-providers"></a>
+
+#### 2.3.6 CLI-backed providers
 
 A command-line program that is not itself an MCP server is bundled behind an
 MCP provider. The provider validates model inputs against the declared
@@ -882,7 +946,9 @@ The reference schema tests validate multi-file bundle fixtures for
 [`Azure CLI`](testdata/tool-providers/azure-cli-tool-provider.json),
 and [`OPA`](testdata/tool-providers/opa-tool-provider.json).
 
-### 9.7 OPA writer and reviewer example
+<a id="97-opa-writer-and-reviewer-example"></a>
+
+#### 2.3.7 OPA writer and reviewer example
 
 The OPA ToolProvider fixture exposes one `evaluate_document` tool backed by an
 `opa-mcp` adapter and the OPA executable. The tool accepts a structured
@@ -919,7 +985,9 @@ The repeated hexadecimal digests in these examples are illustrative. A
 producer MUST replace them with values computed from the concrete ToolProvider
 manifest and composition.
 
-### 9.8 UTC datetime example
+<a id="98-utc-datetime-example"></a>
+
+#### 2.3.8 UTC datetime example
 
 The following example is a bundled stdio MCP server that returns the current
 UTC time. It does not execute `/bin/date`, depend on distribution userland,
@@ -1021,7 +1089,9 @@ Reading the clock makes the tool result runtime-dependent; it does not
 make the provider artifact mutable. The manifest, schemas, executable, variant,
 and composition remain immutable and digest-bound.
 
-### 9.9 Delegated-user connector authorization
+<a id="99-delegated-user-connector-authorization"></a>
+
+#### 2.3.9 Delegated-user connector authorization
 
 A connector-backed capability remains an ordinary callable Tool exposed by a
 ToolProvider. A Tool that requires a specific person's authorization before it
@@ -1065,12 +1135,14 @@ when the requester cannot be verified, when no connection is bound to
 `bindingRef` for that requester, or when the bound connection has drifted
 (for example, relinked, revoked, or stale) since it was granted.
 
-The Tool-level `effect` and `approval` declarations in Section 9.2 apply
+The Tool-level `effect` and `approval` declarations in Section 2.3.2 apply
 independently of these authorization requirements. A valid delegated connection
 does not satisfy a required invocation approval, and approval does not grant
 missing delegated permissions.
 
-### 9.10 Delegated-user connector example
+<a id="910-delegated-user-connector-example"></a>
+
+#### 2.3.10 Delegated-user connector example
 
 The complete fixture is
 [`testdata/remote-mcp/`](testdata/remote-mcp/).
@@ -1121,7 +1193,9 @@ across the provider's tools; the runtime remains responsible for verifying
 that the calling requester matches the requester the connection was granted
 to, for every call.
 
-## 10. Composition manifests
+<a id="10-composition-manifests"></a>
+
+### 2.4 Composition manifests
 
 A composition manifest is the closed, resolved, digest-pinned composition of
 one agent for one exact platform, optional runtime profile and one build profile. It is not the suite
@@ -1136,7 +1210,7 @@ templates and their lifecycle policies are outside this specification.
 The suite-level composition selection key is `(agent, platform)` for legacy
 compositions, or `(agent, platform, runtimeProfile)` when profiled. The optional
 `runtimeProfile` identifier MUST be nonempty when present, MUST resolve to one
-suite-local profile (§11.1), and MUST agree on reference and manifest. Explicit
+suite-local profile (§2.6), and MUST agree on reference and manifest. Explicit
 null or empty selectors, duplicate keys, dangling profiles, and mixing legacy
 and profiled compositions for the same agent/platform MUST refuse. There is no
 implicit profile selection or fallback. Each key selects exactly one
@@ -1210,7 +1284,9 @@ implicitly authorized.
 
 The same immutable tool provider and variant may appear in several compositions.
 
-### 10.1 ToolProvider compositions
+<a id="101-toolprovider-compositions"></a>
+
+#### 2.4.1 ToolProvider compositions
 
 A ToolProvider composition is the closed build input for one standalone ToolProvider Sandbox
 Image:
@@ -1258,7 +1334,9 @@ construction.
 A ToolProvider composition does not authorize any agent, resolve a remote endpoint, or
 deploy the resulting image.
 
-## 11. Build profiles
+<a id="11-build-profiles"></a>
+
+### 2.5 Build profiles
 
 A build profile MUST contain non-empty `runtimeBase` and `harness` arrays and
 one positive, profile-wide `sourceEpoch`. Each array contains one image entry
@@ -1324,7 +1402,9 @@ MUST validate the combined final filesystem against each bundled provider's ABI,
 dynamic loader, shared library, interpreter, CA bundle, NSS, shell, required
 path, and CPU-baseline requirements.
 
-### 11.1 Runtime profiles
+<a id="111-runtime-profiles"></a>
+
+### 2.6 Runtime profiles
 
 The optional closed [runtime-profile schema](schema/runtime-profile.schema.json)
 pins execution declarations. All fields are REQUIRED and non-null:
@@ -1333,7 +1413,7 @@ pins execution declarations. All fields are REQUIRED and non-null:
 |---|---|
 | `schemaVersion`, `mediaType` | `1.0.0-draft`, `application/vnd.agentsuite.runtime.profile.v1+json`. |
 | `id` | Suite-local identifier matching its reference; also valid as an evidence identifier. |
-| `runtime`, `harness`, `renderer` | Each is a closed evidence implementation identity: `id`, `version`, `digest` (§8.2.4). |
+| `runtime`, `harness`, `renderer` | Each is a closed evidence implementation identity: `id`, `version`, `digest` (§4.2). |
 | `configurationABI` | Opaque consumer-owned identifier matching `^[a-z0-9][a-z0-9._-]{0,127}$`. |
 | `imageRequired` | Explicit boolean; false is permitted and MUST NOT be treated as omission. |
 
@@ -1355,7 +1435,9 @@ digests without migration. New readers support both paths; older strict readers
 reject profiled documents as unknown fields. This additive format/API and diff
 change requires a Go module minor release, not a format/media-type rename.
 
-## 12. Agent Sandbox Image construction
+<a id="12-agent-sandbox-image-construction"></a>
+
+### 2.7 Agent Sandbox Image construction
 
 Construction MUST be a pure, offline file-composition operation:
 
@@ -1382,7 +1464,9 @@ Restricting `PATH` is useful for discoverability but is not process
 confinement. Runtime conformance MUST separately test the intended execution
 boundary.
 
-### 12.1 ToolProvider Sandbox Image construction
+<a id="121-toolprovider-sandbox-image-construction"></a>
+
+#### 2.7.1 ToolProvider Sandbox Image construction
 
 ToolProvider Sandbox Image construction MUST:
 
@@ -1414,7 +1498,9 @@ OCI image manifest commits to the resulting image contents. Producers that
 need a verifiable relationship to the complete AgentSuite SHOULD publish a
 signed provenance attestation or OCI referrer.
 
-## 13. Agent sandbox binding
+<a id="13-agent-sandbox-binding"></a>
+
+### 2.8 Agent sandbox binding
 
 Kaimahi's builder-owned [sandbox-binding reference schema](https://github.com/kaimahi-agents/kaimahi/blob/e48f063f422bd38b7f92173351defd21bfcda5cc/internal/kmx/agentsuite/schema/sandbox-binding.schema.json)
 is maintained in the source repository, outside this portable package.
@@ -1445,7 +1531,9 @@ binding. An OCI `subject` relationship alone is not an authenticity proof.
 Producers SHOULD publish signed attestations or OCI referrers binding the suite
 manifest, build inputs, and resulting image manifests.
 
-### 8.2 Agent evaluations
+<a id="82-agent-evaluations"></a>
+
+## 3. Evaluations
 
 Producers SHOULD embed authored evaluation cases for each agent. Consumers MAY
 use them for evaluation, review, or comparison. A suite with omitted or empty
@@ -1458,7 +1546,7 @@ directories. Index and case files MUST be regular files. The top-level `evals/`
 directory MAY be empty.
 
 The agent manifest's optional `evals` is an array of content references, each
-pairing a content-root `path` with a [JCS-canonical descriptor](#12-content-references-and-descriptors),
+pairing a content-root `path` with a [JCS-canonical descriptor](#13-content-references-and-descriptors),
 containing at most one reference in this draft. This agent-manifest fragment
 shows only `evals`:
 
@@ -1484,7 +1572,9 @@ the owning manifest's `id`. Explicit `null` is invalid. Each agent references it
 evaluation index, which references its cases in evaluation order. Each delegated
 agent has its own binding.
 
-#### 8.2.1 Index and bounds
+<a id="821-index-and-bounds"></a>
+
+### 3.1 Index and bounds
 
 The closed index document contains:
 
@@ -1504,7 +1594,7 @@ Each case id and path MUST be unique within the agent.
 `maxCases` MUST be in `1..128`; `maxCaseBytes` MUST be in `1..4194304`.
 Producers MAY declare lower limits. The actual case count and each case's
 serialized UTF-8 byte length MUST fit the declared limits. Each case MUST contain
-`1..1000` assertions. General resource limits are defined in §5.2.
+`1..1000` assertions. General resource limits are defined in §1.5.2.
 Consumers MAY impose stricter resource limits but MUST report a limit refusal
 rather than silently truncating or treating it as a pass.
 
@@ -1514,7 +1604,9 @@ Reference schemas are
 ownership, path/id equality, digest checks, byte bounds, and regex compilation
 are semantic checks in addition to JSON Schema validation.
 
-#### 8.2.2 Case documents and assertions
+<a id="822-case-documents-and-assertions"></a>
+
+### 3.2 Case documents and assertions
 
 A case is a closed JSON document with REQUIRED `schemaVersion: "1.0.0-draft"`,
 `mediaType: "application/vnd.agentsuite.eval.case.v1+json"`, `id`, `input`,
@@ -1562,7 +1654,7 @@ newline and tab. `minScore` MUST be an integer from 0 to 100. `judgeModel` and
 these are authored requirements, not host credentials or attested model identity.
 Inapplicable operands MUST be absent, including when empty or `null`.
 
-An unknown assertion type MUST use the lowercase identifier spelling from §1,
+An unknown assertion type MUST use the lowercase identifier spelling from [Conventions](#conventions),
 explicit `critical: false`, and one nonblank string `value` carrying its
 extension-defined operand; other operand fields MUST be absent. Unknown critical
 types, including those with omitted `critical`, MUST be rejected. Consumers MAY
@@ -1579,7 +1671,11 @@ transport, prompting, sampling, score aggregation, and policy are outside this
 storage contract; a result consumer MUST match the recorded evaluator policy,
 configuration, and authored requirements before treating a score as evidence.
 
-#### 8.2.3 Results and OCI association
+## 4. Evidence
+
+<a id="823-results-and-oci-association"></a>
+
+### 4.1 Results and OCI association
 
 Evaluation results MUST NOT be embedded in the suite content layer.
 An embedded result changes the layer and suite manifest digest, so it cannot
@@ -1593,18 +1689,20 @@ size. The referring manifest follows the
 [OCI artifact guidance][oci-artifact-guidance].
 Discovery follows [OCI Distribution][oci-distribution-spec]
 referrers semantics, not a new registry endpoint. Private local result files
-MAY remain unpublished. The public v1 evidence payload is defined in §8.2.4.
+MAY remain unpublished. The public v1 evidence payload is defined in §4.2.
 Other result payload schemas, signatures, trust policy, and private local
 storage formats are outside this draft.
 
 Results SHOULD additionally identify the agent and its digest, index and ordered
-case digests, target composition digest (§6.4), observed runtime/model, evaluator
+case digests, target composition digest (§1.6.4), observed runtime/model, evaluator
 policy/configuration, and ordered per-assertion verdicts. Trust considerations
-are defined in §17.
+are defined in §8.
 
 See the [writer evaluation example](testdata/coordinator-workers/evals/writer/).
 
-#### 8.2.4 Portable evaluation evidence
+<a id="824-portable-evaluation-evidence"></a>
+
+### 4.2 Portable evaluation evidence
 
 A portable evidence document records an unsigned claim about a complete evaluation
 of one member, composition, platform, and execution subject. Its `schemaVersion`
@@ -1654,7 +1752,7 @@ protocol, identifier and non-secret inference configuration digest; and executio
 configuration digest. These are reported, not provider-attested, identities.
 A pass MUST NOT qualify a different harness, runtime or model.
 
-For a profiled composition (§10), the verifier MUST resolve the exact composition
+For a profiled composition (§2.4), the verifier MUST resolve the exact composition
 by member, platform and composition digest, not array position or legacy pair.
 `execution.runtime`, `harness` and `renderer` MUST equal the selected runtime
 profile's identities. `execution.profile` MUST equal that profile's `id`, the
@@ -1675,7 +1773,7 @@ forgery: independent expectations and trusted evaluation remain caller duties.
 The inventory MUST identify the public index and every ordered case by path and
 canonical descriptor. Evidence MUST retain index order; a filename-sorted hash
 does not establish that order. Effective `runs` and `minPasses` MUST match the
-authored values with defaults from §8.2.2. Every declared case, run and assertion
+authored values with defaults from §3.2. Every declared case, run and assertion
 MUST appear exactly once, in order; run ordinals start at one and are contiguous.
 Empty evaluation content, subsets, missing, extra or duplicate rows MUST refuse.
 
@@ -1694,7 +1792,7 @@ configuration identity. The authored judge model/version and threshold MUST
 match. Both scores MUST be on the same side of the threshold for a known
 verdict; a split is unknown and MUST refuse even inside a repeat policy.
 The evaluator policy is `agentsuite-text-v1` version `1.0.0`: text assertions
-use §8.2.2 semantics, known assertions form a conjunction, and unknown vetoes.
+use §3.2 semantics, known assertions form a conjunction, and unknown vetoes.
 Judge observations additionally require `agentsuite-double-score-v1` version
 `1.0.0` and a complete caller-accepted judge configuration. Each observed model
 MUST equal the authored model or that model joined with `-` and authored version.
@@ -1757,14 +1855,18 @@ than parse error text. Detached schema/privacy fixtures and their use are
 
 **Distribution and trust.** V1 uses an explicitly selected detached file beside,
 not inside, the suite layout/archive; filenames convey no identity. OCI referrer
-publication/discovery is separate transport under §8.2.3, with the complete suite
+publication/discovery is separate transport under §4.1, with the complete suite
 descriptor as referring-manifest subject. Signatures MAY later wrap unchanged v1
 bytes. This verifier establishes consistency of unsigned claims, not who ran
 the evaluation, whether observations are true, or deployment readiness. Anyone
 able to write the document can forge a consistent pass. Unsigned evidence MUST
 NOT be presented as authenticated provenance.
 
-### 8.3 Agent policy binding
+## 5. Policy
+
+<a id="83-agent-policy-binding"></a>
+
+### 5.1 Agent policy binding
 
 An agent MAY declare one optional `policy` content reference. Omission is valid
 and declares no policy requirement; `policy: null` MUST refuse, not mean omission.
@@ -1800,7 +1902,7 @@ The descriptor's media type MUST match the policy document's version:
 
 The policy MUST be a regular file of at most 4194304 bytes, stored as its exact
 RFC 8785 JCS canonical **authored** JSON bytes, and MUST satisfy the closed
-version-specific semantics in [Appendix B](#appendix-b-standalone-policy-contracts-normative).
+version-specific semantics in [Section 5.2](#52-standalone-policy-contracts-normative).
 Unsupported versions/capabilities, malformed policy documents and a mismatched
 media type MUST refuse. A validator MUST check descriptor validity, raw size and
 digest before full policy decoding, then check semantic validity, version/media
@@ -1814,7 +1916,7 @@ A suite with no policies remains valid; no existing no-policy fixture requires
 rewriting. These rules apply equally to extracted content and OCI content layers.
 
 A policy descriptor uses the ordinary content SHA-256 digest and byte length,
-**not** the framed effective-policy digest from Appendix B. A producer MUST
+**not** the framed effective-policy digest from Section 5.2. A producer MUST
 preserve the authored bytes when binding them: administrative composition,
 endpoint/path set normalization and effective-policy framing happen separately.
 Authored arrays retain their stored order and duplicates under JCS; resolution
@@ -1836,15 +1938,19 @@ unsupported boundaries; successful generic validation is not capability
 negotiation. The tool-derived suite `capabilities` list does not certify policy
 support. Runtime wiring, held-start and drift stopping remain outside this binding.
 
-## Appendix B. Standalone policy contracts (normative)
+<a id="appendix-b-standalone-policy-contracts-normative"></a>
+
+### 5.2 Standalone policy contracts (normative)
 
 These standalone contracts are owned by the `policy` package. Policy format
 versions are independent of the Go module version and the AgentSuite artifact
-schema version. [Section 8.3](#83-agent-policy-binding) defines optional Agent
+schema version. [Section 5.1](#51-agent-policy-binding) defines optional Agent
 policy descriptors and graph validation. A standalone document is committed by
 an Agent/suite only when explicitly bound through that reference.
 
-### B.1 Versions and closed inputs
+<a id="b1-versions-and-closed-inputs"></a>
+
+#### 5.2.1 Versions and closed inputs
 
 `agentsuite.policy/v1` remains the filesystem-only contract. Its nonempty set of
 clean absolute UTF-8 `denyWritePaths` excludes `/`, its required capability is
@@ -1905,7 +2011,9 @@ canonical dotted-decimal address strings lexicographically using their ASCII
 bytes (not numeric IPv4 order), then by numeric port; TCP is constant. For example, `10.0.0.2` precedes `9.0.0.1`, and port 80 precedes 443 for
 the same address. Normalization MUST NOT mutate or alias caller-owned rule sets.
 
-### B.2 Administrative intersection and the network ceiling
+<a id="b2-administrative-intersection-and-the-network-ceiling"></a>
+
+#### 5.2.2 Administrative intersection and the network ceiling
 
 The closed v2 administrative shape is defined by
 [`administrative-policy-v2.schema.json`](schema/administrative-policy-v2.schema.json).
@@ -1932,7 +2040,9 @@ unauthorized paths MUST refuse, not claim partial enforcement. This egress-only 
 handling of pre-existing/in-flight connections. It does not select a CNI or
 certify host, NAT, privilege or routing coverage.
 
-### B.3 Canonical bytes, digest and payload
+<a id="b3-canonical-bytes-digest-and-payload"></a>
+
+#### 5.2.3 Canonical bytes, digest and payload
 
 Effective policy bytes MUST be JCS-canonical UTF-8 JSON, with normalized endpoint
 sets and the exact required capability list. Empty lists encode as `[]`, not
@@ -1969,8 +2079,12 @@ deny-all JSON/digest pairs. Read JSON fixture bytes directly without adding a
 newline. Installation, observed activation and lifetime
 safety are distinct runtime claims; neither valid policy bytes nor a provider
 payload establishes any of them. Runtime wiring, held-start and drift stopping
-remain outside these contracts. Section 8.3's authored policy binding does not
+remain outside these contracts. Section 5.1's authored policy binding does not
 establish any runtime guarantee.
+
+## 6. Experimental contracts
+
+### 6.1 Capability-based inference
 
 The experimental capability-based profile accepts `model.capabilities` instead
 of an exact `model.model`. The two are mutually exclusive. Requirements declare
@@ -1979,6 +2093,8 @@ streaming and tool-calling support. Endpoint and credential bindings remain
 deployment inputs. See [inference.schema.json](schema/inference.schema.json).
 The exact-model representation remains supported unchanged. Capability declarations
 are not model qualification evidence or permission to substitute an exact model.
+
+### 6.2 Image execution contract
 
 An optional experimental `execution` record describes the image serving contract,
 named environment inputs and configuration ABI. Its closed schema is
@@ -1996,9 +2112,13 @@ profile's serving contract. Native exact-model profiles must not be converted
 to capability-based image execution merely because their declared build inputs
 include a harness or execution record.
 
-## 15. Conformance
+<a id="15-conformance"></a>
 
-### 15.1 Suite validator
+## 7. Conformance and errors
+
+<a id="151-suite-validator"></a>
+
+### 7.1 Suite validator
 
 A conforming suite validator asserts:
 
@@ -2009,9 +2129,9 @@ A conforming suite validator asserts:
 | `AS-PATH-001` | Archive paths, links, entry types, modes, collisions, and limits are safe. |
 | `AS-ID-001` | Every content-addressed identity matches its normative algorithm. |
 | `AS-GRAPH-001` | All manifest and invocation references form a closed graph. |
-| `AS-EVAL-001` | Optional evaluations conform to §8.2. |
+| `AS-EVAL-001` | Optional evaluations conform to §3. |
 | `AS-COMPOSE-001` | Every agent/platform/profile composition exactly resolves its declared tool providers and contains no ambient providers. |
-| `AS-RUNTIME-001` | Optional runtime profiles and selections satisfy §10 and §11.1 shape, identity, uniqueness and harness consistency. |
+| `AS-RUNTIME-001` | Optional runtime profiles and selections satisfy §2.4 and §2.6 shape, identity, uniqueness and harness consistency. |
 | `AS-PROVIDER-COMPOSE-001` | Every ToolProvider composition resolves one exact same-platform variant, dependency closure, and runtime base. |
 | `AS-PROVIDER-001` | Bundled variants match content inventory and exact platforms; remote ToolProviders contain only supported transports and valid references. |
 | `AS-SECRET-001` | Content contains references and names, not credential-shaped literal values. |
@@ -2032,7 +2152,9 @@ a deduplicated platform inventory. Semantic diff uses legacy composition IDs
 records keyed by profile ID. Profile changes affect only selecting members, plus
 existing transitive invocation impact. Legacy report/diff outputs are unchanged.
 
-### 15.2 Sandbox image validator
+<a id="152-sandbox-image-validator"></a>
+
+### 7.2 Sandbox image validator
 
 A conforming sandbox image validator asserts:
 
@@ -2045,7 +2167,9 @@ A conforming sandbox image validator asserts:
 | `ASI-ABI-001` | Native loaders, libraries, interpreters, CPU baseline, and required base paths resolve in the final filesystem. |
 | `ASI-RUN-001` | Image user, entrypoint, capabilities, and `no_new_privs` contract are valid. |
 
-### 15.3 Runtime conformance
+<a id="153-runtime-conformance"></a>
+
+### 7.3 Runtime conformance
 
 A conforming runtime test asserts:
 
@@ -2062,7 +2186,9 @@ A conforming runtime test asserts:
 Passing suite validation does not imply sandbox-image or runtime conformance.
 It also does not imply any evaluation ran or passed.
 
-## 16. Errors
+<a id="16-errors"></a>
+
+### 7.4 Errors
 
 Validators SHOULD classify failures into stable categories:
 
@@ -2082,7 +2208,9 @@ A validator MUST fail closed. It MUST NOT report conformance after silently
 dropping an unknown field, unsupported critical extension, unavailable tool provider,
 or invalid platform.
 
-## 17. Security considerations
+<a id="17-security-considerations"></a>
+
+## 8. Security considerations
 
 AgentSuite content is untrusted input even when obtained from an authenticated
 registry. Digest verification, strict parsing, archive safety, and bounded
@@ -2118,27 +2246,11 @@ connection bound to `bindingRef` for that requester, or after that binding has
 drifted (relinked, revoked, or stale) has failed open rather than closed; this
 specification requires such calls to be refused.
 
-## Appendix A. Draft exclusions
+## 9. References
 
-This draft does not specify:
+<a id="18-normative-references"></a>
 
-- session transcripts, checkpoints, snapshots, or mutable memory;
-- embedded evaluation results, result payload formats other than §8.2.4,
-  evaluator execution protocols;
-- plaintext credentials or resolved secret values;
-- OAuth flows, consent UX, token issuance, refresh, or revocation;
-- a deployment's Connection or account-link storage and identity verification
-  mechanism;
-- dependency solving inside a packaged suite;
-- generic shell tools, OpenAPI tools, or arbitrary HTTP connectors;
-- agent composition and deploy-time binding for remote MCP providers;
-- standalone non-provider bundles for shared runtimes or libraries;
-- Windows, macOS, or non-`amd64`/`arm64` platforms;
-- additional execution modes or per-provider isolation boundaries;
-- a new OCI Distribution endpoint or registry authentication mechanism;
-- byte-identical gzip output across arbitrary compressor implementations.
-
-## 18. Normative references
+### 9.1 Normative references
 
 - [BCP 14: Requirement-level key words][bcp14]
 - [OCI Image Format Specification v1.1.1][oci-image-spec]
@@ -2148,7 +2260,9 @@ This draft does not specify:
 - [RFC 8785: JSON Canonicalization Scheme][rfc8785]
 - [JSON Schema draft 2020-12][json-schema-2020-12]
 
-## 19. Informative references
+<a id="19-informative-references"></a>
+
+### 9.2 Informative references
 
 - [OCI Runtime Specification][oci-runtime-spec]
 - [Helm: Use OCI-based registries][helm-oci]
@@ -2168,3 +2282,22 @@ This draft does not specify:
 [agentkit]: https://github.com/orka-agents/agentkit
 [dalec-homebrew]: https://github.com/sozercan/dalec-homebrew
 [agentsessions]: https://github.com/agent-primitives/sessions
+## Appendix A. Draft exclusions
+
+This draft does not specify:
+
+- session transcripts, checkpoints, snapshots, or mutable memory;
+- embedded evaluation results, result payload formats other than §4.2,
+  evaluator execution protocols;
+- plaintext credentials or resolved secret values;
+- OAuth flows, consent UX, token issuance, refresh, or revocation;
+- a deployment's Connection or account-link storage and identity verification
+  mechanism;
+- dependency solving inside a packaged suite;
+- generic shell tools, OpenAPI tools, or arbitrary HTTP connectors;
+- agent composition and deploy-time binding for remote MCP providers;
+- standalone non-provider bundles for shared runtimes or libraries;
+- Windows, macOS, or non-`amd64`/`arm64` platforms;
+- additional execution modes or per-provider isolation boundaries;
+- a new OCI Distribution endpoint or registry authentication mechanism;
+- byte-identical gzip output across arbitrary compressor implementations.

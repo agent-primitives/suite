@@ -46,6 +46,9 @@ def slugs(path):
         count = seen.get(slug, 0)
         seen[slug] = count + 1
         anchors.add(slug if count == 0 else f"{slug}-{count}")
+    # Compatibility aliases retain links when a specification heading moves.
+    anchors.update(re.findall(r'<a\b[^>]*?\s+id\s*=\s*[\"\']([^\"\']+)[\"\']',
+                              prose(path), re.IGNORECASE | re.DOTALL))
     return anchors
 
 
@@ -124,6 +127,9 @@ def selftest():
                 ("anchor", "[x](there.md#a-real-heading)", 0),
                 ("missing anchor", "[x](there.md#gone)", 1),
                 ("duplicate heading", "[x](there.md#a-real-heading-1)", 0),
+                ("explicit anchor", "[x](there.md#legacy-section)", 0),
+                ("fenced anchor", "[x](there.md#code-alias)", 1),
+                ("inline-code anchor", "[x](there.md#inline-alias)", 1),
                 ("code heading", "[x](there.md#example)", 1),
                 ("same document", "# Here\n[x](#here)", 0),
                 ("missing same-document anchor", "# Here\n[x](#gone)", 1),
@@ -153,7 +159,9 @@ def selftest():
                 root = Path(tmp)
                 (root / "there.md").write_text(
                     "# There\n## A Real Heading\n## A Real Heading\n"
-                    "```\n## Example\n```\n", encoding="utf-8")
+                    '<a id="legacy-section"></a>\n'
+                    '`<a id="inline-alias"></a>`\n'
+                    '```\n## Example\n<a id="code-alias"></a>\n```\n', encoding="utf-8")
                 (root / "pic.png").write_bytes(b"image")
                 (root / "with space.md").write_text("# Space\n", encoding="utf-8")
                 (root / "nested").mkdir()

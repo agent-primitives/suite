@@ -79,7 +79,7 @@ export default defineConfig({
       { text: 'Site hosting', link: '/hosting' }
     ],
     search: { provider: 'local' },
-    outline: [2, 3],
+    outline: [2, 4],
     socialLinks: [{ icon: 'github', link: repository }],
     editLink: { pattern: `${repository}/edit/main/:path` },
     footer: { message: 'AgentSuite · an open format in the agent-primitives family.' }

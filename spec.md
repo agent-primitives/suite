@@ -36,24 +36,43 @@ Unless stated otherwise:
   empty segment, `.` segment, or `..` segment;
 - a consumer operates offline after all referenced OCI blobs are present.
 
-### 1.1 Tool terminology
+## 2. Scope
 
-The hierarchy is **AgentSuite → ToolProvider → Tool**:
+This draft specifies:
 
-- A **ToolProvider** is the versioned contract and its bundled implementations
-  or remote declaration. It is the unit of cataloging, variant selection,
-  composition, sandbox construction, and runtime binding.
-- A **Tool** is one named, model-callable function with input/output schemas
-  and declared effects. For MCP providers, this is an MCP tool, not the server
-  that exposes it.
-- A **ToolProvider variant** is a platform-specific filesystem bundle. A
-  **ToolProvider composition** selects exact build inputs for a
-  **ToolProvider Sandbox Image**. These names do not include a protocol name.
+- an AgentSuite definition artifact carried by an OCI image manifest;
+- one strict, closed content graph containing agents, tool providers, compositions, and
+  build profiles;
+- bundled stdio MCP providers statically installed into an agent sandbox;
+- remote Streamable HTTP tool provider authoring and cataloging without agent
+  composition or runtime binding;
+- portable delegated-user authorization requirements on a callable Tool,
+  without packaging a person's credential, consent state, or Connection;
+- optional, agent-bound, runtime-neutral authored evaluation cases;
+- exact Linux platform selection;
+- pinned runtime-base and harness images;
+- deterministic, network-free Agent Sandbox Image construction;
+- an Agent binding or exact ToolProvider composition embedded in each derived sandbox
+  image;
+- suite, sandbox-image, and runtime conformance classes.
 
-The terminology is protocol-neutral. This draft's executable contract supports MCP
-only; CLI binaries are implementation details behind an MCP adapter. Naming a
-provider does not imply that its implementation is a network server or that it
-has already been deployed. An inference provider is a separate concept.
+## 3. Artifact model
+
+An **AgentSuite Artifact** is an immutable definition. It is not directly
+runnable.
+
+An **Agent Sandbox Image** is a runnable OCI image derived for exactly one:
+
+- AgentSuite manifest digest;
+- agent identifier;
+- platform;
+- build profile;
+- composition manifest.
+
+A tool provider may be referenced by several agents. Each derived Agent Sandbox Image
+materializes that provider's exact platform bundle independently. Registry
+deduplication MAY avoid storing identical blobs repeatedly, but reuse does not
+change the image-local closure.
 
 ### 1.2 Content references and descriptors
 
@@ -121,44 +140,6 @@ dependency's `variantDigest`, an inventory entry's `digest`, and an
 extension's optional `digest`, remain plain scalar digest strings: they do not
 name a separate referenced file with its own media type and size, so wrapping
 them in a descriptor would not add meaning.
-
-## 2. Scope
-
-This draft specifies:
-
-- an AgentSuite definition artifact carried by an OCI image manifest;
-- one strict, closed content graph containing agents, tool providers, compositions, and
-  build profiles;
-- bundled stdio MCP providers statically installed into an agent sandbox;
-- remote Streamable HTTP tool provider authoring and cataloging without agent
-  composition or runtime binding;
-- portable delegated-user authorization requirements on a callable Tool,
-  without packaging a person's credential, consent state, or Connection;
-- optional, agent-bound, runtime-neutral authored evaluation cases;
-- exact Linux platform selection;
-- pinned runtime-base and harness images;
-- deterministic, network-free Agent Sandbox Image construction;
-- an Agent binding or exact ToolProvider composition embedded in each derived sandbox
-  image;
-- suite, sandbox-image, and runtime conformance classes.
-
-## 3. Artifact model
-
-An **AgentSuite Artifact** is an immutable definition. It is not directly
-runnable.
-
-An **Agent Sandbox Image** is a runnable OCI image derived for exactly one:
-
-- AgentSuite manifest digest;
-- agent identifier;
-- platform;
-- build profile;
-- composition manifest.
-
-A tool provider may be referenced by several agents. Each derived Agent Sandbox Image
-materializes that provider's exact platform bundle independently. Registry
-deduplication MAY avoid storing identical blobs repeatedly, but reuse does not
-change the image-local closure.
 
 ## 4. OCI envelope
 
@@ -511,15 +492,40 @@ derived from tool provider declarations:
 Unknown critical extensions MUST be rejected. Non-critical extensions MAY be
 retained or ignored.
 
-## 8. Agents
+## 14. Distribution
 
-The experimental capability-based profile accepts `model.capabilities` instead
-of an exact `model.model`. The two are mutually exclusive. Requirements declare
-an API revision, minimum total context and maximum-output capacity, inference
-streaming and tool-calling support. Endpoint and credential bindings remain
-deployment inputs. See [inference.schema.json](schema/inference.schema.json).
-The exact-model representation remains supported unchanged. Capability declarations
-are not model qualification evidence or permission to substitute an exact model.
+Registries are used through [OCI Distribution Specification
+v1.1.1][oci-distribution-spec] operations.
+Consumers MUST support digest pulls. Producers SHOULD push all blobs before
+publishing the referencing manifest.
+
+Tags are discovery names only. A deployment, composition, attestation, or
+sandbox binding that requires immutable identity MUST use a digest.
+
+Clients MUST verify every received descriptor before parsing or extracting its
+content. Registry transport security and authentication are deployment
+concerns; credentials are never AgentSuite content.
+
+### 1.1 Tool terminology
+
+The hierarchy is **AgentSuite → ToolProvider → Tool**:
+
+- A **ToolProvider** is the versioned contract and its bundled implementations
+  or remote declaration. It is the unit of cataloging, variant selection,
+  composition, sandbox construction, and runtime binding.
+- A **Tool** is one named, model-callable function with input/output schemas
+  and declared effects. For MCP providers, this is an MCP tool, not the server
+  that exposes it.
+- A **ToolProvider variant** is a platform-specific filesystem bundle. A
+  **ToolProvider composition** selects exact build inputs for a
+  **ToolProvider Sandbox Image**. These names do not include a protocol name.
+
+The terminology is protocol-neutral. This draft's executable contract supports MCP
+only; CLI binaries are implementation details behind an MCP adapter. Naming a
+provider does not imply that its implementation is a network server or that it
+has already been deployed. An inference provider is a separate concept.
+
+## 8. Agents
 
 An agent manifest defines:
 
@@ -604,397 +610,6 @@ permission to invoke the coordinator or each other.
 
 The complete conformant example is checked in at
 [`testdata/coordinator-workers/`](testdata/coordinator-workers/).
-
-### 8.2 Agent evaluations
-
-Producers SHOULD embed authored evaluation cases for each agent. Consumers MAY
-use them for evaluation, review, or comparison. A suite with omitted or empty
-agent `evals` arrays and no evaluation subtrees MUST remain valid and conformant.
-When evaluations are present, validators MUST check the requirements below.
-
-Each `evals/<agent>/` subtree MUST be referenced by that agent's `evals` entry.
-It MUST contain only `index.json`, its referenced case files, and their parent
-directories. Index and case files MUST be regular files. The top-level `evals/`
-directory MAY be empty.
-
-The agent manifest's optional `evals` is an array of content references, each
-pairing a content-root `path` with a [JCS-canonical descriptor](#12-content-references-and-descriptors),
-containing at most one reference in this draft. This agent-manifest fragment
-shows only `evals`:
-
-<!-- json-example: partial -->
-
-```json
-{
-  "evals": [
-    {
-      "path": "evals/writer/index.json",
-      "descriptor": {
-        "mediaType": "application/vnd.agentsuite.eval.index.v1+json",
-        "digest": "sha256:58cdec908ecd57c3f098d90a8b933546ee5a7ac6bd454135e28f64be8c2d996b",
-        "size": 592
-      }
-    }
-  ]
-}
-```
-
-The path MUST be exactly `evals/<agent>/index.json`, where `<agent>` equals
-the owning manifest's `id`. Explicit `null` is invalid. Each agent references its
-evaluation index, which references its cases in evaluation order. Each delegated
-agent has its own binding.
-
-#### 8.2.1 Index and bounds
-
-The closed index document contains:
-
-| Field | Requirement |
-|---|---|
-| `schemaVersion` | REQUIRED. `1.0.0-draft`. |
-| `mediaType` | REQUIRED. `application/vnd.agentsuite.eval.index.v1+json`. |
-| `agent` | REQUIRED. Exact owning agent identifier, not an agent digest. |
-| `cases` | REQUIRED. Ordered, nonempty array of content references, each pairing `path` with a JCS-canonical descriptor. |
-| `limits` | REQUIRED. Closed object containing positive integers `maxCases` and `maxCaseBytes`. |
-
-Case order in `cases` is evaluation order and contributes to identity; consumers
-MUST NOT sort it. Case paths MUST be exactly
-`evals/<agent>/cases/<case-id>.json`.
-Each case id and path MUST be unique within the agent.
-
-`maxCases` MUST be in `1..128`; `maxCaseBytes` MUST be in `1..4194304`.
-Producers MAY declare lower limits. The actual case count and each case's
-serialized UTF-8 byte length MUST fit the declared limits. Each case MUST contain
-`1..1000` assertions. General resource limits are defined in §5.2.
-Consumers MAY impose stricter resource limits but MUST report a limit refusal
-rather than silently truncating or treating it as a pass.
-
-Reference schemas are
-[`eval-index.schema.json`](schema/eval-index.schema.json) and
-[`eval-case.schema.json`](schema/eval-case.schema.json). Cross-document
-ownership, path/id equality, digest checks, byte bounds, and regex compilation
-are semantic checks in addition to JSON Schema validation.
-
-#### 8.2.2 Case documents and assertions
-
-A case is a closed JSON document with REQUIRED `schemaVersion: "1.0.0-draft"`,
-`mediaType: "application/vnd.agentsuite.eval.case.v1+json"`, `id`, `input`,
-and ordered `assertions`. `input` MUST be a nonblank string. Case and assertion
-ids match `^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$`; assertion ids MUST be unique
-within a case. A case MAY contain positive integer `runs` and `minPasses`
-fields. `minPasses` requires `runs` and MUST NOT exceed it. Explicit `null` is
-invalid for either field.
-
-```json
-{
-  "schemaVersion": "1.0.0-draft",
-  "mediaType": "application/vnd.agentsuite.eval.case.v1+json",
-  "id": "capital",
-  "input": "What is the capital of France?",
-  "assertions": [
-    {"id": "capital", "type": "contains", "value": "Paris"},
-    {"id": "not-london", "type": "notContains", "value": "London"}
-  ]
-}
-```
-
-`runs` defaults to 1. Without `minPasses`, all runs MUST pass; otherwise at
-least `minPasses` MUST pass. Any unknown run makes the case unknown. These
-fields define authored policy, not execution mechanics.
-
-Each assertion has REQUIRED `id` and `type`, an OPTIONAL boolean `critical`
-(default `true`), and only the operands applicable to its type:
-
-| `type` | Required operands | Meaning |
-|---|---|---|
-| `contains` | `value` | Exact case-sensitive substring occurs in the answer. |
-| `notContains` | `value` | Exact case-sensitive substring does not occur in the answer. |
-| `regex` | `pattern` | An unanchored RE2 search matches the answer; use explicit anchors for a whole-answer match. |
-| `toolCalled` | `tool` | At least one call with this exact tool name is observed. |
-| `toolNotCalled` | `tool` | Complete tool-call evidence establishes no call with this exact name. |
-| `llmJudge` | `rubric`, `minScore`, `judgeModel`, `judgeVersion` | A separately configured evaluator scores against the authored rubric and threshold. |
-
-`value` for text assertions and `tool` MUST be nonblank single-line strings
-without control characters. `pattern` MUST be nonblank, at most 1,024 UTF-8
-bytes, and valid RE2 syntax. `rubric` MUST
-be nonblank, at most 4,096 UTF-8 bytes, and contain no control characters except
-newline and tab. `minScore` MUST be an integer from 0 to 100. `judgeModel` and
-`judgeVersion` MUST be nonblank printable ASCII strings of at most 256 bytes;
-these are authored requirements, not host credentials or attested model identity.
-Inapplicable operands MUST be absent, including when empty or `null`.
-
-An unknown assertion type MUST use the lowercase identifier spelling from §1,
-explicit `critical: false`, and one nonblank string `value` carrying its
-extension-defined operand; other operand fields MUST be absent. Unknown critical
-types, including those with omitted `critical`, MUST be rejected. Consumers MAY
-retain or ignore an unsupported non-critical definition for storage and review,
-but MUST NOT count it as passing evidence or claim a full evaluation pass.
-Known assertions marked non-critical still retain their defined semantics.
-
-Cases contain no runtime or platform selector. Assertion authoring does not
-establish runtime support. Text checks require an available answer; tool checks
-require an explicitly supported, complete observation mechanism, not an inferred
-empty journal. Missing evidence, unsupported execution, or an unavailable judge
-MUST remain unknown, never pass, including for negative assertions. Judge
-transport, prompting, sampling, score aggregation, and policy are outside this
-storage contract; a result consumer MUST match the recorded evaluator policy,
-configuration, and authored requirements before treating a score as evidence.
-
-#### 8.2.3 Results and OCI association
-
-Evaluation results MUST NOT be embedded in the suite content layer.
-An embedded result changes the layer and suite manifest digest, so it cannot
-vouch for the final artifact that contains itself.
-
-Producers SHOULD publish results as signed attestations or separate OCI
-referring artifacts bound to the exact evaluated suite OCI manifest digest.
-When a result is published as an OCI artifact, its manifest `subject` MUST
-describe that suite manifest using the OCI descriptor media type, digest, and
-size. The referring manifest follows the
-[OCI artifact guidance][oci-artifact-guidance].
-Discovery follows [OCI Distribution][oci-distribution-spec]
-referrers semantics, not a new registry endpoint. Private local result files
-MAY remain unpublished. The public v1 evidence payload is defined in §8.2.4.
-Other result payload schemas, signatures, trust policy, and private local
-storage formats are outside this draft.
-
-Results SHOULD additionally identify the agent and its digest, index and ordered
-case digests, target composition digest (§6.4), observed runtime/model, evaluator
-policy/configuration, and ordered per-assertion verdicts. Trust considerations
-are defined in §17.
-
-See the [writer evaluation example](testdata/coordinator-workers/evals/writer/).
-
-#### 8.2.4 Portable evaluation evidence
-
-A portable evidence document records an unsigned claim about a complete evaluation
-of one member, composition, platform, and execution subject. Its `schemaVersion`
-MUST be `1.0.0`, independent of the suite format version, and its `mediaType`
-MUST be `application/vnd.agentsuite.eval.evidence.v1+json`.
-The closed reference schema is
-[`eval-evidence.schema.json`](schema/eval-evidence.schema.json).
-
-All objects are closed. All fields below are REQUIRED except an assertion's
-`judge`; explicit `null` is never allowed. Schema validation checks storage
-shape, not evaluation success. The wire objects are:
-
-| Object | Fields |
-|---|---|
-| Document | `schemaVersion`, `mediaType`, `subject`, `execution`, `evaluation`, `evaluator`, `results`. |
-| `subject` | `manifest`, `memberID`, `memberDigest`, `compositionDigest`, `buildProfileDigest`, `platform`. |
-| Descriptor | `mediaType`, `digest`, `size`; annotations, URLs and embedded data are forbidden. |
-| `platform` | `os`, `architecture`, `variant` (the empty string means no variant). |
-| `execution` | `runtime`, `model`, `harness`, `renderer`, `profile`, `configurationDigest`. |
-| Implementation | `id`, `version`, `digest`; used separately by runtime, harness, renderer and execution profile. |
-| `model` | `protocol`, `id`, `configurationDigest`. |
-| `evaluation` | `index` (`path`, `descriptor`) and ordered `cases`. |
-| Case reference | `id`, `path`, `descriptor`, effective `runs`, effective `minPasses`. |
-| `evaluator` | `identity` (`id`, `version`, `policy`), `startedAt`, `completedAt`. |
-| Policy | `id`, `version`, `configurationDigest`. |
-| Case result | `id`, `outcome`, ordered `runs`. |
-| Run result | `number`, `status`, `outcome`, ordered `assertions`. |
-| Assertion result | `id`, `type`, `outcome`, optional `judge`. |
-| `judge` | `configuration` (`model`, `version`, `policy`), `observedModels`, `scores`, `minScore`. |
-
-Outcomes are `pass`, `fail` or `unknown`. Run status is `completed`, `error`,
-`cancelled` or `unknown`; only `completed` can qualify. An unavailable judge
-records empty score/model arrays; otherwise both arrays contain exactly two
-entries. Scores and thresholds are integers in `0..100`. A missing judge object
-cannot qualify an authored `llmJudge`; a non-judge assertion MUST omit it.
-
-The subject MUST bind the complete suite OCI manifest descriptor: media type,
-SHA-256 digest of the exact manifest bytes, and size. The suite content-layer
-digest, canonical digest of `agentsuite.json`, and a mutable registry tag are
-not substitutes. Evidence MUST additionally bind the member identifier and
-canonical manifest digest, composition and build-profile digests, and platform.
-A member result MUST NOT imply that other members or invoked agents passed.
-
-The execution identity MUST distinguish runtime, harness, renderer and execution
-profile, each with its own identifier, version and implementation digest; model
-protocol, identifier and non-secret inference configuration digest; and execution
-configuration digest. These are reported, not provider-attested, identities.
-A pass MUST NOT qualify a different harness, runtime or model.
-
-For a profiled composition (§10), the verifier MUST resolve the exact composition
-by member, platform and composition digest, not array position or legacy pair.
-`execution.runtime`, `harness` and `renderer` MUST equal the selected runtime
-profile's identities. `execution.profile` MUST equal that profile's `id`, the
-suite `schemaVersion` (`1.0.0-draft`) as `version`, and its canonical descriptor
-digest. Configuration ABI and image requirements bind through this profile digest.
-Producers and callers MUST include image identity (when required), selected ABI
-and non-secret execution settings in their documented execution-configuration
-projection. The verifier compares its opaque digest to independent expectations;
-it cannot inspect the preimage or prove that an image identity was included.
-Image/build associations remain consumer-owned; evidence v1 gains no image field.
-
-The same S and member/cases may have separate detached passes for two profiles.
-A pass for one runtime MUST NOT qualify another. Relabeling execution claims and
-expectations together while retaining the source composition MUST refuse.
-Rewriting unsigned subjects, claims and expectations together is not detectable
-forgery: independent expectations and trusted evaluation remain caller duties.
-
-The inventory MUST identify the public index and every ordered case by path and
-canonical descriptor. Evidence MUST retain index order; a filename-sorted hash
-does not establish that order. Effective `runs` and `minPasses` MUST match the
-authored values with defaults from §8.2.2. Every declared case, run and assertion
-MUST appear exactly once, in order; run ordinals start at one and are contiguous.
-Empty evaluation content, subsets, missing, extra or duplicate rows MUST refuse.
-
-Results MUST retain assertion identifiers, types and verdicts and run verdicts,
-including failed runs inside passing repeat policies. Verifiers MUST recompute
-outcomes, not trust an overall pass flag. Every supported assertion must pass
-for a run to pass, including known non-critical assertions. Unknown assertions
-or runs, missing observations, unsupported observation mechanisms, unavailable
-judges, execution errors and cancellation MUST prevent a verified pass. Known
-failing runs MAY be absorbed by authored `minPasses`; unknown runs MUST NOT.
-
-The v1 verifier supports text assertions and an explicit versioned two-score
-judge policy. Tool observations and unrecognized policies MUST refuse. Judge
-results MUST retain both integer scores, threshold, model/version and policy
-configuration identity. The authored judge model/version and threshold MUST
-match. Both scores MUST be on the same side of the threshold for a known
-verdict; a split is unknown and MUST refuse even inside a repeat policy.
-The evaluator policy is `agentsuite-text-v1` version `1.0.0`: text assertions
-use §8.2.2 semantics, known assertions form a conjunction, and unknown vetoes.
-Judge observations additionally require `agentsuite-double-score-v1` version
-`1.0.0` and a complete caller-accepted judge configuration. Each observed model
-MUST equal the authored model or that model joined with `-` and authored version.
-This is a declared response identity, not model attestation. Policy and
-configuration digests MUST exactly match caller expectations. Other aggregation
-rules or request/tool-count observations require a supported policy/schema
-revision, never silent reinterpretation of v1.
-
-Evaluator identity, version, accepted policy and non-secret configuration identity
-MUST accompany start/completion UTC RFC3339 timestamps ending in `Z`, with up to
-nine fractional-second digits and start no later than completion. Time is reported history, not trusted-clock or freshness proof.
-Producers MUST capture unavailable metadata when evaluating rather than invent
-it at export. Legacy records lacking required data MUST refuse export with a
-re-evaluation remedy; modification time or export time MUST NOT replace run time.
-
-Only schema-defined bounded identifiers, digests, numeric observations, verdicts
-and timestamps are permitted. Prompts, answers, rubrics, assertion operands,
-reasoning, endpoints, credentials, secret references, tenant/host/session IDs and
-arbitrary annotations MUST NOT appear. Public configuration digests MUST use a
-documented non-secret projection, never credentials or resolved secret values.
-Producers MUST construct allowlisted fields rather than redact private receipts.
-
-**Verification.** `agentsuite.VerifyEvaluation` takes a local OCI layout,
-independently supplied expected subject and evaluator policy, and evidence reader.
-Expected execution identities MUST come from the caller, not copied claims;
-there are no wildcards. Verification MUST validate local manifest/blob bytes and
-the suite graph before matching evidence to the inventory and expectations.
-A digest alone or loose content directory cannot establish OCI identity; archive
-consumers first materialize a local layout. No model, cluster, registry, remote
-schema or private store may be consulted.
-
-Only success returns a verified summary. Failure MUST return a typed refusal;
-missing, malformed, mismatched, unsupported, partial, unknown or failing evidence
-MUST NOT become an evaluated badge. Refusal text MUST NOT echo untrusted JSON,
-paths, authored operands or private causes. Consumers SHOULD display
-`evaluation: not verified` with a safe category; CI MUST fail closed. Resource
-limits MUST refuse explicitly, never truncate or omit failed repeats.
-
-The reference verifier bounds documents to 4,194,304 UTF-8 bytes, nesting to
-100 levels, object members to 1,024 per object and 100,000 per document. There
-are at most 128 cases, 1,000 runs per case, 4,096 total runs, 1,000 assertions
-per run and 32,000 total assertion observations. Authored policies exceeding
-these limits refuse even if the document omits corresponding rows. Digest strings
-use lowercase `sha256:` plus 64 hexadecimal digits; descriptors have positive
-sizes no larger than 4,194,304 bytes. Schema-defined identifier restrictions
-are deliberately narrower than arbitrary provider strings; unsupported values
-MUST refuse rather than be transformed or redacted to create a matching identity.
-These shape checks cannot guarantee that a producer has not disguised sensitive
-data as an identifier; producers remain responsible for the allowlist boundary.
-
-`ExpectedEvaluation` requires a complete `Subject`, `Execution` and evaluator
-identity plus an explicit `Judges` allowlist (empty when no judge is accepted).
-The verifier additionally matches the model protocol/identifier to the member
-manifest. `VerifiedEvaluation` contains only the validated subject, case/run
-totals, completion time and `unsigned: true`. `EvidenceRefusal.Code` is one of
-`missing`, `malformed`, `unsupported`, `limit`, `artifact`, `subject`, `coverage`,
-`policy`, `unknown`, `not-passing`. Callers SHOULD use the typed code rather
-than parse error text. Detached schema/privacy fixtures and their use are
-[documented here](testdata/evidence/README.md).
-
-**Distribution and trust.** V1 uses an explicitly selected detached file beside,
-not inside, the suite layout/archive; filenames convey no identity. OCI referrer
-publication/discovery is separate transport under §8.2.3, with the complete suite
-descriptor as referring-manifest subject. Signatures MAY later wrap unchanged v1
-bytes. This verifier establishes consistency of unsigned claims, not who ran
-the evaluation, whether observations are true, or deployment readiness. Anyone
-able to write the document can forge a consistent pass. Unsigned evidence MUST
-NOT be presented as authenticated provenance.
-
-### 8.3 Agent policy binding
-
-An agent MAY declare one optional `policy` content reference. Omission is valid
-and declares no policy requirement; `policy: null` MUST refuse, not mean omission.
-The reference is a closed object with exactly required `path` and `descriptor`
-fields. Its path MUST be exactly `policies/<agent-id>.json`, where `<agent-id>`
-is the owning Agent's `id`. Shared or cross-Agent paths MUST refuse; identical
-bytes MAY be stored separately under each owning Agent's path.
-
-For example, this agent-manifest fragment from the
-[policy-binding fixture](testdata/policy-binding/) shows only `policy`:
-
-<!-- json-example: partial -->
-
-```json
-{
-  "policy": {
-    "descriptor": {
-      "digest": "sha256:9579149c9e7bdecb5b49b67c6dd279e434e4d8a1feb28c517299750b96ffcd8b",
-      "mediaType": "application/vnd.agentsuite.policy.v2+json",
-      "size": 213
-    },
-    "path": "policies/writer.json"
-  }
-}
-```
-
-The descriptor's media type MUST match the policy document's version:
-
-| Policy version | Descriptor media type |
-|---|---|
-| `agentsuite.policy/v1` | `application/vnd.agentsuite.policy.v1+json` |
-| `agentsuite.policy/v2` | `application/vnd.agentsuite.policy.v2+json` |
-
-The policy MUST be a regular file of at most 4194304 bytes, stored as its exact
-RFC 8785 JCS canonical **authored** JSON bytes, and MUST satisfy the closed
-version-specific semantics in [Appendix B](#appendix-b-standalone-policy-contracts-normative).
-Unsupported versions/capabilities, malformed policy documents and a mismatched
-media type MUST refuse. A validator MUST check descriptor validity, raw size and
-digest before full policy decoding, then check semantic validity, version/media
-agreement and exact canonical storage. Descriptor annotations remain descriptive.
-
-The `policies/` namespace is closed: every policy file MUST be referenced by
-its owning Agent, and only those regular files and the optional top-level
-`policies/` directory are permitted. The top-level directory MAY be empty.
-Orphan files, nested/extra directories, symlinks and OCI archive hardlinks MUST refuse.
-A suite with no policies remains valid; no existing no-policy fixture requires
-rewriting. These rules apply equally to extracted content and OCI content layers.
-
-A policy descriptor uses the ordinary content SHA-256 digest and byte length,
-**not** the framed effective-policy digest from Appendix B. A producer MUST
-preserve the authored bytes when binding them: administrative composition,
-endpoint/path set normalization and effective-policy framing happen separately.
-Authored arrays retain their stored order and duplicates under JCS; resolution
-and effective-policy canonicalization still normalize those sets. Changing
-authored bytes therefore changes their descriptor even when effective sets
-would be equivalent.
-
-Policy content identity is committed through policy descriptor → Agent manifest
-descriptor → suite manifest. After a policy change, all affected ancestor
-descriptors MUST be updated; stale ancestors MUST refuse. A conformant changed
-suite has a different suite content identity and, when repackaged, OCI manifest
-digest. Policy files are in the existing content layer, not additional OCI
-layers or an external policy store.
-
-Validation establishes definition/graph conformance only, not installation,
-observed activation, startup/lifetime safety, provider qualification or runtime
-enforcement. Consumers MUST inspect declared policy requirements and refuse
-unsupported boundaries; successful generic validation is not capability
-negotiation. The tool-derived suite `capabilities` list does not certify policy
-support. Runtime wiring, held-start and drift stopping remain outside this binding.
 
 ## 9. Tool providers and tools
 
@@ -1645,22 +1260,6 @@ deploy the resulting image.
 
 ## 11. Build profiles
 
-An optional experimental `execution` record describes the image serving contract,
-named environment inputs and configuration ABI. Its closed schema is
-[execution.schema.json](schema/execution.schema.json). The initial mounted
-configuration mapping is deliberately limited to the pinned AgentKit HTTP profile;
-it does not complete sandbox-image conformance or native runtime registration.
-The `http-v1` kind describes a serving interface, not Kubernetes placement or
-runtime selection. The `agentkit-v0-mounted-v1` configuration value is an explicit
-experimental adapter ABI; it is not a general cross-harness configuration format.
-This record describes a built image interface; it does not select a suite
-member's runtime or make images mandatory for native execution. A consumer's
-versioned execution-profile selection determines whether a member requires an
-image. If it does, the image declaration must agree with the selected build
-profile's serving contract. Native exact-model profiles must not be converted
-to capability-based image execution merely because their declared build inputs
-include a harness or execution record.
-
 A build profile MUST contain non-empty `runtimeBase` and `harness` arrays and
 one positive, profile-wide `sourceEpoch`. Each array contains one image entry
 per platform:
@@ -1846,19 +1445,556 @@ binding. An OCI `subject` relationship alone is not an authenticity proof.
 Producers SHOULD publish signed attestations or OCI referrers binding the suite
 manifest, build inputs, and resulting image manifests.
 
-## 14. Distribution
+### 8.2 Agent evaluations
 
-Registries are used through [OCI Distribution Specification
-v1.1.1][oci-distribution-spec] operations.
-Consumers MUST support digest pulls. Producers SHOULD push all blobs before
-publishing the referencing manifest.
+Producers SHOULD embed authored evaluation cases for each agent. Consumers MAY
+use them for evaluation, review, or comparison. A suite with omitted or empty
+agent `evals` arrays and no evaluation subtrees MUST remain valid and conformant.
+When evaluations are present, validators MUST check the requirements below.
 
-Tags are discovery names only. A deployment, composition, attestation, or
-sandbox binding that requires immutable identity MUST use a digest.
+Each `evals/<agent>/` subtree MUST be referenced by that agent's `evals` entry.
+It MUST contain only `index.json`, its referenced case files, and their parent
+directories. Index and case files MUST be regular files. The top-level `evals/`
+directory MAY be empty.
 
-Clients MUST verify every received descriptor before parsing or extracting its
-content. Registry transport security and authentication are deployment
-concerns; credentials are never AgentSuite content.
+The agent manifest's optional `evals` is an array of content references, each
+pairing a content-root `path` with a [JCS-canonical descriptor](#12-content-references-and-descriptors),
+containing at most one reference in this draft. This agent-manifest fragment
+shows only `evals`:
+
+<!-- json-example: partial -->
+
+```json
+{
+  "evals": [
+    {
+      "path": "evals/writer/index.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.eval.index.v1+json",
+        "digest": "sha256:58cdec908ecd57c3f098d90a8b933546ee5a7ac6bd454135e28f64be8c2d996b",
+        "size": 592
+      }
+    }
+  ]
+}
+```
+
+The path MUST be exactly `evals/<agent>/index.json`, where `<agent>` equals
+the owning manifest's `id`. Explicit `null` is invalid. Each agent references its
+evaluation index, which references its cases in evaluation order. Each delegated
+agent has its own binding.
+
+#### 8.2.1 Index and bounds
+
+The closed index document contains:
+
+| Field | Requirement |
+|---|---|
+| `schemaVersion` | REQUIRED. `1.0.0-draft`. |
+| `mediaType` | REQUIRED. `application/vnd.agentsuite.eval.index.v1+json`. |
+| `agent` | REQUIRED. Exact owning agent identifier, not an agent digest. |
+| `cases` | REQUIRED. Ordered, nonempty array of content references, each pairing `path` with a JCS-canonical descriptor. |
+| `limits` | REQUIRED. Closed object containing positive integers `maxCases` and `maxCaseBytes`. |
+
+Case order in `cases` is evaluation order and contributes to identity; consumers
+MUST NOT sort it. Case paths MUST be exactly
+`evals/<agent>/cases/<case-id>.json`.
+Each case id and path MUST be unique within the agent.
+
+`maxCases` MUST be in `1..128`; `maxCaseBytes` MUST be in `1..4194304`.
+Producers MAY declare lower limits. The actual case count and each case's
+serialized UTF-8 byte length MUST fit the declared limits. Each case MUST contain
+`1..1000` assertions. General resource limits are defined in §5.2.
+Consumers MAY impose stricter resource limits but MUST report a limit refusal
+rather than silently truncating or treating it as a pass.
+
+Reference schemas are
+[`eval-index.schema.json`](schema/eval-index.schema.json) and
+[`eval-case.schema.json`](schema/eval-case.schema.json). Cross-document
+ownership, path/id equality, digest checks, byte bounds, and regex compilation
+are semantic checks in addition to JSON Schema validation.
+
+#### 8.2.2 Case documents and assertions
+
+A case is a closed JSON document with REQUIRED `schemaVersion: "1.0.0-draft"`,
+`mediaType: "application/vnd.agentsuite.eval.case.v1+json"`, `id`, `input`,
+and ordered `assertions`. `input` MUST be a nonblank string. Case and assertion
+ids match `^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$`; assertion ids MUST be unique
+within a case. A case MAY contain positive integer `runs` and `minPasses`
+fields. `minPasses` requires `runs` and MUST NOT exceed it. Explicit `null` is
+invalid for either field.
+
+```json
+{
+  "schemaVersion": "1.0.0-draft",
+  "mediaType": "application/vnd.agentsuite.eval.case.v1+json",
+  "id": "capital",
+  "input": "What is the capital of France?",
+  "assertions": [
+    {"id": "capital", "type": "contains", "value": "Paris"},
+    {"id": "not-london", "type": "notContains", "value": "London"}
+  ]
+}
+```
+
+`runs` defaults to 1. Without `minPasses`, all runs MUST pass; otherwise at
+least `minPasses` MUST pass. Any unknown run makes the case unknown. These
+fields define authored policy, not execution mechanics.
+
+Each assertion has REQUIRED `id` and `type`, an OPTIONAL boolean `critical`
+(default `true`), and only the operands applicable to its type:
+
+| `type` | Required operands | Meaning |
+|---|---|---|
+| `contains` | `value` | Exact case-sensitive substring occurs in the answer. |
+| `notContains` | `value` | Exact case-sensitive substring does not occur in the answer. |
+| `regex` | `pattern` | An unanchored RE2 search matches the answer; use explicit anchors for a whole-answer match. |
+| `toolCalled` | `tool` | At least one call with this exact tool name is observed. |
+| `toolNotCalled` | `tool` | Complete tool-call evidence establishes no call with this exact name. |
+| `llmJudge` | `rubric`, `minScore`, `judgeModel`, `judgeVersion` | A separately configured evaluator scores against the authored rubric and threshold. |
+
+`value` for text assertions and `tool` MUST be nonblank single-line strings
+without control characters. `pattern` MUST be nonblank, at most 1,024 UTF-8
+bytes, and valid RE2 syntax. `rubric` MUST
+be nonblank, at most 4,096 UTF-8 bytes, and contain no control characters except
+newline and tab. `minScore` MUST be an integer from 0 to 100. `judgeModel` and
+`judgeVersion` MUST be nonblank printable ASCII strings of at most 256 bytes;
+these are authored requirements, not host credentials or attested model identity.
+Inapplicable operands MUST be absent, including when empty or `null`.
+
+An unknown assertion type MUST use the lowercase identifier spelling from §1,
+explicit `critical: false`, and one nonblank string `value` carrying its
+extension-defined operand; other operand fields MUST be absent. Unknown critical
+types, including those with omitted `critical`, MUST be rejected. Consumers MAY
+retain or ignore an unsupported non-critical definition for storage and review,
+but MUST NOT count it as passing evidence or claim a full evaluation pass.
+Known assertions marked non-critical still retain their defined semantics.
+
+Cases contain no runtime or platform selector. Assertion authoring does not
+establish runtime support. Text checks require an available answer; tool checks
+require an explicitly supported, complete observation mechanism, not an inferred
+empty journal. Missing evidence, unsupported execution, or an unavailable judge
+MUST remain unknown, never pass, including for negative assertions. Judge
+transport, prompting, sampling, score aggregation, and policy are outside this
+storage contract; a result consumer MUST match the recorded evaluator policy,
+configuration, and authored requirements before treating a score as evidence.
+
+#### 8.2.3 Results and OCI association
+
+Evaluation results MUST NOT be embedded in the suite content layer.
+An embedded result changes the layer and suite manifest digest, so it cannot
+vouch for the final artifact that contains itself.
+
+Producers SHOULD publish results as signed attestations or separate OCI
+referring artifacts bound to the exact evaluated suite OCI manifest digest.
+When a result is published as an OCI artifact, its manifest `subject` MUST
+describe that suite manifest using the OCI descriptor media type, digest, and
+size. The referring manifest follows the
+[OCI artifact guidance][oci-artifact-guidance].
+Discovery follows [OCI Distribution][oci-distribution-spec]
+referrers semantics, not a new registry endpoint. Private local result files
+MAY remain unpublished. The public v1 evidence payload is defined in §8.2.4.
+Other result payload schemas, signatures, trust policy, and private local
+storage formats are outside this draft.
+
+Results SHOULD additionally identify the agent and its digest, index and ordered
+case digests, target composition digest (§6.4), observed runtime/model, evaluator
+policy/configuration, and ordered per-assertion verdicts. Trust considerations
+are defined in §17.
+
+See the [writer evaluation example](testdata/coordinator-workers/evals/writer/).
+
+#### 8.2.4 Portable evaluation evidence
+
+A portable evidence document records an unsigned claim about a complete evaluation
+of one member, composition, platform, and execution subject. Its `schemaVersion`
+MUST be `1.0.0`, independent of the suite format version, and its `mediaType`
+MUST be `application/vnd.agentsuite.eval.evidence.v1+json`.
+The closed reference schema is
+[`eval-evidence.schema.json`](schema/eval-evidence.schema.json).
+
+All objects are closed. All fields below are REQUIRED except an assertion's
+`judge`; explicit `null` is never allowed. Schema validation checks storage
+shape, not evaluation success. The wire objects are:
+
+| Object | Fields |
+|---|---|
+| Document | `schemaVersion`, `mediaType`, `subject`, `execution`, `evaluation`, `evaluator`, `results`. |
+| `subject` | `manifest`, `memberID`, `memberDigest`, `compositionDigest`, `buildProfileDigest`, `platform`. |
+| Descriptor | `mediaType`, `digest`, `size`; annotations, URLs and embedded data are forbidden. |
+| `platform` | `os`, `architecture`, `variant` (the empty string means no variant). |
+| `execution` | `runtime`, `model`, `harness`, `renderer`, `profile`, `configurationDigest`. |
+| Implementation | `id`, `version`, `digest`; used separately by runtime, harness, renderer and execution profile. |
+| `model` | `protocol`, `id`, `configurationDigest`. |
+| `evaluation` | `index` (`path`, `descriptor`) and ordered `cases`. |
+| Case reference | `id`, `path`, `descriptor`, effective `runs`, effective `minPasses`. |
+| `evaluator` | `identity` (`id`, `version`, `policy`), `startedAt`, `completedAt`. |
+| Policy | `id`, `version`, `configurationDigest`. |
+| Case result | `id`, `outcome`, ordered `runs`. |
+| Run result | `number`, `status`, `outcome`, ordered `assertions`. |
+| Assertion result | `id`, `type`, `outcome`, optional `judge`. |
+| `judge` | `configuration` (`model`, `version`, `policy`), `observedModels`, `scores`, `minScore`. |
+
+Outcomes are `pass`, `fail` or `unknown`. Run status is `completed`, `error`,
+`cancelled` or `unknown`; only `completed` can qualify. An unavailable judge
+records empty score/model arrays; otherwise both arrays contain exactly two
+entries. Scores and thresholds are integers in `0..100`. A missing judge object
+cannot qualify an authored `llmJudge`; a non-judge assertion MUST omit it.
+
+The subject MUST bind the complete suite OCI manifest descriptor: media type,
+SHA-256 digest of the exact manifest bytes, and size. The suite content-layer
+digest, canonical digest of `agentsuite.json`, and a mutable registry tag are
+not substitutes. Evidence MUST additionally bind the member identifier and
+canonical manifest digest, composition and build-profile digests, and platform.
+A member result MUST NOT imply that other members or invoked agents passed.
+
+The execution identity MUST distinguish runtime, harness, renderer and execution
+profile, each with its own identifier, version and implementation digest; model
+protocol, identifier and non-secret inference configuration digest; and execution
+configuration digest. These are reported, not provider-attested, identities.
+A pass MUST NOT qualify a different harness, runtime or model.
+
+For a profiled composition (§10), the verifier MUST resolve the exact composition
+by member, platform and composition digest, not array position or legacy pair.
+`execution.runtime`, `harness` and `renderer` MUST equal the selected runtime
+profile's identities. `execution.profile` MUST equal that profile's `id`, the
+suite `schemaVersion` (`1.0.0-draft`) as `version`, and its canonical descriptor
+digest. Configuration ABI and image requirements bind through this profile digest.
+Producers and callers MUST include image identity (when required), selected ABI
+and non-secret execution settings in their documented execution-configuration
+projection. The verifier compares its opaque digest to independent expectations;
+it cannot inspect the preimage or prove that an image identity was included.
+Image/build associations remain consumer-owned; evidence v1 gains no image field.
+
+The same S and member/cases may have separate detached passes for two profiles.
+A pass for one runtime MUST NOT qualify another. Relabeling execution claims and
+expectations together while retaining the source composition MUST refuse.
+Rewriting unsigned subjects, claims and expectations together is not detectable
+forgery: independent expectations and trusted evaluation remain caller duties.
+
+The inventory MUST identify the public index and every ordered case by path and
+canonical descriptor. Evidence MUST retain index order; a filename-sorted hash
+does not establish that order. Effective `runs` and `minPasses` MUST match the
+authored values with defaults from §8.2.2. Every declared case, run and assertion
+MUST appear exactly once, in order; run ordinals start at one and are contiguous.
+Empty evaluation content, subsets, missing, extra or duplicate rows MUST refuse.
+
+Results MUST retain assertion identifiers, types and verdicts and run verdicts,
+including failed runs inside passing repeat policies. Verifiers MUST recompute
+outcomes, not trust an overall pass flag. Every supported assertion must pass
+for a run to pass, including known non-critical assertions. Unknown assertions
+or runs, missing observations, unsupported observation mechanisms, unavailable
+judges, execution errors and cancellation MUST prevent a verified pass. Known
+failing runs MAY be absorbed by authored `minPasses`; unknown runs MUST NOT.
+
+The v1 verifier supports text assertions and an explicit versioned two-score
+judge policy. Tool observations and unrecognized policies MUST refuse. Judge
+results MUST retain both integer scores, threshold, model/version and policy
+configuration identity. The authored judge model/version and threshold MUST
+match. Both scores MUST be on the same side of the threshold for a known
+verdict; a split is unknown and MUST refuse even inside a repeat policy.
+The evaluator policy is `agentsuite-text-v1` version `1.0.0`: text assertions
+use §8.2.2 semantics, known assertions form a conjunction, and unknown vetoes.
+Judge observations additionally require `agentsuite-double-score-v1` version
+`1.0.0` and a complete caller-accepted judge configuration. Each observed model
+MUST equal the authored model or that model joined with `-` and authored version.
+This is a declared response identity, not model attestation. Policy and
+configuration digests MUST exactly match caller expectations. Other aggregation
+rules or request/tool-count observations require a supported policy/schema
+revision, never silent reinterpretation of v1.
+
+Evaluator identity, version, accepted policy and non-secret configuration identity
+MUST accompany start/completion UTC RFC3339 timestamps ending in `Z`, with up to
+nine fractional-second digits and start no later than completion. Time is reported history, not trusted-clock or freshness proof.
+Producers MUST capture unavailable metadata when evaluating rather than invent
+it at export. Legacy records lacking required data MUST refuse export with a
+re-evaluation remedy; modification time or export time MUST NOT replace run time.
+
+Only schema-defined bounded identifiers, digests, numeric observations, verdicts
+and timestamps are permitted. Prompts, answers, rubrics, assertion operands,
+reasoning, endpoints, credentials, secret references, tenant/host/session IDs and
+arbitrary annotations MUST NOT appear. Public configuration digests MUST use a
+documented non-secret projection, never credentials or resolved secret values.
+Producers MUST construct allowlisted fields rather than redact private receipts.
+
+**Verification.** `agentsuite.VerifyEvaluation` takes a local OCI layout,
+independently supplied expected subject and evaluator policy, and evidence reader.
+Expected execution identities MUST come from the caller, not copied claims;
+there are no wildcards. Verification MUST validate local manifest/blob bytes and
+the suite graph before matching evidence to the inventory and expectations.
+A digest alone or loose content directory cannot establish OCI identity; archive
+consumers first materialize a local layout. No model, cluster, registry, remote
+schema or private store may be consulted.
+
+Only success returns a verified summary. Failure MUST return a typed refusal;
+missing, malformed, mismatched, unsupported, partial, unknown or failing evidence
+MUST NOT become an evaluated badge. Refusal text MUST NOT echo untrusted JSON,
+paths, authored operands or private causes. Consumers SHOULD display
+`evaluation: not verified` with a safe category; CI MUST fail closed. Resource
+limits MUST refuse explicitly, never truncate or omit failed repeats.
+
+The reference verifier bounds documents to 4,194,304 UTF-8 bytes, nesting to
+100 levels, object members to 1,024 per object and 100,000 per document. There
+are at most 128 cases, 1,000 runs per case, 4,096 total runs, 1,000 assertions
+per run and 32,000 total assertion observations. Authored policies exceeding
+these limits refuse even if the document omits corresponding rows. Digest strings
+use lowercase `sha256:` plus 64 hexadecimal digits; descriptors have positive
+sizes no larger than 4,194,304 bytes. Schema-defined identifier restrictions
+are deliberately narrower than arbitrary provider strings; unsupported values
+MUST refuse rather than be transformed or redacted to create a matching identity.
+These shape checks cannot guarantee that a producer has not disguised sensitive
+data as an identifier; producers remain responsible for the allowlist boundary.
+
+`ExpectedEvaluation` requires a complete `Subject`, `Execution` and evaluator
+identity plus an explicit `Judges` allowlist (empty when no judge is accepted).
+The verifier additionally matches the model protocol/identifier to the member
+manifest. `VerifiedEvaluation` contains only the validated subject, case/run
+totals, completion time and `unsigned: true`. `EvidenceRefusal.Code` is one of
+`missing`, `malformed`, `unsupported`, `limit`, `artifact`, `subject`, `coverage`,
+`policy`, `unknown`, `not-passing`. Callers SHOULD use the typed code rather
+than parse error text. Detached schema/privacy fixtures and their use are
+[documented here](testdata/evidence/README.md).
+
+**Distribution and trust.** V1 uses an explicitly selected detached file beside,
+not inside, the suite layout/archive; filenames convey no identity. OCI referrer
+publication/discovery is separate transport under §8.2.3, with the complete suite
+descriptor as referring-manifest subject. Signatures MAY later wrap unchanged v1
+bytes. This verifier establishes consistency of unsigned claims, not who ran
+the evaluation, whether observations are true, or deployment readiness. Anyone
+able to write the document can forge a consistent pass. Unsigned evidence MUST
+NOT be presented as authenticated provenance.
+
+### 8.3 Agent policy binding
+
+An agent MAY declare one optional `policy` content reference. Omission is valid
+and declares no policy requirement; `policy: null` MUST refuse, not mean omission.
+The reference is a closed object with exactly required `path` and `descriptor`
+fields. Its path MUST be exactly `policies/<agent-id>.json`, where `<agent-id>`
+is the owning Agent's `id`. Shared or cross-Agent paths MUST refuse; identical
+bytes MAY be stored separately under each owning Agent's path.
+
+For example, this agent-manifest fragment from the
+[policy-binding fixture](testdata/policy-binding/) shows only `policy`:
+
+<!-- json-example: partial -->
+
+```json
+{
+  "policy": {
+    "descriptor": {
+      "digest": "sha256:9579149c9e7bdecb5b49b67c6dd279e434e4d8a1feb28c517299750b96ffcd8b",
+      "mediaType": "application/vnd.agentsuite.policy.v2+json",
+      "size": 213
+    },
+    "path": "policies/writer.json"
+  }
+}
+```
+
+The descriptor's media type MUST match the policy document's version:
+
+| Policy version | Descriptor media type |
+|---|---|
+| `agentsuite.policy/v1` | `application/vnd.agentsuite.policy.v1+json` |
+| `agentsuite.policy/v2` | `application/vnd.agentsuite.policy.v2+json` |
+
+The policy MUST be a regular file of at most 4194304 bytes, stored as its exact
+RFC 8785 JCS canonical **authored** JSON bytes, and MUST satisfy the closed
+version-specific semantics in [Appendix B](#appendix-b-standalone-policy-contracts-normative).
+Unsupported versions/capabilities, malformed policy documents and a mismatched
+media type MUST refuse. A validator MUST check descriptor validity, raw size and
+digest before full policy decoding, then check semantic validity, version/media
+agreement and exact canonical storage. Descriptor annotations remain descriptive.
+
+The `policies/` namespace is closed: every policy file MUST be referenced by
+its owning Agent, and only those regular files and the optional top-level
+`policies/` directory are permitted. The top-level directory MAY be empty.
+Orphan files, nested/extra directories, symlinks and OCI archive hardlinks MUST refuse.
+A suite with no policies remains valid; no existing no-policy fixture requires
+rewriting. These rules apply equally to extracted content and OCI content layers.
+
+A policy descriptor uses the ordinary content SHA-256 digest and byte length,
+**not** the framed effective-policy digest from Appendix B. A producer MUST
+preserve the authored bytes when binding them: administrative composition,
+endpoint/path set normalization and effective-policy framing happen separately.
+Authored arrays retain their stored order and duplicates under JCS; resolution
+and effective-policy canonicalization still normalize those sets. Changing
+authored bytes therefore changes their descriptor even when effective sets
+would be equivalent.
+
+Policy content identity is committed through policy descriptor → Agent manifest
+descriptor → suite manifest. After a policy change, all affected ancestor
+descriptors MUST be updated; stale ancestors MUST refuse. A conformant changed
+suite has a different suite content identity and, when repackaged, OCI manifest
+digest. Policy files are in the existing content layer, not additional OCI
+layers or an external policy store.
+
+Validation establishes definition/graph conformance only, not installation,
+observed activation, startup/lifetime safety, provider qualification or runtime
+enforcement. Consumers MUST inspect declared policy requirements and refuse
+unsupported boundaries; successful generic validation is not capability
+negotiation. The tool-derived suite `capabilities` list does not certify policy
+support. Runtime wiring, held-start and drift stopping remain outside this binding.
+
+## Appendix B. Standalone policy contracts (normative)
+
+These standalone contracts are owned by the `policy` package. Policy format
+versions are independent of the Go module version and the AgentSuite artifact
+schema version. [Section 8.3](#83-agent-policy-binding) defines optional Agent
+policy descriptors and graph validation. A standalone document is committed by
+an Agent/suite only when explicitly bound through that reference.
+
+### B.1 Versions and closed inputs
+
+`agentsuite.policy/v1` remains the filesystem-only contract. Its nonempty set of
+clean absolute UTF-8 `denyWritePaths` excludes `/`, its required capability is
+exactly `["filesystem/deny-write/v1"]`, and administrative denied paths are
+unioned with requested denied paths. Duplicate paths collapse and paths sort
+lexicographically by unsigned UTF-16 code units, the comparison model RFC 8785
+uses for JSON object property names. JCS preserves this normalized array order;
+it does not sort array elements. An omitted administrative `denyWritePaths`
+field and an explicit empty array add no restrictions; explicit `null` MUST
+fail closed. The existing v1 vector is unchanged.
+That capability covers create, writable open/write, truncate, rename effects,
+unlink, link, metadata and symlink mutation, including declared mount/path bypass
+coverage; a provider unable to cover the required boundary MUST refuse.
+
+The explicit successor, **`agentsuite.policy/v2`**, is network-only. Its authored
+and effective document shape is defined by
+[`policy-v2.schema.json`](schema/policy-v2.schema.json):
+
+```json
+{
+  "version": "agentsuite.policy/v2",
+  "network": {
+    "egressAllow": [
+      {"address": "192.0.2.10", "protocol": "TCP", "port": 443}
+    ]
+  },
+  "requiredCapabilities": ["network/egress-allow/v1"]
+}
+```
+
+All three root fields, the network object and its `egressAllow` array are
+required and MUST NOT be null. An explicit empty array is valid and means
+**deny all egress**, not unrestricted access or an omitted requirement. V2 MUST
+NOT contain `denyWritePaths`, even as null or an empty array. V1 MUST NOT contain
+`network`, even as null. Neither version is silently upgraded or rewritten.
+
+Each v2 endpoint MUST have exactly `address`, `protocol` and `port`:
+
+- `address` is one canonical dotted-decimal IPv4 literal: four decimal octets
+  from 0 to 255, with no leading zeroes except the single digit `0`.
+- `protocol` is exactly `TCP` (case-sensitive).
+- `port` is an integer from 1 through 65535, explicitly supplied. There is no
+  default port or named port. Equivalent integral JSON number representations
+  may normalize through JCS; fractional or lossy numbers MUST refuse.
+
+CIDR (including `/32`), hostnames, IPv6 and IPv4-mapped IPv6, UDP and other
+protocols, wildcards, address/port ranges, and unknown fields MUST refuse, never
+be ignored or converted into a broader grant. No DNS resolution or hostname-to-IP
+snapshot is part of this format. An address literal never denotes a wildcard;
+providers MUST refuse address classes or translated/aliased routes they cannot
+mediate with the declared exact meaning. Syntax validity is not target qualification.
+
+The required capability list is exactly `["network/egress-allow/v1"]`; absent,
+empty, duplicate or unknown capabilities MUST refuse. V2 does not combine
+filesystem or Tool capabilities. Duplicate endpoint tuples are permitted in
+authored input, but MUST collapse during resolution/effective-policy canonicalization. Sort by
+canonical dotted-decimal address strings lexicographically using their ASCII
+bytes (not numeric IPv4 order), then by numeric port; TCP is constant. For example, `10.0.0.2` precedes `9.0.0.1`, and port 80 precedes 443 for
+the same address. Normalization MUST NOT mutate or alias caller-owned rule sets.
+
+### B.2 Administrative intersection and the network ceiling
+
+The closed v2 administrative shape is defined by
+[`administrative-policy-v2.schema.json`](schema/administrative-policy-v2.schema.json).
+An omitted `network` (`{}`) imposes no additional restriction. If `network` is
+supplied, its nonnull `egressAllow` array is required. An explicit empty array
+denies all. Null does not mean omission. Filesystem and unknown administrative
+fields MUST refuse in v2; network restrictions MUST refuse when resolving v1.
+
+Treat the requested and administrative allowances as sets of exact
+`(address, TCP, port)` tuples. The effective set is the requested set when admin
+network restrictions are omitted, otherwise their intersection. Administrative
+entries absent from the requested set cannot grant access. Deduplicate and sort
+both inputs as above; an empty intersection remains an explicit empty array.
+Each supplied rule set is limited to 4096 entries before deduplication, following
+the v1 resource-bound rule. Effective lists are subject to the same bound.
+
+`network/egress-allow/v1` authorizes only initiation of outbound TCP connections
+to the listed destination tuples within the provider's claimed network boundary. There are **no implicit allowances** for
+DNS, loopback, model inference, fallbacks, controller/results services or control
+planes. A model endpoint MUST be listed like any other destination. Other new outbound
+traffic is not authorized, including protocols/families that cannot be expressed
+as grants in this version. A provider unable to cover that boundary or deny
+unauthorized paths MUST refuse, not claim partial enforcement. This egress-only contract does not define ingress permissions or promise
+handling of pre-existing/in-flight connections. It does not select a CNI or
+certify host, NAT, privilege or routing coverage.
+
+### B.3 Canonical bytes, digest and payload
+
+Effective policy bytes MUST be JCS-canonical UTF-8 JSON, with normalized endpoint
+sets and the exact required capability list. Empty lists encode as `[]`, not
+`null`; no dummy filesystem field is emitted for v2. Canonical output is limited
+to 4 MiB, as in v1, and input uses the strict JSON profile: duplicate/unknown
+fields, invalid UTF-8 or unpaired surrogate escapes, trailing values and unsafe numbers
+MUST refuse. Reference schemas validate structure, not all byte-level constraints.
+
+For **both** policy versions, the existing digest algorithm is unchanged:
+
+```text
+SHA-256("agentsuite-effective-policy\x00v1\x00" ||
+        uint64-big-endian(byte-length(canonical-policy-bytes)) ||
+        canonical-policy-bytes)
+```
+
+The displayed `\x00` denotes one NUL byte, not four printable characters. Prefix
+the lowercase hexadecimal result with `sha256:`. The domain's `v1` identifies
+this digest framing, not the policy format version; the policy's own `version`
+is already committed by its canonical bytes. Do not substitute a new domain or
+use the root artifact content-digest function in place of this policy digest.
+
+A provider payload carries the exact policy bytes, their policy digest, the
+policy format version and the required capabilities. Its outer version MUST
+match the version inside the bytes. Capabilities MUST match exactly, and the
+bytes MUST verify both their digest and exact canonical representation. A digest
+of noncanonical bytes is insufficient. Consumers MUST preserve and verify the
+bytes rather than decode and reserialize them before use. Carrier transport
+encoding is not a new policy representation.
+
+Language-neutral vectors live in `policy/testdata/`: the existing v1 JSON/digest
+pair, a v1 ordering pair that orders U+10000 before U+E000, plus v2 nonempty and
+deny-all JSON/digest pairs. Read JSON fixture bytes directly without adding a
+newline. Installation, observed activation and lifetime
+safety are distinct runtime claims; neither valid policy bytes nor a provider
+payload establishes any of them. Runtime wiring, held-start and drift stopping
+remain outside these contracts. Section 8.3's authored policy binding does not
+establish any runtime guarantee.
+
+The experimental capability-based profile accepts `model.capabilities` instead
+of an exact `model.model`. The two are mutually exclusive. Requirements declare
+an API revision, minimum total context and maximum-output capacity, inference
+streaming and tool-calling support. Endpoint and credential bindings remain
+deployment inputs. See [inference.schema.json](schema/inference.schema.json).
+The exact-model representation remains supported unchanged. Capability declarations
+are not model qualification evidence or permission to substitute an exact model.
+
+An optional experimental `execution` record describes the image serving contract,
+named environment inputs and configuration ABI. Its closed schema is
+[execution.schema.json](schema/execution.schema.json). The initial mounted
+configuration mapping is deliberately limited to the pinned AgentKit HTTP profile;
+it does not complete sandbox-image conformance or native runtime registration.
+The `http-v1` kind describes a serving interface, not Kubernetes placement or
+runtime selection. The `agentkit-v0-mounted-v1` configuration value is an explicit
+experimental adapter ABI; it is not a general cross-harness configuration format.
+This record describes a built image interface; it does not select a suite
+member's runtime or make images mandatory for native execution. A consumer's
+versioned execution-profile selection determines whether a member requires an
+image. If it does, the image declaration must agree with the selected build
+profile's serving contract. Native exact-model profiles must not be converted
+to capability-based image execution merely because their declared build inputs
+include a harness or execution record.
 
 ## 15. Conformance
 
@@ -2001,142 +2137,6 @@ This draft does not specify:
 - additional execution modes or per-provider isolation boundaries;
 - a new OCI Distribution endpoint or registry authentication mechanism;
 - byte-identical gzip output across arbitrary compressor implementations.
-
-## Appendix B. Standalone policy contracts (normative)
-
-These standalone contracts are owned by the `policy` package. Policy format
-versions are independent of the Go module version and the AgentSuite artifact
-schema version. [Section 8.3](#83-agent-policy-binding) defines optional Agent
-policy descriptors and graph validation. A standalone document is committed by
-an Agent/suite only when explicitly bound through that reference.
-
-### B.1 Versions and closed inputs
-
-`agentsuite.policy/v1` remains the filesystem-only contract. Its nonempty set of
-clean absolute UTF-8 `denyWritePaths` excludes `/`, its required capability is
-exactly `["filesystem/deny-write/v1"]`, and administrative denied paths are
-unioned with requested denied paths. Duplicate paths collapse and paths sort
-lexicographically by unsigned UTF-16 code units, the comparison model RFC 8785
-uses for JSON object property names. JCS preserves this normalized array order;
-it does not sort array elements. An omitted administrative `denyWritePaths`
-field and an explicit empty array add no restrictions; explicit `null` MUST
-fail closed. The existing v1 vector is unchanged.
-That capability covers create, writable open/write, truncate, rename effects,
-unlink, link, metadata and symlink mutation, including declared mount/path bypass
-coverage; a provider unable to cover the required boundary MUST refuse.
-
-The explicit successor, **`agentsuite.policy/v2`**, is network-only. Its authored
-and effective document shape is defined by
-[`policy-v2.schema.json`](schema/policy-v2.schema.json):
-
-```json
-{
-  "version": "agentsuite.policy/v2",
-  "network": {
-    "egressAllow": [
-      {"address": "192.0.2.10", "protocol": "TCP", "port": 443}
-    ]
-  },
-  "requiredCapabilities": ["network/egress-allow/v1"]
-}
-```
-
-All three root fields, the network object and its `egressAllow` array are
-required and MUST NOT be null. An explicit empty array is valid and means
-**deny all egress**, not unrestricted access or an omitted requirement. V2 MUST
-NOT contain `denyWritePaths`, even as null or an empty array. V1 MUST NOT contain
-`network`, even as null. Neither version is silently upgraded or rewritten.
-
-Each v2 endpoint MUST have exactly `address`, `protocol` and `port`:
-
-- `address` is one canonical dotted-decimal IPv4 literal: four decimal octets
-  from 0 to 255, with no leading zeroes except the single digit `0`.
-- `protocol` is exactly `TCP` (case-sensitive).
-- `port` is an integer from 1 through 65535, explicitly supplied. There is no
-  default port or named port. Equivalent integral JSON number representations
-  may normalize through JCS; fractional or lossy numbers MUST refuse.
-
-CIDR (including `/32`), hostnames, IPv6 and IPv4-mapped IPv6, UDP and other
-protocols, wildcards, address/port ranges, and unknown fields MUST refuse, never
-be ignored or converted into a broader grant. No DNS resolution or hostname-to-IP
-snapshot is part of this format. An address literal never denotes a wildcard;
-providers MUST refuse address classes or translated/aliased routes they cannot
-mediate with the declared exact meaning. Syntax validity is not target qualification.
-
-The required capability list is exactly `["network/egress-allow/v1"]`; absent,
-empty, duplicate or unknown capabilities MUST refuse. V2 does not combine
-filesystem or Tool capabilities. Duplicate endpoint tuples are permitted in
-authored input, but MUST collapse during resolution/effective-policy canonicalization. Sort by
-canonical dotted-decimal address strings lexicographically using their ASCII
-bytes (not numeric IPv4 order), then by numeric port; TCP is constant. For example, `10.0.0.2` precedes `9.0.0.1`, and port 80 precedes 443 for
-the same address. Normalization MUST NOT mutate or alias caller-owned rule sets.
-
-### B.2 Administrative intersection and the network ceiling
-
-The closed v2 administrative shape is defined by
-[`administrative-policy-v2.schema.json`](schema/administrative-policy-v2.schema.json).
-An omitted `network` (`{}`) imposes no additional restriction. If `network` is
-supplied, its nonnull `egressAllow` array is required. An explicit empty array
-denies all. Null does not mean omission. Filesystem and unknown administrative
-fields MUST refuse in v2; network restrictions MUST refuse when resolving v1.
-
-Treat the requested and administrative allowances as sets of exact
-`(address, TCP, port)` tuples. The effective set is the requested set when admin
-network restrictions are omitted, otherwise their intersection. Administrative
-entries absent from the requested set cannot grant access. Deduplicate and sort
-both inputs as above; an empty intersection remains an explicit empty array.
-Each supplied rule set is limited to 4096 entries before deduplication, following
-the v1 resource-bound rule. Effective lists are subject to the same bound.
-
-`network/egress-allow/v1` authorizes only initiation of outbound TCP connections
-to the listed destination tuples within the provider's claimed network boundary. There are **no implicit allowances** for
-DNS, loopback, model inference, fallbacks, controller/results services or control
-planes. A model endpoint MUST be listed like any other destination. Other new outbound
-traffic is not authorized, including protocols/families that cannot be expressed
-as grants in this version. A provider unable to cover that boundary or deny
-unauthorized paths MUST refuse, not claim partial enforcement. This egress-only contract does not define ingress permissions or promise
-handling of pre-existing/in-flight connections. It does not select a CNI or
-certify host, NAT, privilege or routing coverage.
-
-### B.3 Canonical bytes, digest and payload
-
-Effective policy bytes MUST be JCS-canonical UTF-8 JSON, with normalized endpoint
-sets and the exact required capability list. Empty lists encode as `[]`, not
-`null`; no dummy filesystem field is emitted for v2. Canonical output is limited
-to 4 MiB, as in v1, and input uses the strict JSON profile: duplicate/unknown
-fields, invalid UTF-8 or unpaired surrogate escapes, trailing values and unsafe numbers
-MUST refuse. Reference schemas validate structure, not all byte-level constraints.
-
-For **both** policy versions, the existing digest algorithm is unchanged:
-
-```text
-SHA-256("agentsuite-effective-policy\x00v1\x00" ||
-        uint64-big-endian(byte-length(canonical-policy-bytes)) ||
-        canonical-policy-bytes)
-```
-
-The displayed `\x00` denotes one NUL byte, not four printable characters. Prefix
-the lowercase hexadecimal result with `sha256:`. The domain's `v1` identifies
-this digest framing, not the policy format version; the policy's own `version`
-is already committed by its canonical bytes. Do not substitute a new domain or
-use the root artifact content-digest function in place of this policy digest.
-
-A provider payload carries the exact policy bytes, their policy digest, the
-policy format version and the required capabilities. Its outer version MUST
-match the version inside the bytes. Capabilities MUST match exactly, and the
-bytes MUST verify both their digest and exact canonical representation. A digest
-of noncanonical bytes is insufficient. Consumers MUST preserve and verify the
-bytes rather than decode and reserialize them before use. Carrier transport
-encoding is not a new policy representation.
-
-Language-neutral vectors live in `policy/testdata/`: the existing v1 JSON/digest
-pair, a v1 ordering pair that orders U+10000 before U+E000, plus v2 nonempty and
-deny-all JSON/digest pairs. Read JSON fixture bytes directly without adding a
-newline. Installation, observed activation and lifetime
-safety are distinct runtime claims; neither valid policy bytes nor a provider
-payload establishes any of them. Runtime wiring, held-start and drift stopping
-remain outside these contracts. Section 8.3's authored policy binding does not
-establish any runtime guarantee.
 
 ## 18. Normative references
 

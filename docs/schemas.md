@@ -7,8 +7,12 @@ from the repository's schema directory, not rendered as HTML.
 
 Use the entire schema directory from the same release as your producer or
 validator. A `schemaVersion`, media type or historical `$id` alone does not
-select a release: several releases use the same identifiers with different
-validation constraints. Do not mix schemas from different releases in one registry.
+select a release: several historical releases use the same identifiers with
+different validation constraints. Do not mix conflicting contract bundles in
+one registry. Pin the validator/library separately from editor configuration:
+a Go module pin does not configure an editor's schema registry. Registry and
+editor callers SHOULD report the selected release; no new Go or TypeScript
+diagnostic API is required.
 
 | Contract source | Pinned schema directory | Notable additions |
 | --- | --- | --- |
@@ -23,8 +27,41 @@ kaimahi.dev `$id` URLs are not a reliable way to retrieve the selected contract:
 some serve immutable v0.1.0 copies and others are not hosted. For example, the
 v0.1.0 Agent schema does not accept the policy binding added in v0.3.0. Fetching
 that historical ID cannot validate a v0.4.0 Agent with a policy binding.
-Schema identity/versioning and hosting remain separate maintainer decisions;
-this selection recipe does not rename IDs or replace historical schemas.
+The [schema identity contract](../spec.md#54-schema-identity-and-contract-selection)
+defines a minor-scoped replacement namespace. The migration has not happened:
+the files and downloads below still carry historical IDs, and the current
+manual release process does not publish versioned schema assets.
+
+## Minor-scoped identity and migration
+
+New stable IDs will use
+`https://suite.agent-primitives.dev/schema/v0.N/<filename>.schema.json`,
+with one immutable bundle per minor release. Patches MUST keep that minor's
+entire schema inventory and bytes unchanged; schema changes require a minor.
+Main will use explicitly unstable `/schema/draft/` IDs, never catalogued as
+released contracts. Minor-release preparation rewrites them to `/schema/v0.N/`;
+main returns to drafts before further schema development. CI guards must reject
+changes to catalogued bytes and patch bundles differing from their minor.
+
+The first namespace move ships in a minor release, after publication and
+immutability guards are ready. Its reviewed catalog will identify release
+assets by URL, source commit and checksum and map releases to bundles. Pages
+downloads assets only at build time and retains all catalogued history on every
+deployment. A missing or conflicting asset blocks deployment. These paths are
+a publication policy, not additional working downloads today; use the pinned
+source directories above until migrated assets are published and verified.
+
+Wire-format versions remain independent of schema IDs: Suite `schemaVersion`,
+evidence `schemaVersion`, policy `version` and document media types do not change
+for this namespace move. Schema-document `$schema` still selects JSON Schema
+2020-12. Do not add instance `$schema` or `apiVersion` to closed AgentSuite
+documents or reserialize artifacts merely to select a schema.
+
+Retain the hosted kaimahi.dev v0.1.0 schemas byte-for-byte, without redirects to
+current contracts. Historical releases with reused IDs need separate,
+explicitly selected release-local registries. Never install a global
+old-to-latest alias or guess a contract for an unhosted historical ID.
+See the [release policy](../CONTRIBUTING.md#schema-publication-policy).
 
 ## Suite entry point
 
@@ -118,7 +155,12 @@ filename `policy-v2.schema.json` has an ID ending in `policy/v2/policy.schema.js
 `Registry()` has no network retrieval callback, so an unregistered external
 reference fails rather than silently downloading another revision. Configure
 other validators with the equivalent local URI-to-schema registry and disable
-remote retrieval; preserve the downloaded schema bytes and their `$id`s.
+remote retrieval, including meta-schema fetching during compilation; preload
+the declared dialect too. Preserve the downloaded schema bytes and their `$id`s.
+Conforming AgentSuite validation MUST NOT fetch schemas or meta-schemas over
+the network and MUST fail closed on unresolved or conflicting resources.
+Equivalent handwritten validation is permitted; the Go Suite and TypeScript
+policy validators do not need a runtime JSON Schema engine.
 
 Schema validation checks shape only. The example does not validate the Agent's
 referenced policy contents, descriptor digests or graph closure; use the Go

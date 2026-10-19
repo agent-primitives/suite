@@ -379,6 +379,59 @@ cross-field rules require semantic validation after schema validation (standard
 JSON Schema cannot compare sibling numbers or enforce uniqueness by a property).
 Reserved input environments and non-normalized health paths are refused by both.
 
+### 5.4 Schema identity and contract selection
+
+Schema identity is separate from content identity and wire-format versions.
+Suite documents use `schemaVersion: "1.0.0-draft"`, evidence uses
+`schemaVersion: "1.0.0"`, and authored policies use
+`version: "agentsuite.policy/v1"` or `"agentsuite.policy/v2"`. A schema's
+`$schema` selects its JSON Schema dialect. Media types identify document
+families and major contracts; none of these values selects a release-specific
+schema bundle. Schema-ID changes alone do not change these values, instance
+bytes, or canonical digests. Closed AgentSuite documents do not gain instance
+`$schema` or `apiVersion` fields.
+
+**Contract selection and resolution.** Conforming AgentSuite validation,
+including schema compilation, MUST NOT fetch schemas or meta-schemas over the
+network. Schema-based validation MUST use a complete, trusted bundle selected
+out of band and bundled or preloaded with its declared dialect resources.
+References MUST resolve within that selected contract; unresolved references
+and conflicting resources for one ID MUST fail closed. Equivalent handwritten
+validation is permitted; a runtime JSON Schema engine is not required.
+Registry and editor callers SHOULD report the selected release. These caller
+diagnostics do not require a new Go or TypeScript API. See
+[Suite validator conformance](#151-suite-validator) for the other offline
+validation requirements.
+
+**Minor-scoped namespace.** The target schema IDs are
+`https://suite.agent-primitives.dev/schema/v0.N/<filename>.schema.json`,
+where `N` is the minor release number, not the wire-format version. Each minor
+has a complete bundle with sibling-relative references; policy filenames remain
+`policy-v2.schema.json` and `administrative-policy-v2.schema.json`. A published
+ID MUST identify immutable bytes. Within this namespace, patch releases MUST
+retain their minor's entire schema inventory and bytes, including IDs; any
+schema change requires a new minor. Wire-format versions remain independent of schema IDs and module
+tags; breaking wire semantics require separate format/media-version review.
+
+**Drafts and transition.** The namespace migration is pending: existing
+`schema/` files still declare historical kaimahi.dev IDs. The first namespace
+move MUST ship in a minor release. After migration, main uses unstable
+`https://suite.agent-primitives.dev/schema/draft/<filename>.schema.json` IDs,
+which are not immutable contracts and MUST NOT enter the release catalog.
+The reviewed minor-release commit rewrites draft IDs to its minor namespace;
+main returns to draft IDs before further schema development. CI MUST reject
+changes to bytes identified by a catalogued ID and patch bundles differing
+from their minor's inventory or bytes. Publication and these guards must be
+in place before the namespace move.
+
+Historical bundles MUST remain unchanged. Legacy IDs reused across releases
+are ambiguous without an explicit release selection: use the selected old
+release's original bytes in a separate registry, not a mixed-contract registry
+or global old-to-latest alias. The hosted kaimahi.dev v0.1.0 schemas MUST retain
+their original bytes and MUST NOT redirect to a newer contract. See
+[schema selection and current downloads](https://suite.agent-primitives.dev/schemas) and the
+[release policy](CONTRIBUTING.md#release-policy) for migration and publication.
+
 ## 6. Identity
 
 ### 6.1 Canonical JSON

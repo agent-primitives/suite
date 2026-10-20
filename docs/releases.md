@@ -2,6 +2,8 @@
 
 These pages render **main**. They are development documentation, not a versioned
 snapshot. Pin a tag when reproducing a build or reviewing a fixed contract.
+See the [frozen legacy draft reader](legacy-draft.md) for the reviewed acceptance
+baseline, its published v0.5.0 distribution and historical compatibility limits.
 
 The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).

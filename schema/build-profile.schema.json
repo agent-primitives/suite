@@ -12,7 +12,7 @@
     "runtimeBase": {"$ref": "#/$defs/images"},
     "harness": {"$ref": "#/$defs/images"},
     "sourceEpoch": {"type": "integer", "minimum": 1},
-    "execution": {"$ref": "execution.schema.json"}
+    "execution": {"description": "Experimental image-serving contract, including its configuration mapping; does not select a member runtime. See spec sections 1.1.1 and 6.2.", "$ref": "execution.schema.json"}
   },
   "$defs": {
     "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"},

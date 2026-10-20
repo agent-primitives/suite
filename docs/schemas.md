@@ -89,6 +89,25 @@ explicitly selected release-local registries. Never install a global
 old-to-latest alias or guess a contract for an unhosted historical ID.
 See the [release policy](../CONTRIBUTING.md#schema-publication-policy).
 
+## Stability boundaries
+
+The [normative status table](../spec.md#111-stability-boundaries-and-compatibility)
+names all ten manifest families and the exact experimental exceptions. The spec
+still uses `1.0.0-draft`: the table describes the intended wire-1.0 stable core,
+not a released stable format. Tools and `Agent.policy` are embedded fields;
+the ToolProvider catalog has a normative definition but no standalone schema.
+Optional runtime-profile metadata is in the stable-core scope; its opaque
+`configurationABI` and actual runtime support remain consumer-owned. Normative
+sandbox-binding requirements remain in scope even though their reference schema
+is builder-owned.
+
+Future optional fields are not automatically compatible with old closed readers:
+unknown properties still refuse. Pin a contract and reader that support the
+fields emitted. The mixed draft/stable graph ban is migration policy text only
+here; it does not add stable-version acceptance or change draft acceptance.
+Go API/semantic-diff compatibility, evidence/policy versions and schema namespaces
+remain separate from the wire-1.0 promise.
+
 ## Suite entry point
 
 - [suite.schema.json](../schema/suite.schema.json): root manifest and its content references.
@@ -113,8 +132,20 @@ See the [release policy](../CONTRIBUTING.md#schema-publication-policy).
 
 ## Experimental execution and inference contracts
 
-- [execution.schema.json](../schema/execution.schema.json): a built image's execution interface (experimental).
-- [inference.schema.json](../schema/inference.schema.json): inference requirements (experimental).
+- [inference.schema.json](../schema/inference.schema.json): experimental
+  `Agent.model.capabilities` and all its fields. This branch selects capability
+  requirements with `api: "openai-chat-completions-v1"`, rather than an exact model.
+- [execution.schema.json](../schema/execution.schema.json): experimental
+  `BuildProfile.execution` and all its fields, selected by the image-serving record
+  with `kind: "http-v1"` and `protocol: "openai-chat-v1"`.
+- Within that execution record, `configuration: "agentkit-v0-mounted-v1"`
+  explicitly opts into the experimental AgentKit mounted configuration mapping.
+  It is not the runtime profile's opaque `configurationABI`.
+
+These are existing opt-in branches/selectors, not new flags. Their presence does
+not select a runtime, qualify a model or establish execution support. Experimental
+revisions cannot silently change stable fields, canonical identity or refusal
+behavior; see the [compatibility policy](../spec.md#111-stability-boundaries-and-compatibility).
 
 ## Standalone network-only policies
 

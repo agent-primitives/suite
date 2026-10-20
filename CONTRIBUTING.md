@@ -68,6 +68,10 @@ coverage and the shared policy decode corpus. Generated two-runtime-profile
 graph/schema and same-OCI separate-evidence conformance tests are also required
 passes. A missing or renamed required test must not become
 a green empty selection. Race tests, vet, staticcheck and formatting also gate CI.
+The separate **Go tests (umask 077)** job runs all packages uncached with private
+default permissions and rejects skipped tests. Fixtures that bind modes in an
+inventory or packaged evidence must set those modes explicitly after creation;
+file-creation permissions alone are filtered by the caller's umask.
 
 The small offline docs checker covers local links and Markdown heading anchors
 (including hidden GitHub documentation); its selftests exercise accepted and

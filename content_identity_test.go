@@ -31,9 +31,23 @@ func writeIdentityFixture(t *testing.T) string {
 
 func TestLooseDirectoryIdentityGolden(t *testing.T) {
 	const golden = "sha256:15e0613bf11e7c70e2255a7f669381343656b0957a9231d0b92e189bf254f3fb"
-	for _, mode := range []os.FileMode{0600, 0644, 0700, 0755} {
+	for _, mode := range []os.FileMode{0444, 0600, 0644, 0700, 0755} {
 		t.Run(fmt.Sprintf("%o", mode), func(t *testing.T) {
 			root := writeIdentityFixture(t)
+			// Restore writable attributes before TempDir cleanup on Windows.
+			t.Cleanup(func() {
+				if err := filepath.WalkDir(root, func(name string, d os.DirEntry, err error) error {
+					if err != nil {
+						return err
+					}
+					if d.Type().IsRegular() {
+						return os.Chmod(name, 0600)
+					}
+					return nil
+				}); err != nil {
+					t.Error(err)
+				}
+			})
 			if err := filepath.WalkDir(root, func(name string, d os.DirEntry, err error) error {
 				if err != nil {
 					return err
@@ -117,6 +131,10 @@ func TestLooseDirectoryDeclaredDirectoryMetadata(t *testing.T) {
 	variant.VariantDigest = mustVariantDigest(t, variant)
 	if err := validateVariant(variant, variant.VariantDigest, content); err != nil {
 		t.Fatal(err)
+	}
+	entry := content.entries["tool-providers/large/1.0.0/linux-amd64/bin"]
+	if entry.Mode != 0700 || entry.Size != 0 {
+		t.Fatalf("declared directory metadata: mode=%o size=%d", entry.Mode, entry.Size)
 	}
 }
 

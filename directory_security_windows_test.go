@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"golang.org/x/sys/windows"
@@ -61,15 +62,20 @@ func secureDirectoryFixture(t *testing.T, root string) {
 	}
 }
 
-func windowsCheckFixture(t *testing.T, name string, root, wantOK bool) {
+func windowsCheckFixture(t *testing.T, name string, root bool, wantError string) {
 	t.Helper()
 	file, err := os.OpenFile(name, os.O_RDONLY|directoryReadFlags, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer file.Close()
-	if err := checkDirectorySecurity(file, root); (err == nil) != wantOK {
-		t.Fatalf("checkDirectorySecurity(%s, root=%v) = %v; want success=%v", name, root, err, wantOK)
+	err = checkDirectorySecurity(file, root)
+	if wantError == "" {
+		if err != nil {
+			t.Fatal(err)
+		}
+	} else if err == nil || !strings.Contains(err.Error(), wantError) {
+		t.Fatalf("checkDirectorySecurity(%s, root=%v) = %v; want %q", name, root, err, wantError)
 	}
 }
 
@@ -80,25 +86,30 @@ func TestWindowsDirectorySecurityProtectedOwnerRoot(t *testing.T) {
 		t.Fatal(err)
 	}
 	secureDirectoryFixture(t, root)
-	windowsCheckFixture(t, root, true, true)
-	windowsCheckFixture(t, name, false, true)
+	windowsCheckFixture(t, root, true, "")
+	windowsCheckFixture(t, name, false, "")
 }
 
 func TestWindowsDirectorySecurityRefusals(t *testing.T) {
 	owner := windowsFixtureUser(t).String()
 	for _, tc := range []struct {
-		name, dacl string
-		protected  bool
+		name, dacl, wantError string
+		protected             bool
 	}{
-		{"BroadExplicit", "P(A;;FA;;;" + owner + ")(A;;FR;;;WD)", true},
-		{"UnprotectedRoot", "(A;;FA;;;" + owner + ")", false},
-		{"NullDACL", "NO_ACCESS_CONTROL", true},
-		{"UnsupportedObjectACE", "P(A;;FA;;;" + owner + ")(OA;;FR;00112233-4455-6677-8899-aabbccddeeff;;WD)", true},
+		{"BroadExplicit", "P(A;;FA;;;" + owner + ")(A;;FR;;;WD)", "non-owner grant", true},
+		{"UnprotectedRoot", "(A;;FA;;;" + owner + ")", "root DACL is not protected", false},
+		{"NullDACL", "NO_ACCESS_CONTROL", "missing or null DACL", true},
+		{"UnsupportedObjectACE", "P(A;;FA;;;" + owner + ")(OA;;FR;00112233-4455-6677-8899-aabbccddeeff;;WD)", "unsupported ACE", true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			root := t.TempDir()
+			parent := t.TempDir()
+			secureDirectoryFixture(t, parent)
+			root := filepath.Join(parent, "root")
+			if err := os.Mkdir(root, 0700); err != nil {
+				t.Fatal(err)
+			}
 			windowsFixtureACL(t, root, tc.dacl, tc.protected)
-			windowsCheckFixture(t, root, true, false)
+			windowsCheckFixture(t, root, true, tc.wantError)
 		})
 	}
 }
@@ -114,7 +125,11 @@ func TestWindowsDirectorySecurityInheritance(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			root := t.TempDir()
 			windowsFixtureACL(t, root, grants, true)
-			windowsCheckFixture(t, root, true, !broad)
+			wantError := ""
+			if broad {
+				wantError = "non-owner grant"
+			}
+			windowsCheckFixture(t, root, true, wantError)
 			child := filepath.Join(root, "child")
 			if err := os.Mkdir(child, 0o700); err != nil {
 				t.Fatal(err)
@@ -140,7 +155,7 @@ func TestWindowsDirectorySecurityInheritance(t *testing.T) {
 					t.Fatalf("child ACE %d is not inherited: %v", i, err)
 				}
 			}
-			windowsCheckFixture(t, child, false, !broad)
+			windowsCheckFixture(t, child, false, wantError)
 		})
 	}
 }
@@ -151,8 +166,8 @@ func TestWindowsDirectorySecurityInvalidHandle(t *testing.T) {
 		t.Fatal(err)
 	}
 	file.Close()
-	if err := checkDirectorySecurity(file, true); err == nil {
-		t.Fatal("closed handle was accepted")
+	if err := checkDirectorySecurity(file, true); err == nil || !strings.Contains(err.Error(), "query directory input type") {
+		t.Fatalf("closed handle error: %v", err)
 	}
 	read, write, err := os.Pipe()
 	if err != nil {
@@ -160,8 +175,8 @@ func TestWindowsDirectorySecurityInvalidHandle(t *testing.T) {
 	}
 	defer read.Close()
 	defer write.Close()
-	if err := checkDirectorySecurity(read, false); err == nil {
-		t.Fatal("pipe was accepted")
+	if err := checkDirectorySecurity(read, false); err == nil || !strings.Contains(err.Error(), "not a disk file or directory") {
+		t.Fatalf("pipe error: %v", err)
 	}
 }
 
@@ -174,8 +189,8 @@ func TestWindowsDirectorySecurityJunction(t *testing.T) {
 	if output, err := exec.Command("cmd", "/c", "mklink", "/J", junction, root).CombinedOutput(); err != nil {
 		t.Fatalf("create junction: %v: %s", err, output)
 	}
-	windowsCheckFixture(t, junction, false, false)
-	if _, err := loadDirectory(parent); err == nil {
-		t.Fatal("loose directory containing a junction was accepted")
+	windowsCheckFixture(t, junction, false, "reparse point or device")
+	if _, err := loadDirectory(parent); err == nil || !strings.Contains(err.Error(), "unsupported file type") {
+		t.Fatalf("loose junction error: %v", err)
 	}
 }

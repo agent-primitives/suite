@@ -573,13 +573,16 @@ artifact bytes, OCI identities, JCS document identities and evidence subjects
 remain unchanged. Rebuilding loose input may produce a new artifact; it does not
 update or re-sign a previously published one.
 
-Host access safety is a separate check, not identity metadata. Unix unsafe-mode
-refusals remain in place. Windows loose input requires verifiable owner-only
-access: the root must have a protected DACL, every file and directory must be
+Host access safety is a separate check, not identity metadata. Unix loose input
+MUST refuse group- or world-writable regular files and directories, including the
+selected root, and any setid or sticky modes. Windows loose input requires
+verifiable owner-only access: the root must have a protected DACL, every file and directory must be
 owned by the current user, and all permitted grants must name that owner. Child
 owner-only inheritance is allowed; broad explicit or inherited grants, unsupported
 ACLs/filesystems and reparse-backed content MUST refuse. No permission bypass or
-automatic ACL repair is implied. See [directory identity migration](docs/directory-identity.md)
+automatic ACL repair is implied. Platforms that are neither Unix nor Windows
+MUST refuse loose input with an unsupported-platform error until their security
+semantics are explicitly supported. See [directory identity migration](docs/directory-identity.md)
 for the v0.6.0 reader boundary and consumer digest comparisons.
 
 <a id="63-toolprovider-variants"></a>

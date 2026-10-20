@@ -77,6 +77,14 @@ jobs:
               raise SystemExit(f"Conformance gate failed: skipped={skipped}; missing passes={missing}")
           print(f"Conformance gate: {len(required)} required tests passed; no skips")
           PY
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+      - name: Unsupported platforms fail closed
+        run: |
+          GOOS=js GOARCH=wasm go test -count=1 -exec="$(go env GOROOT)/lib/wasm/go_js_wasm_exec" -run '^TestUnsupportedDirectorySecurity$' .
+          GOOS=plan9 GOARCH=amd64 go test -c -o "$RUNNER_TEMP/suite-plan9.test" .
+          GOOS=wasip1 GOARCH=wasm go test -c -o "$RUNNER_TEMP/suite-wasip1.test" .
       - name: Race detector
         run: go test -race -count=1 ./...
       - name: Vet
@@ -162,6 +170,11 @@ jobs:
                   "TestWindowsDirectorySecurityInheritance",
                   "TestWindowsDirectorySecurityInvalidHandle",
                   "TestWindowsDirectorySecurityJunction",
+              })
+          else:
+              required.update({
+                  "TestLooseDirectoryUnixSecurityRefusals",
+                  "TestLooseDirectoryUnixSafeDirectoryModes",
               })
           events = [json.loads(line) for line in Path(os.environ["TEST_RESULTS"]).read_text().splitlines()]
           passed = {event.get("Test") for event in events if event.get("Action") == "pass"}

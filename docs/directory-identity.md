@@ -12,10 +12,12 @@ payload entry uses its explicit inventory mode; conflicting declarations refuse.
 Directories use `0755`/size zero, and supported Unix symbolic links use `0777`.
 Host `chmod`, Windows readonly attributes and the process umask do not select
 canonical content modes. File types, bytes, digests, safe declarations and host
-access checks still matter. Unsafe Unix write permissions still refuse; Windows
+access checks still matter. Unix group/world write permissions and setid/sticky
+modes refuse on regular files and directories, including the selected root. Windows
 loose trees require a current-user owner, protected root DACL and owner-only
-file/directory grants, with no broad inherited access. Unknown security semantics
-fail closed. Validators do not repair ACLs or execute a declared executable.
+file/directory grants, with no broad inherited access. Platforms that are neither
+Unix nor Windows (including js/wasm, Plan 9 and WASI) refuse loose input with an
+explicit unsupported-platform error. Validators do not repair ACLs or execute a declared executable.
 The owner check uses the token's user SID, not its default group owner; Windows
 trees created with an Administrators-group owner, including some elevated-shell
 outputs, must be materialized with an explicit user owner before validation.

@@ -18,6 +18,13 @@ supported symbolic links to `0777`. Explicit ToolProvider payload inventories
 supply their declared modes. A host `chmod +x` alone no longer changes identity
 or grants executable content. Conflicting declared modes refuse.
 
+Inventory decoding now rejects missing or null required `path`, `type`, `mode`,
+`uid` and `gid` properties in both loose and archived inputs. Explicit zero mode
+and root ownership remain valid. Direct `encoding/json.Unmarshal` of an
+`InventoryEntry` also rejects unknown and duplicate properties. To repair malformed
+authored inventories, declare the required values and rebind the variant digest,
+provider descriptor and all ancestor descriptors; do not rewrite published artifacts.
+
 Loose-directory semantic `ContentDigest` values and supplemental content-record
 digests may change even when file bytes do not. Previously recorded loose
 identities must be recomputed under an explicitly selected reader version. A

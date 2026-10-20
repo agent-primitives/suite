@@ -49,6 +49,9 @@ type validator struct {
 	compositions             map[string]Composition
 	builds                   map[string]BuildProfile
 	runtimes                 map[string]RuntimeProfile
+	flowMode                 bool
+	flow                     *FlowV1Alpha1
+	flowDigest               string
 }
 
 func validateContent(content *contentSet) (*Report, error) {
@@ -57,6 +60,10 @@ func validateContent(content *contentSet) (*Report, error) {
 }
 
 func validateContentGraph(content *contentSet) (*validator, *Report, error) {
+	return validateContentGraphMode(content, false)
+}
+
+func validateContentGraphMode(content *contentSet, flowMode bool) (*validator, *Report, error) {
 	rawSuite, err := content.data("agentsuite.json")
 	if err != nil {
 		return nil, nil, err
@@ -67,6 +74,7 @@ func validateContentGraph(content *contentSet) (*validator, *Report, error) {
 	}
 	v := &validator{
 		content:                  content,
+		flowMode:                 flowMode,
 		suite:                    suite,
 		agents:                   map[string]Agent{},
 		toolProviders:            map[string]ToolProvider{},
@@ -89,6 +97,11 @@ func validateContentGraph(content *contentSet) (*validator, *Report, error) {
 	errs = append(errs, v.validateReferences())
 	if err := errors.Join(errs...); err != nil {
 		return nil, nil, err
+	}
+	if flowMode {
+		if err := v.validateFlowV1Alpha1(); err != nil {
+			return nil, nil, err
+		}
 	}
 	capabilities := derivedCapabilities(v.toolProviders)
 	agentPlatforms := make([]AgentPlatform, 0, len(v.agents))
@@ -155,7 +168,11 @@ func (v *validator) validateSuite() error {
 	if len(v.suite.BuildProfiles) == 0 {
 		errs = append(errs, errors.New("agentsuite.json must contain at least one build profile"))
 	}
-	errs = append(errs, validateExtensions(v.suite.Extensions))
+	if v.flowMode {
+		errs = append(errs, validateFlowExtensionsV1Alpha1(v.suite.Extensions))
+	} else {
+		errs = append(errs, validateExtensions(v.suite.Extensions))
+	}
 	return errors.Join(errs...)
 }
 
@@ -1214,6 +1231,10 @@ func exactVariant(variants []ToolProviderVariant, platform Platform) (ToolProvid
 }
 
 func validateExtensions(extensions []Extension) error {
+	return validateExtensionsMode(extensions, false)
+}
+
+func validateExtensionsMode(extensions []Extension, flowRoot bool) error {
 	var errs []error
 	seen := map[string]bool{}
 	for _, extension := range extensions {
@@ -1221,7 +1242,7 @@ func validateExtensions(extensions []Extension) error {
 			errs = append(errs, fmt.Errorf("extension %q is invalid or duplicated", extension.Name))
 		}
 		seen[extension.Name] = true
-		if extension.Critical {
+		if extension.Critical && !(flowRoot && extension.Name == FlowExtensionV1Alpha1) {
 			errs = append(errs, fmt.Errorf("unknown critical extension %q is unsupported", extension.Name))
 		}
 		if extension.Digest != "" && !IsValidDigest(extension.Digest) {

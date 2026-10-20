@@ -8,7 +8,7 @@ import { publishCatalog } from '../../scripts/schema-bundles.mjs'
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const repository = 'https://github.com/agent-primitives/suite'
 const sourceRef = process.env.GITHUB_SHA || 'main'
-const pages = ['index', 'schemas', 'conformance', 'go', 'releases', 'hosting', 'legacy-draft', 'directory-identity']
+const pages = ['index', 'schemas', 'conformance', 'go', 'releases', 'hosting', 'legacy-draft', 'directory-identity', 'experimental-flow']
 
 export default defineConfig({
   title: 'AgentSuite',
@@ -82,6 +82,7 @@ export default defineConfig({
       { text: 'Go usage', link: '/go' },
       { text: 'Versions and releases', link: '/releases' },
       { text: 'Directory identity migration', link: '/directory-identity' },
+      { text: 'Experimental flow', link: '/experimental-flow' },
       { text: 'Site hosting', link: '/hosting' }
     ],
     search: { provider: 'local' },

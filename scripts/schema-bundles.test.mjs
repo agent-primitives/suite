@@ -186,6 +186,20 @@ test('main accepts draft schemas while release checks, bundles and catalogs refu
   assert.throws(() => readCatalog(catalog));
 });
 
+test('experimental flow joins only a new minor inventory without mutating the old bundle', () => {
+  const previous = fixture().catalog;
+  const before = JSON.stringify(previous);
+  const name = 'kmx-flow-v1alpha1.schema.json';
+  const draft = { ...stable(3), [name]: schema(`https://suite.agent-primitives.dev/schema/draft/${name}`) };
+  assert.throws(() => createBundle('v0.3.0', commit, draft, previous));
+  const texts = { ...stable(3), [name]: schema(`https://suite.agent-primitives.dev/schema/v0.3/${name}`) };
+  const next = createBundle('v0.3.0', commit, texts, previous);
+  assert.deepEqual(Object.keys(next.entry.schemas), ['agent.schema.json', name]);
+  assert.equal(next.entry.schemas[name].sha256, hash(texts[name]));
+  assert.equal(JSON.stringify(previous), before);
+  assert.throws(() => createBundle('v0.2.1', commit, { ...stable(), [name]: schema(`https://suite.agent-primitives.dev/schema/v0.2/${name}`) }, previous));
+});
+
 test('legacy archives allow changed reused IDs without global stable-ID aliases', () => {
   const first = createBundle('v0.1.0', commit, legacy(), empty());
   const changed = { 'agent.schema.json': schema(JSON.parse(legacy()['agent.schema.json']).$id, { title: 'new' }) };

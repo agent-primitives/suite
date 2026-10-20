@@ -130,6 +130,10 @@ remain separate from the wire-1.0 promise.
 
 - [eval-evidence.schema.json](../schema/eval-evidence.schema.json): external, suite-bound evaluation records.
 
+## Experimental critical flow
+
+- [kmx-flow-v1alpha1.schema.json](../schema/kmx-flow-v1alpha1.schema.json): independently versioned critical payload; only the [fixed opt-in readers](experimental-flow.md) recognize it. This is not a new core manifest or runtime-support claim.
+
 ## Experimental execution and inference contracts
 
 - [inference.schema.json](../schema/inference.schema.json): experimental

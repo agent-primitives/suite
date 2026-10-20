@@ -8,7 +8,7 @@ import { publishCatalog } from '../../scripts/schema-bundles.mjs'
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const repository = 'https://github.com/agent-primitives/suite'
 const sourceRef = process.env.GITHUB_SHA || 'main'
-const pages = ['index', 'schemas', 'conformance', 'go', 'releases', 'hosting', 'legacy-draft']
+const pages = ['index', 'schemas', 'conformance', 'go', 'releases', 'hosting', 'legacy-draft', 'directory-identity']
 
 export default defineConfig({
   title: 'AgentSuite',
@@ -36,6 +36,8 @@ export default defineConfig({
         const relative = href.replace(/^\.\.\//, '')
         if (/^spec\.md(?:#|$)/.test(relative)) {
           token.attrSet('href', `/${relative}`)
+        } else if (/^docs\/[^/]+\.md(?:#|$)/.test(relative)) {
+          token.attrSet('href', `/${relative.slice('docs/'.length)}`)
         } else if (relative.startsWith('schema/')) {
           token.attrSet('href', relative === 'schema/' ? '/schemas' : `/${relative}`)
         } else if (relative.startsWith('testdata/')) {
@@ -79,6 +81,7 @@ export default defineConfig({
       { text: 'Conformance fixtures', link: '/conformance' },
       { text: 'Go usage', link: '/go' },
       { text: 'Versions and releases', link: '/releases' },
+      { text: 'Directory identity migration', link: '/directory-identity' },
       { text: 'Site hosting', link: '/hosting' }
     ],
     search: { provider: 'local' },

@@ -41,6 +41,7 @@ type contentSet struct {
 	folded         map[string]string
 	sourceType     string
 	artifactDigest string
+	declaredModes  map[string]uint32
 }
 
 func loadDirectory(root string) (*contentSet, error) {
@@ -58,6 +59,15 @@ func loadDirectory(root string) (*contentSet, error) {
 		return nil, err
 	}
 	defer rootHandle.Close()
+	rootFile, err := rootHandle.OpenFile(".", os.O_RDONLY|directoryReadFlags, 0)
+	if err != nil {
+		return nil, err
+	}
+	securityErr := checkDirectorySecurity(rootFile, true)
+	closeErr := rootFile.Close()
+	if err := errors.Join(securityErr, closeErr); err != nil {
+		return nil, err
+	}
 	count := 0
 	var total, retained int64
 	err = fs.WalkDir(rootHandle.FS(), ".", func(current string, _ fs.DirEntry, walkErr error) error {
@@ -83,12 +93,23 @@ func loadDirectory(root string) (*contentSet, error) {
 		if mode&(os.ModeSetuid|os.ModeSetgid|os.ModeSticky) != 0 {
 			return fmt.Errorf("%s has setid or sticky mode", name)
 		}
-		record := contentEntry{Path: name, Mode: uint32(mode.Perm()), Size: info.Size()}
+		record := contentEntry{Path: name, Size: info.Size()}
 		switch {
 		case mode.IsDir():
+			directory, err := rootHandle.OpenFile(current, os.O_RDONLY|directoryReadFlags, 0)
+			if err != nil {
+				return err
+			}
+			securityErr := checkDirectorySecurity(directory, false)
+			closeErr := directory.Close()
+			if err := errors.Join(securityErr, closeErr); err != nil {
+				return err
+			}
 			record.Type = "directory"
+			record.Mode = 0o755
+			record.Size = 0
 		case mode.IsRegular():
-			file, err := rootHandle.Open(current)
+			file, err := rootHandle.OpenFile(current, os.O_RDONLY|directoryReadFlags, 0)
 			if err != nil {
 				return err
 			}
@@ -101,13 +122,14 @@ func loadDirectory(root string) (*contentSet, error) {
 				file.Close()
 				return fmt.Errorf("%s changed while opening", name)
 			}
-			mode = openedInfo.Mode()
-			if mode&(os.ModeSetuid|os.ModeSetgid|os.ModeSticky) != 0 || mode.Perm()&0o022 != 0 {
+			if err := checkDirectorySecurity(file, false); err != nil {
 				file.Close()
-				return fmt.Errorf("%s has unsafe file mode", name)
+				return fmt.Errorf("%s: %w", name, err)
 			}
 			record.Type = "file"
-			record.Mode = uint32(mode.Perm())
+			// Host access permissions are not portable content metadata.
+			// Explicit payload inventories bind their declared modes during validation.
+			record.Mode = 0o644
 			record.Size = openedInfo.Size()
 			if record.Size < 0 || record.Size > maxContentBytes-total {
 				file.Close()
@@ -145,7 +167,11 @@ func loadDirectory(root string) (*contentSet, error) {
 			record.Digest = "sha256:" + hex.EncodeToString(hash.Sum(nil))
 			record.Data = data
 		case mode&os.ModeSymlink != 0:
+			if err := checkDirectoryLink(); err != nil {
+				return err
+			}
 			record.Type = "symlink"
+			record.Mode = 0o777
 			target, err := rootHandle.Readlink(current)
 			if err != nil {
 				return err

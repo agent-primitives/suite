@@ -556,6 +556,32 @@ identity. Duplicate names are rejected before canonicalization.
 A regular file digest is SHA-256 over its exact bytes. An inventory records
 type, mode, numeric owner, size, digest or link target, and component.
 
+For loose-directory inputs, canonical content metadata MUST NOT be inferred from
+host permission bits. Regular files default to mode `0644` (non-executable),
+directories to `0755` with size zero, and supported symbolic links to `0777`.
+A ToolProvider variant's explicit `files` inventory supplies the canonical mode
+for each declared payload entry, including executable bits. The declaration's
+mode MUST be safe under the existing inventory rules; conflicting declarations
+for one content path MUST refuse. Host executable bits alone MUST NOT promote a
+loose file to executable content. Consumers packaging loose inputs MUST use these
+defaults and declarations rather than infer tar modes from the host filesystem.
+
+These rules do not change archived content: an OCI content layer's tar modes
+remain authoritative and MUST match its declared inventory exactly. Validators
+MUST NOT normalize archived modes to the loose-directory defaults. Existing
+artifact bytes, OCI identities, JCS document identities and evidence subjects
+remain unchanged. Rebuilding loose input may produce a new artifact; it does not
+update or re-sign a previously published one.
+
+Host access safety is a separate check, not identity metadata. Unix unsafe-mode
+refusals remain in place. Windows loose input requires verifiable owner-only
+access: the root must have a protected DACL, every file and directory must be
+owned by the current user, and all permitted grants must name that owner. Child
+owner-only inheritance is allowed; broad explicit or inherited grants, unsupported
+ACLs/filesystems and reparse-backed content MUST refuse. No permission bypass or
+automatic ACL repair is implied. See [directory identity migration](docs/directory-identity.md)
+for the v0.6.0 reader boundary and consumer digest comparisons.
+
 <a id="63-toolprovider-variants"></a>
 
 #### 1.6.3 ToolProvider variants

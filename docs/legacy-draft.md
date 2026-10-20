@@ -48,6 +48,26 @@ images where applicable, re-evaluate and re-sign as needed. Evidence's own
 version and standalone policy versions are independent; existing evidence does
 not qualify a converted suite subject. This note changes no evidence checks.
 
+## v0.6.0 loose-directory reader exception
+
+The planned v0.6.0 minor release changes the loose-directory reader's content
+metadata, not the published archive or JSON grammar. Loose regular files default
+to non-executable `0644`; explicit payload inventories supply declared modes.
+Host permission bits no longer enter loose semantic `ContentDigest` or supplemental
+content-record identities. This is an explicit exception to frozen loose-reader
+identity behavior: select v0.5.0 when reproducing its host-mode-dependent loose
+results. Windows loose access additionally requires verified owner-only ACLs and
+refuses broad inherited grants or unsupported security/reparse semantics.
+
+Retained OCI artifacts still use their original tar modes, descriptors, JCS
+identities, signatures and evidence. The reader MUST NOT normalize those archived
+modes or silently rewrite an inventory to match new loose defaults. Rebuilding
+source under the new policy is a new artifact where packaged bytes change; obtain
+fresh proof for the new subject rather than reusing or editing old evidence.
+The [comparison inventory](directory-identity.md) and [release notes](releases.md)
+describe which identities change and which remain byte-for-byte authoritative.
+No wire field or schema byte changes are part of this reader exception.
+
 ## Historical fixtures and baseline exceptions
 
 A recorded offline probe on 2026-10-20 extracted the original `testdata/` trees

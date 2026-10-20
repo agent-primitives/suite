@@ -9,6 +9,17 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
+## Unreleased — experimental critical-flow reader
+
+Explicit `ValidatePathFlowV1Alpha1`, `ValidateDirectoryFlowV1Alpha1` and
+`VerifyEvaluationFlowV1Alpha1` APIs select the bounded critical-flow contract.
+See [experimental flow](experimental-flow.md) for identity, schema and conformance
+limits. Default readers, frozen draft grammar, evidence-v1 fields and published
+schema bundles remain unchanged. This is stored-graph/member-evidence validation,
+not runtime delegation, approval enforcement or whole-suite qualification.
+A new draft reference schema requires an available **minor** release and the
+ordinary immutable bundle/catalog publication procedure. No tag is selected here.
+
 ## [v0.5.0](https://github.com/agent-primitives/suite/releases/tag/v0.5.0) — 2026-10-19 — schema namespace and stricter validation
 
 ### Schema namespace

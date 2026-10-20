@@ -21,7 +21,7 @@ const referenceSchemaPrefix = "https://suite.agent-primitives.dev/schema/draft/"
 var referenceSchemaNames = []string{
 	"administrative-policy-v2.schema.json", "agent.schema.json", "build-profile.schema.json",
 	"composition.schema.json", "eval-case.schema.json", "eval-evidence.schema.json",
-	"eval-index.schema.json", "execution.schema.json", "inference.schema.json",
+	"eval-index.schema.json", "execution.schema.json", "inference.schema.json", "kmx-flow-v1alpha1.schema.json",
 	"policy-v2.schema.json", "runtime-profile.schema.json", "suite.schema.json",
 	"tool-provider-composition.schema.json", "tool-provider.schema.json",
 }

@@ -8,12 +8,12 @@ import { latestRelease } from './release.mjs'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const dist = path.join(root, 'docs/.vitepress/dist')
-const schemas = ['administrative-policy-v2', 'agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'execution', 'inference', 'policy-v2', 'runtime-profile', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
+const schemas = ['administrative-policy-v2', 'agent', 'build-profile', 'composition', 'eval-case', 'eval-evidence', 'eval-index', 'execution', 'inference', 'kmx-flow-v1alpha1', 'policy-v2', 'runtime-profile', 'suite', 'tool-provider-composition', 'tool-provider'].map(name => `${name}.schema.json`).sort()
 const html = name => readFile(path.join(dist, `${name}.html`), 'utf8')
 const catalog = JSON.parse(await readFile(path.join(root, 'docs/schema-catalog.json'), 'utf8'))
 
 test('all documentation pages render with root-based navigation and assets', async () => {
-  const pages = ['404', 'index', 'spec', 'schemas', 'conformance', 'go', 'releases', 'hosting', 'legacy-draft']
+  const pages = ['404', 'index', 'spec', 'schemas', 'conformance', 'go', 'releases', 'hosting', 'legacy-draft', 'experimental-flow']
   assert.deepEqual((await readdir(dist)).filter(name => name.endsWith('.html')).sort(), pages.map(name => `${name}.html`).sort())
   for (const page of pages) {
     const content = await html(page)
@@ -24,6 +24,15 @@ test('all documentation pages render with root-based navigation and assets', asy
   for (const word of ['AgentSuite', 'kmx', 'agentsessions', 'Orka', 'planned']) assert.ok(home.includes(word))
   assert.match(home, /href="\/spec"/)
   assert.match(home, /https:\/\/github.com\/agent-primitives\/suite/)
+})
+
+test('experimental flow documentation renders the explicit opt-in and runtime boundary', async () => {
+  const content = await html('experimental-flow')
+  for (const name of ['ValidatePathFlowV1Alpha1', 'ValidateDirectoryFlowV1Alpha1', 'VerifyEvaluationFlowV1Alpha1']) assert.ok(content.includes(name))
+  assert.ok(content.includes('/schema/kmx-flow-v1alpha1.schema.json'))
+  assert.ok(content.includes('not executable runtime qualification'))
+  assert.ok(content.includes('external serial runner'))
+  assert.ok((await html('spec')).includes('href="/experimental-flow"'))
 })
 
 test('the landing page exposes the format and release-first reading paths without JavaScript', async () => {

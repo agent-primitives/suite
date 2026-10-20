@@ -10,6 +10,10 @@ import (
 // claims: it does not authenticate the evaluator, observations, or clock.
 // Reader, path, JSON and authored-content errors are never included in refusals.
 func VerifyEvaluation(layoutPath string, expected ExpectedEvaluation, evidenceReader io.Reader) (*VerifiedEvaluation, error) {
+	return verifyEvaluation(layoutPath, expected, evidenceReader, false)
+}
+
+func verifyEvaluation(layoutPath string, expected ExpectedEvaluation, evidenceReader io.Reader, flowMode bool) (*VerifiedEvaluation, error) {
 	if !evidenceSubject(expected.Subject) || !evidenceExecution(expected.Execution) || !evidenceEvaluator(expected.Evaluator) {
 		return nil, evidenceRefuse("missing")
 	}
@@ -71,7 +75,7 @@ func VerifyEvaluation(layoutPath string, expected ExpectedEvaluation, evidenceRe
 	if _, err := readBlob(layoutPath, ociDescriptor{MediaType: manifest.MediaType, Digest: manifest.Digest, Size: manifest.Size}); err != nil {
 		return nil, evidenceRefuse("subject")
 	}
-	v, _, err := validateContentGraph(content)
+	v, _, err := validateContentGraphMode(content, flowMode)
 	if err != nil {
 		return nil, evidenceRefuse("artifact")
 	}

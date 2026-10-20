@@ -107,6 +107,11 @@ cross-field checks in [§1.5.3](#153-json-profile), still apply. Selecting an
 experimental record does not select a member's runtime, qualify a model or
 establish execution support; see [§6](#6-experimental-contracts).
 
+A separately selected critical `kmx.flow.v1alpha1` extension and its independent
+`coordination/flow.json` payload form the additional experimental boundary in
+[§6.3](#63-experimental-critical-flow). Default draft readers remain strict;
+this carve-out does not change the frozen core grammar or unknown-critical refusal.
+
 The stable-core promise includes closed field sets, required/optional/null
 distinctions and semantics, paths, descriptors, exact references, supported
 platforms, extension criticality, graph closure, JCS/file/variant digests, OCI
@@ -2183,7 +2188,8 @@ establish any runtime guarantee.
 
 ## 6. Experimental contracts
 
-This section collects the experimental inference and image-execution contracts referenced by Agents and Build profiles.
+This section collects explicitly selected experimental contracts; selecting a
+stored definition does not establish runtime enforcement or qualification.
 
 ### 6.1 Capability-based inference
 
@@ -2212,6 +2218,23 @@ image. If it does, the image declaration must agree with the selected build
 profile's serving contract. Native exact-model profiles must not be converted
 to capability-based image execution merely because their declared build inputs
 include a harness or execution record.
+
+### 6.3 Experimental critical flow
+
+The separately selected `kmx.flow.v1alpha1` root extension MUST be critical and
+bind the original JCS bytes at `coordination/flow.json`. Its closed, bounded
+`kmx.flow/v1alpha1` payload and fixed reader/member-verifier APIs are defined in
+[Experimental critical serial flow](docs/experimental-flow.md), with
+[kmx-flow-v1alpha1.schema.json](schema/kmx-flow-v1alpha1.schema.json).
+Core manifest versions and the default reader's critical-extension refusal remain
+unchanged. No extension stripping, graph rewrite or error-driven fallback is allowed.
+
+Only this experimental contract applies calling-session/per-edge outstanding
+invocation accounting, inherited ancestor-depth bounds and monotonic step/edge
+approval requirements; see its explicit runtime conformance vectors. It does not
+add `Agent.invokes[].approval` to the frozen draft. Runtime enforcement and
+whole-suite proof remain consumer-owned; unsupported delegation/gates MUST refuse.
+Stable graduation belongs to #30; this experimental delivery under #35 does not wait for it.
 
 <a id="15-conformance"></a>
 

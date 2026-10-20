@@ -35,6 +35,27 @@ test('pack reads exact tagged bytes, not changed working files, and emits a cata
   assert.equal(candidate.releases['v0.4.0'], 'archive/v0.4.0')
 })
 
+test('experimental flow is refused as a patch addition and retained in a new minor asset', t => {
+  const f = fixture(t, true)
+  assert.equal(f.run('pack', '--release', 'v0.5.0', '--out', f.out).status, 0)
+  writeFileSync(path.join(f.root, 'docs/schema-catalog.json'), readFileSync(path.join(f.out, 'catalog-candidate.json')))
+  const name = 'kmx-flow-v1alpha1.schema.json'
+  const text = minor => JSON.stringify({ $id: `https://suite.agent-primitives.dev/schema/v0.${minor}/${name}`, type: 'object', properties: { schemaVersion: { const: 'kmx.flow/v1alpha1' } } }) + '\n'
+  writeFileSync(path.join(f.root, 'schema', name), text(5))
+  f.git('add', '.'); f.git('commit', '-qm', 'new experimental schema'); f.git('tag', 'v0.5.1')
+  assert.notEqual(f.run('pack', '--release', 'v0.5.1', '--out', path.join(f.root, 'patch')).status, 0)
+  // Synthetic test tags only: no product release number is selected here.
+  writeFileSync(path.join(f.root, 'schema/suite.schema.json'), f.schema.replace('/v0.5/', '/v0.9/'))
+  writeFileSync(path.join(f.root, 'schema', name), text(9))
+  f.git('add', '.'); f.git('commit', '-qm', 'new minor inventory'); f.git('tag', 'v0.9.0')
+  const out = path.join(f.root, 'minor')
+  const packed = f.run('pack', '--release', 'v0.9.0', '--out', out)
+  assert.equal(packed.status, 0, packed.stderr)
+  const asset = JSON.parse(readFileSync(path.join(out, 'schemas-v0.9.0.json')))
+  assert.equal(asset.schemas[name], text(9))
+  assert.equal(asset.schemas['suite.schema.json'], f.schema.replace('/v0.5/', '/v0.9/'))
+})
+
 test('pack refuses executable link entries and malformed release inputs', t => {
   const f = fixture(t)
   symlinkSync('../docs/schema-catalog.json', path.join(f.root, 'schema/link.schema.json'))

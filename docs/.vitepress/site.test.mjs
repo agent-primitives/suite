@@ -13,7 +13,7 @@ const html = name => readFile(path.join(dist, `${name}.html`), 'utf8')
 const catalog = JSON.parse(await readFile(path.join(root, 'docs/schema-catalog.json'), 'utf8'))
 
 test('all documentation pages render with root-based navigation and assets', async () => {
-  const pages = ['404', 'index', 'spec', 'schemas', 'conformance', 'go', 'releases', 'hosting']
+  const pages = ['404', 'index', 'spec', 'schemas', 'conformance', 'go', 'releases', 'hosting', 'legacy-draft']
   assert.deepEqual((await readdir(dist)).filter(name => name.endsWith('.html')).sort(), pages.map(name => `${name}.html`).sort())
   for (const page of pages) {
     const content = await html(page)

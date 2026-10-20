@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/v0.5/inference.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/draft/inference.schema.json",
   "title": "Inference capability requirements",
   "$comment": "Full conformance also requires outputTokens <= contextTokens, checked by semantic validation. Standard JSON Schema cannot compare sibling numeric values.",
   "type": "object",

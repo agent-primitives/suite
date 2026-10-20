@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/v0.5/execution.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/draft/execution.schema.json",
   "title": "Agent image execution contract",
   "$comment": "Full conformance also requires semantic validation: input names and environment destinations must each be unique. JSON Schema cannot express uniqueness by a selected property.",
   "type": "object",

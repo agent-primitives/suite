@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/v0.5/eval-case.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/draft/eval-case.schema.json",
   "title": "AgentSuite authored evaluation case",
   "type": "object",
   "additionalProperties": false,

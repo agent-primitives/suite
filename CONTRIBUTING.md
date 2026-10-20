@@ -149,10 +149,10 @@ new wire-format version or every behavior of a validator/library release.
 
 The [schema identity contract](spec.md#54-schema-identity-and-contract-selection)
 defines the target `https://suite.agent-primitives.dev/schema/v0.N/` namespace.
-The initial namespace move is prepared for v0.5.0, a minor release. Historical
-release bytes, IDs and hosting remain unchanged; the current release-preparation
-commit carries `/schema/v0.5/` IDs until main returns to drafts before further
-schema development.
+The initial namespace move shipped in v0.5.0, a minor release. Its
+`/schema/v0.5/` bundle is frozen; main uses unstable `/schema/draft/` IDs for
+further schema development. Historical release bytes, IDs and hosting remain
+unchanged.
 
 After migration, each minor release freezes a complete schema bundle. A patch
 release MUST NOT change any schema bytes or inventory, including IDs, relative

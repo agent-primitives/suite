@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/draft/tool-provider-composition.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/v0.6/tool-provider-composition.schema.json",
   "title": "AgentSuite ToolProvider composition manifest",
   "description": "The closed, digest-pinned build input for one standalone ToolProvider Sandbox Image.",
   "type": "object",

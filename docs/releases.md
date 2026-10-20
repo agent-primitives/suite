@@ -9,60 +9,125 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
-## Unreleased — experimental critical-flow reader
+## v0.6.0 — planned — portable loose-directory identity and experimental flow
 
-Explicit `ValidatePathFlowV1Alpha1`, `ValidateDirectoryFlowV1Alpha1` and
-`VerifyEvaluationFlowV1Alpha1` APIs select the bounded critical-flow contract.
-See [experimental flow](experimental-flow.md) for identity, schema and conformance
-limits. Default readers, frozen draft grammar, evidence-v1 fields and published
-schema bundles remain unchanged. This is stored-graph/member-evidence validation,
-not runtime delegation, approval enforcement or whole-suite qualification.
-A new draft reference schema requires an available **minor** release and the
-ordinary immutable bundle/catalog publication procedure. No tag is selected here.
+### Portable loose-directory identity
 
-## v0.6.0 — planned — portable loose-directory content identity
+This minor release intentionally changes loose-directory content identity. Host
+permissions no longer select canonical content modes: ordinary files default to
+non-executable `0644`, directories to `0755` with size zero, and supported Unix
+symbolic links to `0777`. Explicit ToolProvider payload inventories supply their
+declared modes; conflicting declarations refuse. A host `chmod +x` alone no
+longer changes content identity or declares an executable.
 
-This is a **minor**, intentionally breaking loose-directory identity change.
-Canonical content metadata no longer comes from host permission bits: regular
-files default to non-executable `0644`, directories to `0755`/size zero, and
-supported symbolic links to `0777`. Explicit ToolProvider payload inventories
-supply their declared modes. A host `chmod +x` alone no longer changes identity
-or grants executable content. Conflicting declared modes refuse.
+This separates portable content metadata from host access controls, so the same
+loose content does not acquire different identities from Unix permissions,
+umask or synthesized Windows permission bits. Unsafe host access still refuses.
+Unix access checks remain separate: group/world-writable regular files and
+directories, including the selected root, and setid/sticky modes refuse.
+Platforms that are neither Unix nor Windows refuse loose input with an explicit
+unsupported-platform error. Windows loose trees require a current-user
+owner, a protected root DACL and owner-only file/directory grants, with no broad
+inherited access. Unsupported or unverifiable ACLs, filesystem security and
+reparse-backed content refuse; caller-selected root aliases still resolve before
+validation. Validation does not repair ACLs. Windows security checks add
+`golang.org/x/sys v0.46.0` to the Go module dependency graph.
 
-Inventory decoding now rejects missing or null required `path`, `type`, `mode`,
-`uid` and `gid` properties in both loose and archived inputs. Explicit zero mode
+Loose `ContentDigest` values and supplemental content-record digests may change
+even when file bytes do not. Recompute saved loose results with an explicitly
+selected reader version; use v0.5.0 to reproduce its host-mode-dependent loose
+identities. Older OCI archives with non-default undeclared modes may legitimately
+differ from the new loose view.
+
+**Published artifacts are untouched.** OCI layers retain their original tar
+metadata and exact inventory comparisons. Existing byte/JCS/OCI digest
+definitions, wire fields, signatures and evidence are not normalized or relabelled.
+Verify an existing artifact from its original OCI representation, not a rebuilt
+loose tree.
+
+Rebuilds may produce new packaged bytes and digests. When they do, regenerate
+affected descriptors and derived bindings/images, and obtain fresh evaluation,
+approval and signing for the new exact subject as required. Do not edit old
+receipts or reuse proof for a different subject. Consumers must migrate their
+loose packagers and invalidate preparation caches when packaging output changes;
+upgrading this library alone does not make a downstream packager portable.
+The migration inventory in `docs/directory-identity.md` records these boundaries.
+Native create → eval → lift qualification remains downstream work.
+
+### Presence-sensitive inventory validation
+
+Inventory decoding rejects missing or null required `path`, `type`, `mode`,
+`uid` and `gid` properties in both loose and archived input. Explicit zero mode
 and root ownership remain valid. Direct `encoding/json.Unmarshal` of an
-`InventoryEntry` also rejects unknown and duplicate properties. To repair malformed
-authored inventories, declare the required values and rebind the variant digest,
-provider descriptor and all ancestor descriptors; do not rewrite published artifacts.
+`InventoryEntry` also rejects unknown and duplicate properties. These malformed
+inventories could previously pass after decoding erased property presence; this
+minor release closes that acceptance gap without changing schema constraints.
 
-Loose-directory semantic `ContentDigest` values and supplemental content-record
-digests may change even when file bytes do not. Previously recorded loose
-identities must be recomputed under an explicitly selected reader version. A
-rebuild using these rules produces a newly packaged artifact where output bytes
-change; update affected descriptors and obtain fresh evaluation/signing for that
-new subject as required. Do not rewrite existing receipts to authorize it.
+To repair malformed authored inventories, declare the required values and rebind
+the variant digest, provider descriptor and all ancestor descriptors. Do not
+rewrite published artifacts. Valid retained OCI artifacts and their identities
+remain unchanged; malformed archived inputs may now refuse.
 
-Published OCI artifacts continue to use their original tar modes and exact
-inventory comparisons. Existing OCI/JCS digests, wire fields, schema bytes and
-historical signatures/evidence are not relabelled, normalized or re-signed.
-Archive and loose-directory comparisons may legitimately differ when an older
-archive carries non-default modes not declared by the source manifests. Select
-the original OCI artifact when reproducing or verifying that artifact's identity.
+### Experimental opt-in flow
 
-Unix host access checks remain separate from content modes. Windows loose
-input uses handle-based owner/DACL checks, not synthesized POSIX permissions:
-owner-only grants, a protected root, and no inherited broad grants. Unsupported
-or unverifiable ACLs, filesystem security and reparse-backed entries refuse;
-validation never repairs input ACLs. Windows CI exercises these refusal paths;
-it is not Docker Desktop, kind or runtime qualification.
+The `kmx.flow.v1alpha1` critical extension adds a bounded two-step flow contract
+at `coordination/flow.json`. Explicit `ValidatePathFlowV1Alpha1`,
+`ValidateDirectoryFlowV1Alpha1` and `VerifyEvaluationFlowV1Alpha1` APIs opt in;
+default readers refuse artifacts carrying this critical extension. This validates
+stored graphs and member evidence, not runtime delegation, approval enforcement
+or whole-suite success. The frozen core draft grammar and evidence-v1 fields
+remain unchanged. Stable graduation is tracked by
+[#30](https://github.com/agent-primitives/suite/issues/30).
 
-The [migration inventory](directory-identity.md) distinguishes every identified
-suite/kmx loose-to-recorded comparison from unchanged byte/JCS/OCI/provenance
-checks and records the required consumer packaging/cache follow-up. The
-[frozen draft reader note](legacy-draft.md#v060-loose-directory-reader-exception)
-records this explicit reader-version exception. This section describes unreleased
-development; maintainers own release and schema-catalog preparation.
+### Fresh v0.6 schema namespace
+
+All 15 reference schemas use
+`https://suite.agent-primitives.dev/schema/v0.6/` plus their actual filenames,
+including `policy-v2.schema.json`, `administrative-policy-v2.schema.json` and
+the new experimental `kmx-flow-v1alpha1.schema.json`. Select the complete v0.6.0 bundle in offline editor/validator registries; keep
+historical bundles separate, without global old-to-latest aliases. The v0.5
+bundle remains byte-for-byte frozen.
+
+The namespace change does not change wire versions, media types, instance bytes
+or validation constraints. Schema annotations also clarify the existing stable
+core and experimental branches. The loose-reader identity change above is a
+separate library behavior change, not a consequence of schema selection.
+Minor releases freeze fresh IDs; patches must preserve their minor's entire
+schema inventory and bytes, including IDs and whitespace. Canonical URL
+availability requires the release asset, reviewed catalog and verified Pages
+deployment; source IDs alone do not publish URLs. Validation remains offline.
+
+### Stability and legacy-reader boundaries
+
+The specification now names the intended wire-1.0 stable core and existing
+experimental inference/execution branches. This is not a wire-1.0 release:
+`1.0.0-draft` remains the Suite document version. Optional runtime profiles do
+not establish runtime support, and unknown fields still refuse in closed readers.
+
+The strict legacy draft grammar and acceptance baseline is documented at
+`85da5faf6eaf400df2edeb401c194c11fe023b74`, distributed as v0.5.0 with schema
+root-ID differences. New regression tests pin its version grammar and reader
+boundary, including draft spellings that are not full SemVer. The loose-reader
+identity change above is an explicit v0.6 exception; retained OCI identities and
+historical proof remain authoritative. No dual-reader API, stable writer default
+or automatic migration is introduced. The inventory-presence correction above
+also tightens malformed-input acceptance; it does not redefine valid draft grammar.
+
+### Verification infrastructure
+
+Fixture helpers explicitly restore declared permissions after creation, so
+restrictive umasks do not corrupt test inventories. CI adds a full umask-077
+Go test leg, portable-identity checks on Linux/macOS/Windows and native Windows
+security acceptance/refusal coverage. These are offline library checks, not
+runtime or deployment qualification.
+
+Local js/wasm verification required a minimal child environment because Go's wasm
+launcher rejected the inherited command/environment size before test execution.
+The same check passed with the minimal environment; no product or test change
+was needed.
+
+This section describes unreleased development. Release assets, the reviewed catalog
+and canonical URL verification remain separate publication steps.
 
 ## [v0.5.0](https://github.com/agent-primitives/suite/releases/tag/v0.5.0) — 2026-10-19 — schema namespace and stricter validation
 

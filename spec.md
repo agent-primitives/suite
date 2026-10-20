@@ -515,10 +515,14 @@ retain their minor's entire schema inventory and bytes, including IDs; any
 schema change requires a new minor. Wire-format versions remain independent of schema IDs and module
 tags; breaking wire semantics require separate format/media-version review.
 
-**Drafts and transition.** The reviewed v0.5.0 release preparation assigns
-minor-scoped IDs to the `schema/` files; canonical URL publication still requires
-release assets, the catalog and site deployment. The first namespace
-move MUST ship in a minor release. After migration, main uses unstable
+**Drafts and transition.** The first minor-scoped bundle shipped in v0.5.0
+with frozen `/schema/v0.5/` IDs. The first namespace move MUST ship in a minor
+release. This reviewed v0.6.0 release preparation assigns
+`https://suite.agent-primitives.dev/schema/v0.6/<filename>.schema.json` IDs to
+all 15 current reference schemas, including the experimental flow schema.
+This identifies the release-source namespace; canonical URL publication still
+requires release assets, the reviewed catalog and site deployment. Outside
+release preparation, main uses unstable
 `https://suite.agent-primitives.dev/schema/draft/<filename>.schema.json` IDs,
 which are not immutable contracts and MUST NOT enter the release catalog.
 The reviewed minor-release commit rewrites draft IDs to its minor namespace;

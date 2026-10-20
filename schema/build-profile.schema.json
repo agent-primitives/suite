@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/draft/build-profile.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/v0.6/build-profile.schema.json",
   "title": "Agent Sandbox Image build profile",
   "type": "object",
   "additionalProperties": false,

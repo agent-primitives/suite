@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/v0.6/inference.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/draft/inference.schema.json",
   "title": "Inference capability requirements",
   "description": "Experimental requirements selected by Agent.model.capabilities, with api openai-chat-completions-v1; outside the intended wire-1.0 stable core. See spec sections 1.1.1 and 6.1.",
   "$comment": "Full conformance also requires outputTokens <= contextTokens, checked by semantic validation. Standard JSON Schema cannot compare sibling numeric values.",

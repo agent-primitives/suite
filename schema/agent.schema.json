@@ -27,7 +27,7 @@
       "properties": {
         "protocol": {"type": "string", "minLength": 1},
         "model": {"type": "string", "minLength": 1},
-        "capabilities": {"$ref": "inference.schema.json"},
+        "capabilities": {"description": "Experimental capability-based inference branch; see spec section 1.1.1. Does not qualify a model or select a runtime.", "$ref": "inference.schema.json"},
         "endpointEnv": {"$ref": "#/$defs/env"},
         "secretRefs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}
       }

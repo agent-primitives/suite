@@ -18,8 +18,10 @@ execution across runtimes.
 
 The [specification](spec.md) is a draft. The module is pre-1.0; see the
 [compatibility and release policy](CONTRIBUTING.md#release-policy) before adopting
-or changing the contract. [Execution and inference contracts](docs/schemas.md#experimental-execution-and-inference-contracts)
-are experimental; validation does not establish runtime support.
+or changing the contract. The [stability boundaries](spec.md#111-stability-boundaries-and-compatibility)
+define the intended wire-1.0 stable core, not a released stable format.
+[Capability-based inference, build-profile execution and the AgentKit configuration mapping](docs/schemas.md#experimental-execution-and-inference-contracts)
+remain experimental; validation does not establish runtime support.
 
 - [kmx](https://kaimahi.dev/) uses AgentSuite for
   [packaging and validation](https://github.com/kaimahi-agents/kaimahi/tree/1617117e6b73fc00403ba59e6edecbe05fa58dc1/internal/kmx/agentsuite/oras);

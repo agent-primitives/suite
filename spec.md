@@ -64,6 +64,92 @@ This draft specifies:
   image;
 - suite, sandbox-image, and runtime conformance classes.
 
+#### 1.1.1 Stability boundaries and compatibility
+
+This specification remains `1.0.0-draft`. The table defines the scope of the
+intended wire-`1.0.0` stability promise, not a declaration that stable documents,
+dual readers or runtime support have shipped. “Stable core” below means that
+planned promise; it does not make the current draft immutable. Optional fields
+are not experimental unless listed as such.
+
+Paths below are document-relative, prefixed by the document type; `[]` means an
+array item. A whole-document row covers every declared field and nested record,
+subject only to the experimental exceptions listed below. It does not permit
+unknown fields. The ten manifest families are:
+
+| Stable-core family | Field scope | Reference schema or normative definition |
+| --- | --- | --- |
+| Suite | `Suite`, including `Suite.toolProviderCatalog`, content references and derived `Suite.capabilities` | [suite.schema.json](schema/suite.schema.json) |
+| Agent | `Agent`, except `Agent.model.capabilities`; includes the exact-model branch and embedded `Agent.policy` reference | [agent.schema.json](schema/agent.schema.json) |
+| ToolProvider catalog | `ToolProviderCatalog`, including `ToolProviderCatalog.toolProviders[]` | [ToolProvider catalog](#231-toolprovider-catalog); no standalone reference schema |
+| ToolProvider | `ToolProvider`, including embedded `ToolProvider.tools[]`, variants and dependencies | [tool-provider.schema.json](schema/tool-provider.schema.json) |
+| Agent composition | `Composition` | [composition.schema.json](schema/composition.schema.json) |
+| ToolProvider composition | `ToolProviderComposition` | [tool-provider-composition.schema.json](schema/tool-provider-composition.schema.json) |
+| Build profile | `BuildProfile`, except `BuildProfile.execution` | [build-profile.schema.json](schema/build-profile.schema.json) |
+| Runtime profile | `RuntimeProfile`, including `RuntimeProfile.configurationABI` | [runtime-profile.schema.json](schema/runtime-profile.schema.json) |
+| Evaluation index | `EvaluationIndex` | [eval-index.schema.json](schema/eval-index.schema.json) |
+| Evaluation case | `EvaluationCase`, including authored assertions | [eval-case.schema.json](schema/eval-case.schema.json) |
+
+Tools and `Agent.policy` are embedded fields, not additional manifest families.
+Runtime-profile metadata pins requirements; `RuntimeProfile.configurationABI`
+is an opaque consumer-owned identifier, not the AgentKit mapping below. Opaque
+configuration contents and actual implementation support remain consumer-owned.
+
+| Experimental boundary | Reference schema | Existing opt-in and profile selectors |
+| --- | --- | --- |
+| `Agent.model.capabilities` and all its fields | [agent.schema.json](schema/agent.schema.json) → [inference.schema.json](schema/inference.schema.json) | Capability-based branch selected by `model.capabilities`, with `model.capabilities.api = "openai-chat-completions-v1"`; see [§6.1](#61-capability-based-inference) |
+| `BuildProfile.execution` and all its fields | [build-profile.schema.json](schema/build-profile.schema.json) → [execution.schema.json](schema/execution.schema.json) | Image-serving record selected by `execution`, with `execution.kind = "http-v1"` and `execution.protocol = "openai-chat-v1"`; see [§6.2](#62-image-execution-contract) |
+| AgentKit mounted configuration mapping, `BuildProfile.execution.configuration` | [execution.schema.json](schema/execution.schema.json), `configuration` property | Explicit `execution.configuration = "agentkit-v0-mounted-v1"`; a narrower experimental adapter ABI within the experimental execution record |
+
+These are existing document branches and profile selectors, not new instance
+flags. Their existing shape and semantic requirements, including presence and
+cross-field checks in [§1.5.3](#153-json-profile), still apply. Selecting an
+experimental record does not select a member's runtime, qualify a model or
+establish execution support; see [§6](#6-experimental-contracts).
+
+The stable-core promise includes closed field sets, required/optional/null
+distinctions and semantics, paths, descriptors, exact references, supported
+platforms, extension criticality, graph closure, JCS/file/variant digests, OCI
+envelope rules and the normative [sandbox-binding requirements](#28-agent-sandbox-binding).
+The builder-owned sandbox-binding reference schema remains externally maintained;
+that ownership does not remove the normative requirements in this specification.
+
+Portable evidence and standalone policies retain their independent contracts:
+evidence uses `schemaVersion: "1.0.0"`, with
+[eval-evidence.schema.json](schema/eval-evidence.schema.json); policies use
+`agentsuite.policy/v1` or `agentsuite.policy/v2`, with their existing digest
+framing and [normative policy definitions](#52-standalone-policy-contracts-normative).
+The policy-v2 reference schemas are [policy-v2.schema.json](schema/policy-v2.schema.json)
+and [administrative-policy-v2.schema.json](schema/administrative-policy-v2.schema.json).
+The stability boundary does not rename these contracts or imply authenticated
+evidence, policy enforcement or portable execution.
+
+**Compatibility policy for wire `1.0.0`.** Revisions MUST preserve the meaning
+and identity of existing stable documents. Experimental revisions MUST NOT
+silently change stable fields, canonical identity rules or refusal behavior.
+Breaking stable semantics require explicit format/media-version review, not
+an experimental label. Deferred features remain refused; status labels do not
+add ad-hoc flags to closed documents.
+
+A future optional field is not automatically compatible with an old closed
+reader: [§1.5.3](#153-json-profile) already requires unknown-property refusal.
+Producers MUST select a contract and reader that support the fields they emit;
+optional means omissible under that contract, not ignorable by older readers.
+Removing an unknown field or normalizing received bytes is not a compatibility
+mechanism: it changes the artifact and its identity.
+
+Under the stable policy, a manifest graph MUST NOT mix `1.0.0-draft` and
+`1.0.0` manifest versions. This states the migration policy; it neither adds
+stable-version acceptance nor changes current draft acceptance. Evidence's own
+version and standalone policy versions are independent of that graph rule.
+Reader implementation and migration verification remain separate release gates.
+
+Wire versions, Go module releases and schema namespaces are independent, as
+specified in [§1.5.4](#154-schema-identity-and-contract-selection). Go API and
+semantic-diff API/report compatibility remain on the module-release axis,
+outside the wire-`1.0.0` promise. These status labels do not change accepted
+document shapes, literals, canonicalization, digests or producer defaults.
+
 <a id="3-artifact-model"></a>
 
 ### 1.2 Artifact model

@@ -50,7 +50,7 @@ not qualify a converted suite subject. This note changes no evidence checks.
 
 ## v0.6.0 loose-directory reader exception
 
-The planned v0.6.0 minor release changes the loose-directory reader's content
+The v0.6.0 minor release changes the loose-directory reader's content
 metadata, not the published archive or JSON grammar. Loose regular files default
 to non-executable `0644`; explicit payload inventories supply declared modes.
 Host permission bits no longer enter loose semantic `ContentDigest` or supplemental

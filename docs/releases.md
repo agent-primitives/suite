@@ -9,6 +9,50 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
+## v0.6.0 — planned — portable loose-directory content identity
+
+This is a **minor**, intentionally breaking loose-directory identity change.
+Canonical content metadata no longer comes from host permission bits: regular
+files default to non-executable `0644`, directories to `0755`/size zero, and
+supported symbolic links to `0777`. Explicit ToolProvider payload inventories
+supply their declared modes. A host `chmod +x` alone no longer changes identity
+or grants executable content. Conflicting declared modes refuse.
+
+Inventory decoding now rejects missing or null required `path`, `type`, `mode`,
+`uid` and `gid` properties in both loose and archived inputs. Explicit zero mode
+and root ownership remain valid. Direct `encoding/json.Unmarshal` of an
+`InventoryEntry` also rejects unknown and duplicate properties. To repair malformed
+authored inventories, declare the required values and rebind the variant digest,
+provider descriptor and all ancestor descriptors; do not rewrite published artifacts.
+
+Loose-directory semantic `ContentDigest` values and supplemental content-record
+digests may change even when file bytes do not. Previously recorded loose
+identities must be recomputed under an explicitly selected reader version. A
+rebuild using these rules produces a newly packaged artifact where output bytes
+change; update affected descriptors and obtain fresh evaluation/signing for that
+new subject as required. Do not rewrite existing receipts to authorize it.
+
+Published OCI artifacts continue to use their original tar modes and exact
+inventory comparisons. Existing OCI/JCS digests, wire fields, schema bytes and
+historical signatures/evidence are not relabelled, normalized or re-signed.
+Archive and loose-directory comparisons may legitimately differ when an older
+archive carries non-default modes not declared by the source manifests. Select
+the original OCI artifact when reproducing or verifying that artifact's identity.
+
+Unix host access checks remain separate from content modes. Windows loose
+input uses handle-based owner/DACL checks, not synthesized POSIX permissions:
+owner-only grants, a protected root, and no inherited broad grants. Unsupported
+or unverifiable ACLs, filesystem security and reparse-backed entries refuse;
+validation never repairs input ACLs. Windows CI exercises these refusal paths;
+it is not Docker Desktop, kind or runtime qualification.
+
+The [migration inventory](directory-identity.md) distinguishes every identified
+suite/kmx loose-to-recorded comparison from unchanged byte/JCS/OCI/provenance
+checks and records the required consumer packaging/cache follow-up. The
+[frozen draft reader note](legacy-draft.md#v060-loose-directory-reader-exception)
+records this explicit reader-version exception. This section describes unreleased
+development; maintainers own release and schema-catalog preparation.
+
 ## [v0.5.0](https://github.com/agent-primitives/suite/releases/tag/v0.5.0) — 2026-10-19 — schema namespace and stricter validation
 
 ### Schema namespace

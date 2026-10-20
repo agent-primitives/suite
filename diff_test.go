@@ -263,7 +263,7 @@ func TestDiffPathsReportsSupplementalContentAcrossOCILayouts(t *testing.T) {
 	}
 }
 
-func TestDiffPathsReportsSupplementalMetadataAlongsideOtherChanges(t *testing.T) {
+func TestDiffPathsIgnoresHostModeAlongsideByteChanges(t *testing.T) {
 	before := writeMinimalSuite(t)
 	after := writeMinimalSuite(t)
 	for _, root := range []string{before, after} {
@@ -283,7 +283,9 @@ func TestDiffPathsReportsSupplementalMetadataAlongsideOtherChanges(t *testing.T)
 	if err != nil {
 		t.Fatalf("DiffPaths() error = %v", err)
 	}
-	assertDiffField(t, report, "content", "same.txt", "mode", "420", "493")
+	if hasRecordChange(report, DiffModified, "content", "same.txt") {
+		t.Fatal("host executable bits changed loose content identity")
+	}
 	if !hasRecordChange(report, DiffModified, "content", "other.txt") {
 		t.Fatalf("other supplemental content change is absent: %+v", report.Changes)
 	}

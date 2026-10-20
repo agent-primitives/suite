@@ -159,7 +159,13 @@ func TestFlowV1Alpha1GraphRefusals(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			mustWrite(t, root, "coordination/flow.json", append(b, '\n'))
+			// Keep the raw binding valid so this reaches the canonical-storage check.
+			b = append(b, '\n')
+			mustWrite(t, root, "coordination/flow.json", b)
+			var s Suite
+			readStrictJSON(t, filepath.Join(root, "agentsuite.json"), &s)
+			s.Extensions[len(s.Extensions)-1].Digest = digestBytes(b)
+			mustWriteJSON(t, root, "agentsuite.json", MediaTypeSuite, s)
 		},
 		"extra file": func(t *testing.T, root string) { mustWrite(t, root, "coordination/extra.json", []byte("{}")) },
 		"extra directory": func(t *testing.T, root string) {

@@ -26,7 +26,7 @@ diagnostic API is required.
 | v0.4.0 | [v0.4.0/schema](https://github.com/agent-primitives/suite/tree/v0.4.0/schema) | Runtime profiles |
 | v0.5.0 | [v0.5.0/schema](https://github.com/agent-primitives/suite/tree/v0.5.0/schema) | Frozen minor-scoped schema IDs |
 | v0.6.0 | [v0.6.0/schema](https://github.com/agent-primitives/suite/tree/v0.6.0/schema) | Portable loose-directory identity and opt-in experimental flow |
-| main (current release source) | [schema/](https://github.com/agent-primitives/suite/tree/main/schema) | Released v0.6 IDs until draft restoration; downloads below |
+| main (current draft source) | [schema/](https://github.com/agent-primitives/suite/tree/main/schema) | Unstable draft IDs for further development; downloads below |
 
 The site downloads track main, not the latest release. The historical
 kaimahi.dev `$id` URLs are not a reliable way to retrieve the selected contract:
@@ -36,9 +36,8 @@ that historical ID cannot validate a v0.4.0 Agent with a policy binding.
 The [schema identity contract](../spec.md#54-schema-identity-and-contract-selection)
 defines the minor-scoped namespace. The released v0.5.0 and v0.6.0 bundles use
 frozen `/schema/v0.5/` and `/schema/v0.6/` IDs and are listed in the catalog below.
-Main currently uses the released v0.6 IDs; its downloads still track main, not an
-immutable tag. Main returns to unstable `/schema/draft/` IDs before further
-schema development.
+Main uses unstable `/schema/draft/` IDs for further development; its downloads
+track main, not an immutable tag.
 An ID in source does not mean its URL is published: the asset workflow,
 reviewed catalog update and site deployment are separate steps. Manual tags
 do not publish schema assets; maintainers prepare them with the separate
@@ -168,12 +167,13 @@ See the [normative policy contract](../spec.md#appendix-b-standalone-policy-cont
 ## Validation and identity
 
 All use JSON Schema 2020-12. Each current schema ID is
-`https://suite.agent-primitives.dev/schema/v0.6/` plus its actual filename,
+`https://suite.agent-primitives.dev/schema/draft/` plus its actual filename,
 including `policy-v2.schema.json`, `administrative-policy-v2.schema.json` and
-`kmx-flow-v1alpha1.schema.json`. These IDs identify the v0.6.0 release contract,
-including the opt-in experimental flow schema. Use the complete tagged bundle
-for pinned validation constraints. Schema-document identity is separate from
-instance versions, media types and artifact digests. The unversioned main
+`kmx-flow-v1alpha1.schema.json`. These unstable IDs include the opt-in
+experimental flow schema; they do not identify the frozen v0.6.0 release
+contract. Use the complete tagged bundle for pinned validation constraints.
+Schema-document identity is separate from instance versions, media types and
+artifact digests. The unversioned main
 downloads do not establish canonical URL availability. Historical
 kaimahi.dev IDs and hosted v0.1.0 bytes remain unchanged; older releases must
 still be selected with their own complete schema bundle.

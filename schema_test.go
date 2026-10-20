@@ -16,7 +16,7 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 )
 
-const referenceSchemaPrefix = "https://suite.agent-primitives.dev/schema/v0.6/"
+const referenceSchemaPrefix = "https://suite.agent-primitives.dev/schema/draft/"
 
 var referenceSchemaNames = []string{
 	"administrative-policy-v2.schema.json", "agent.schema.json", "build-profile.schema.json",
@@ -63,8 +63,8 @@ func TestReferenceSchemaResolutionRefusesUnknownResourcesOffline(t *testing.T) {
 		"https://kaimahi.dev/schemas/agentsuite/v1/suite.schema.json",
 		"https://suite.agent-primitives.dev/schema/v0.4/suite.schema.json",
 		"https://suite.agent-primitives.dev/schema/v0.5/suite.schema.json",
-		"https://suite.agent-primitives.dev/schema/draft/suite.schema.json",
-		"https://suite.agent-primitives.dev.evil.invalid/schema/v0.6/suite.schema.json",
+		"https://suite.agent-primitives.dev/schema/v0.6/suite.schema.json",
+		"https://suite.agent-primitives.dev.evil.invalid/schema/draft/suite.schema.json",
 		referenceSchemaPrefix + "unknown.schema.json",
 		referenceSchemaPrefix + "suite.schema.json?other=1",
 		"file:///schema/suite.schema.json",

@@ -157,9 +157,9 @@ for (const colorScheme of ['light', 'dark']) {
           }
         }
         for (const [name, id] of [
-          ['agent.schema.json', 'https://suite.agent-primitives.dev/schema/v0.6/agent.schema.json'],
-          ['policy-v2.schema.json', 'https://suite.agent-primitives.dev/schema/v0.6/policy-v2.schema.json'],
-          ['administrative-policy-v2.schema.json', 'https://suite.agent-primitives.dev/schema/v0.6/administrative-policy-v2.schema.json']
+          ['agent.schema.json', 'https://suite.agent-primitives.dev/schema/draft/agent.schema.json'],
+          ['policy-v2.schema.json', 'https://suite.agent-primitives.dev/schema/draft/policy-v2.schema.json'],
+          ['administrative-policy-v2.schema.json', 'https://suite.agent-primitives.dev/schema/draft/administrative-policy-v2.schema.json']
         ]) {
           const response = await page.request.get(`${origin}/schema/${name}`)
           assert.equal(response.status(), 200)

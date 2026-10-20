@@ -65,9 +65,79 @@
           "sha256": "0935f9285be64236af6156d11b78b818a697c0a8bea8eeea58199e8aeef3ecb8"
         }
       }
+    },
+    {
+      "path": "v0.6",
+      "release": "v0.6.0",
+      "sourceCommit": "4282636b7cd34aeba76a7b16b68ee209bfc2be02",
+      "assetUrl": "https://github.com/agent-primitives/suite/releases/download/v0.6.0/schemas-v0.6.0.json",
+      "sha256": "a0389f9c13f1d475fbb160116e3806c03244f8f112bdb6c2cd9de84b3354990d",
+      "schemas": {
+        "administrative-policy-v2.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/administrative-policy-v2.schema.json",
+          "sha256": "a88531677dab6bff328190d3db81d2af25e2bb77b59cd1d1ad8188cad5c32ffe"
+        },
+        "agent.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/agent.schema.json",
+          "sha256": "a9b25d734e234523d6adbb83178442e471fc90e7e87fcbeed4dfa36dd26808f1"
+        },
+        "build-profile.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/build-profile.schema.json",
+          "sha256": "a1ff236910609b10fa16d6c3e497dad87d508e85e83fd5bcf6b8319211687b4d"
+        },
+        "composition.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/composition.schema.json",
+          "sha256": "e452545eb8942767495e1410bb7e9fbbb3b8a95b707b9178d41a3e5037d9f825"
+        },
+        "eval-case.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/eval-case.schema.json",
+          "sha256": "9c2250a98a89e2f2a72370c5aa0380e47a266c8248fa4af32b00818fdf6d806b"
+        },
+        "eval-evidence.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/eval-evidence.schema.json",
+          "sha256": "9c1db7d3a302e262f182ab9ed015d3094640bbd76e8bf989a932d31fefd90ccb"
+        },
+        "eval-index.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/eval-index.schema.json",
+          "sha256": "0c9868f6c5bca1a43622f16b270b918c34b738688695642701a3be021513cdae"
+        },
+        "execution.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/execution.schema.json",
+          "sha256": "8bf7f45247ba5419cf20561065809fa5dcae9fd2fc545c51d9b2b7bfa6b83f37"
+        },
+        "inference.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/inference.schema.json",
+          "sha256": "5f5017f102b401a7e17fea29c0f244e66c31585c2d2e5448c224b7fa3ae520eb"
+        },
+        "kmx-flow-v1alpha1.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/kmx-flow-v1alpha1.schema.json",
+          "sha256": "24a13f036d8cc38269dfffb7428232ca4c6d95deefe9e5d63571a6e6812ae6bb"
+        },
+        "policy-v2.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/policy-v2.schema.json",
+          "sha256": "d6e0037c36f63a9f6360d844f787a91c27bd698e2fc4c9c92fc3a38efcc22f78"
+        },
+        "runtime-profile.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/runtime-profile.schema.json",
+          "sha256": "6c91db1148c54ef395262e135e867943962cc593a00fe642f1f5486bd32c2c5a"
+        },
+        "suite.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/suite.schema.json",
+          "sha256": "3610c210fca0df1839260ca00ceb9b2fbedd9c4513bec67b6c6d6b26f038ed6f"
+        },
+        "tool-provider-composition.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/tool-provider-composition.schema.json",
+          "sha256": "c291817735e0e4fc581d14075b46aebb5b7ad713e9034c560b09b38c1dbcb291"
+        },
+        "tool-provider.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.6/tool-provider.schema.json",
+          "sha256": "72be8746607f667d66903cf9f2a8385316d1ee5f8a326cfb673a9223712110a6"
+        }
+      }
     }
   ],
   "releases": {
-    "v0.5.0": "v0.5"
+    "v0.5.0": "v0.5",
+    "v0.6.0": "v0.6"
   }
 }

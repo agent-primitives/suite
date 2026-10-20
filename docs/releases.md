@@ -9,7 +9,16 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
-## v0.6.0 — planned — portable loose-directory identity and experimental flow
+## [v0.6.0](https://github.com/agent-primitives/suite/releases/tag/v0.6.0) — 2026-10-20 — portable loose-directory identity and experimental flow
+
+### Summary
+- **Loose-directory identity is now portable.** Digests of unpacked suite directories no longer depend on host file permissions, umask or OS. Published artifacts are unchanged; rebuilding from a loose directory may produce a new digest.
+- **Malformed inventories now refuse** (missing or null required fields).
+- **Experimental, opt-in `kmx.flow.v1alpha1`** for two-step multi-agent flows; default readers refuse it.
+- **Schemas move to `/schema/v0.6/`.** The v0.5 bundle is unchanged.
+- **New dependency:** `golang.org/x/sys` (Windows security checks).
+
+Who needs to act: if you package suites from loose directories, recompute digests and re-run evaluation for any artifact whose bytes change. If you only consume published artifacts, nothing changes.
 
 ### Portable loose-directory identity
 
@@ -120,14 +129,6 @@ restrictive umasks do not corrupt test inventories. CI adds a full umask-077
 Go test leg, portable-identity checks on Linux/macOS/Windows and native Windows
 security acceptance/refusal coverage. These are offline library checks, not
 runtime or deployment qualification.
-
-Local js/wasm verification required a minimal child environment because Go's wasm
-launcher rejected the inherited command/environment size before test execution.
-The same check passed with the minimal environment; no product or test change
-was needed.
-
-This section describes unreleased development. Release assets, the reviewed catalog
-and canonical URL verification remain separate publication steps.
 
 ## [v0.5.0](https://github.com/agent-primitives/suite/releases/tag/v0.5.0) — 2026-10-19 — schema namespace and stricter validation
 

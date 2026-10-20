@@ -62,6 +62,12 @@ jobs:
               "TestSharedDecodeCases",
               "TestValidatePathAcceptsOCILayout",
               "TestDiffPathsTreatsExtractedSuiteAndOCILayoutAsEquivalent",
+              "TestLooseDirectoryIdentityGolden",
+              "TestLooseDirectoryDeclaredModeIgnoresHostMode",
+              "TestLooseDirectoryConflictingDeclarationsRefuse",
+              "TestLooseDirectoryDeclaredDirectoryMetadata",
+              "TestPublishedArtifactIdentityGolden",
+              "TestPublishedArtifactInventoryModesRemainExact",
           }
           events = [json.loads(line) for line in Path(os.environ["TEST_RESULTS"]).read_text().splitlines()]
           passed = {event.get("Test") for event in events if event.get("Action") == "pass"}
@@ -71,6 +77,14 @@ jobs:
               raise SystemExit(f"Conformance gate failed: skipped={skipped}; missing passes={missing}")
           print(f"Conformance gate: {len(required)} required tests passed; no skips")
           PY
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+      - name: Unsupported platforms fail closed
+        run: |
+          GOOS=js GOARCH=wasm go test -count=1 -exec="$(go env GOROOT)/lib/wasm/go_js_wasm_exec" -run '^TestUnsupportedDirectorySecurity$' .
+          GOOS=plan9 GOARCH=amd64 go test -c -o "$RUNNER_TEMP/suite-plan9.test" .
+          GOOS=wasip1 GOARCH=wasm go test -c -o "$RUNNER_TEMP/suite-wasip1.test" .
       - name: Race detector
         run: go test -race -count=1 ./...
       - name: Vet
@@ -108,6 +122,70 @@ jobs:
           if skipped:
               raise SystemExit(f"Tests skipped under umask 077: {skipped}")
           PY
+
+  portable-identity:
+    name: Portable identity (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: go.mod
+      - name: Build and vet
+        run: go build ./... && go vet ./...
+      - name: Golden identities and native access checks (no skips)
+        env:
+          TEST_RESULTS: ${{ runner.temp }}/portable-identity.jsonl
+        run: |
+          set -euo pipefail
+          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity)' . | tee "$TEST_RESULTS"
+          python3 - <<'PY'
+          import json
+          import os
+          import platform
+          from pathlib import Path
+
+          required = {
+              "TestLooseDirectoryIdentityGolden",
+              "TestLooseDirectoryDeclaredModeIgnoresHostMode",
+              "TestLooseDirectoryConflictingDeclarationsRefuse",
+              "TestLooseDirectoryDeclaredDirectoryMetadata",
+              "TestPublishedArtifactIdentityGolden",
+              "TestPublishedArtifactInventoryModesRemainExact",
+          }
+          if platform.system() == "Windows":
+              required.update({
+                  "TestWindowsDirectorySecurityProtectedOwnerRoot",
+                  "TestWindowsDirectorySecurityRefusals",
+                  "TestWindowsDirectorySecurityInheritance",
+                  "TestWindowsDirectorySecurityInvalidHandle",
+                  "TestWindowsDirectorySecurityJunction",
+              })
+          else:
+              required.update({
+                  "TestLooseDirectoryUnixSecurityRefusals",
+                  "TestLooseDirectoryUnixSafeDirectoryModes",
+              })
+          events = [json.loads(line) for line in Path(os.environ["TEST_RESULTS"]).read_text().splitlines()]
+          passed = {event.get("Test") for event in events if event.get("Action") == "pass"}
+          skipped = [event.get("Test", event.get("Package")) for event in events if event.get("Action") == "skip"]
+          missing = sorted(required - passed)
+          if skipped or missing:
+              raise SystemExit(f"Portable identity gate failed: skipped={skipped}; missing passes={missing}")
+          print(f"Portable identity gate: {len(required)} required tests passed; no skips")
+          PY
+      - name: Platform-independent package tests
+        run: go test -count=1 ./internal/jsoncodec ./policy
 
   typescript:
     name: TypeScript policy parity

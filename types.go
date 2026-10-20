@@ -454,6 +454,33 @@ type InventoryEntry struct {
 	Component  string `json:"component,omitempty"`
 }
 
+// UnmarshalJSON requires path, type, mode, uid, and gid to be present and
+// non-null. Mode 0 and uid/gid 0 are legitimate authored values, so an omitted
+// or null property would otherwise be indistinguishable from them after typed
+// decoding. The shared strict decoder still rejects unknown and duplicate keys.
+func (e *InventoryEntry) UnmarshalJSON(data []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	for _, name := range []string{"path", "type", "mode", "uid", "gid"} {
+		raw, ok := fields[name]
+		if !ok {
+			return fmt.Errorf("inventory entry is missing required field %q", name)
+		}
+		if isJSONNull(raw) {
+			return fmt.Errorf("inventory entry field %q must not be null", name)
+		}
+	}
+	type wire InventoryEntry
+	var decoded wire
+	if err := Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*e = InventoryEntry(decoded)
+	return nil
+}
+
 type ToolProviderDependency struct {
 	ID            string `json:"id"`
 	Version       string `json:"version"`

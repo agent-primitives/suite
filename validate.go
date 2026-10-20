@@ -927,6 +927,11 @@ func validateVariant(variant ToolProviderVariant, expectedDigest string, content
 			errs = append(errs, fmt.Errorf("inventory path %s is absent from payload", entry.Path))
 			continue
 		}
+		if err := content.bindDirectoryMode(actualPath, entry.Mode); err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		actual = content.entries[actualPath]
 		if actual.Type != entry.Type || actual.Mode != entry.Mode || actual.Size != entry.Size ||
 			actual.Digest != entry.Digest || actual.LinkTarget != entry.LinkTarget ||
 			actual.UID != entry.UID || actual.GID != entry.GID {

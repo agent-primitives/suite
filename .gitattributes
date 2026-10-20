@@ -1,0 +1,2 @@
+# This shared corpus compares exact canonical JSON lines on every platform.
+/policy/testdata/decode-cases.jsonl text eol=lf

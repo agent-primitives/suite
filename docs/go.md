@@ -97,4 +97,62 @@ with nil `Policy` retain their prior serialized form. Use keyed struct literals.
 See the
 [normative specification](../spec.md#appendix-b-standalone-policy-contracts-normative).
 
+## Format and package scope
+
+AgentSuite defines one or more related agents and the exact ToolProviders used
+to construct their runnable sandboxes. Suites are distributed as Open Container
+Initiative (OCI) artifacts and contain a closed graph of agent, ToolProvider,
+composition and build-profile manifests. The format adds instructions, exact tool
+provider bindings, compositions, canonical identity and optional evaluation
+requirements to OCI distribution. Portability is of definitions, not demonstrated
+equivalent execution across runtimes.
+
+This standalone Go module, `github.com/agent-primitives/suite`, provides:
+
+- public types for suites, agents, ToolProviders, callable Tools, compositions,
+  build profiles and optional [runtime profiles](../spec.md#111-runtime-profiles);
+- media types and specification version constants;
+- strict JSON decoding with closed-field and duplicate-key enforcement;
+- JSON Canonicalization Scheme (JCS) encoding and digest calculation;
+- offline validation of extracted content and OCI image-layout directories;
+- optional [agent evaluations](../spec.md#82-agent-evaluations) with ordered cases;
+- closed JSON Schema 2020-12 documents in [schema/](../schema/).
+
+The normative format and conformance requirements are defined in
+[spec.md](../spec.md). Examples and conformance fixtures live in
+[testdata/](../testdata/). Validation does not execute evaluations, tools, models
+or agents, and does not attest runtime or sandbox conformance.
+
+The specification is a draft. Its
+[stability boundaries](../spec.md#111-stability-boundaries-and-compatibility)
+define the intended wire-1.0 stable core, not a released stable format.
+[Capability-based inference, build-profile execution and the AgentKit configuration mapping](schemas.md#experimental-execution-and-inference-contracts)
+remain experimental; validation does not establish runtime support.
+
+Builders, packers, registry transfer, sandbox-image construction and
+builder-owned image metadata are consumer responsibilities. Kaimahi's
+[sandbox-binding schema](https://github.com/kaimahi-agents/kaimahi/blob/e48f063f422bd38b7f92173351defd21bfcda5cc/internal/kmx/agentsuite/schema/sandbox-binding.schema.json)
+remains in its source repository.
+
+Go module versions and format versions are independent. Repository extraction
+did not change schema IDs, media types, format versions, canonical bytes or
+digests; later changes follow the [release policy](../CONTRIBUTING.md#release-policy).
+
+## Integrations and provenance
+
+- [kmx](https://kaimahi.dev/) uses AgentSuite for
+  [packaging and validation](https://github.com/kaimahi-agents/kaimahi/tree/1617117e6b73fc00403ba59e6edecbe05fa58dc1/internal/kmx/agentsuite/oras).
+  Its [go.mod at that recorded commit](https://github.com/kaimahi-agents/kaimahi/blob/1617117e6b73fc00403ba59e6edecbe05fa58dc1/go.mod)
+  pins this module at v0.4.0; that source link is not a claim about its current pin.
+- [Sessions](https://github.com/agent-primitives/sessions) is related runtime
+  ecosystem work, not a direct AgentSuite implementation.
+- The [documentation site](https://suite.agent-primitives.dev/) lists an
+  [Orka](https://github.com/orka-agents/orka) dashboard integration as planned,
+  not provided by this library. The site tracks main and may include unreleased changes.
+
+Extracted with portable history from
+[kaimahi-agents/kaimahi](https://github.com/kaimahi-agents/kaimahi/tree/e48f063f422bd38b7f92173351defd21bfcda5cc/agentsuite).
+See [contributing](../CONTRIBUTING.md) for local cross-repository development and
+maintainer-owned root release tags.
+
 [Go API reference](https://pkg.go.dev/github.com/agent-primitives/suite)

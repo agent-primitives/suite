@@ -1,552 +1,253 @@
 package agentsuite
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
+
+	"github.com/agent-primitives/suite/core"
+	"github.com/agent-primitives/suite/internal/contract"
 )
 
 const (
-	SpecVersion = "1.0.0-draft"
-
-	LayoutVersion = "1.0.0"
-
-	MediaTypeArtifact                = "application/vnd.agentsuite.suite.v1"
-	MediaTypeEmptyConfig             = "application/vnd.oci.empty.v1+json"
-	MediaTypeContent                 = "application/vnd.agentsuite.content.v1.tar+gzip"
-	MediaTypeSuite                   = "application/vnd.agentsuite.manifest.v1+json"
-	MediaTypeAgent                   = "application/vnd.agentsuite.agent.v1+json"
-	MediaTypePolicyV1                = "application/vnd.agentsuite.policy.v1+json"
-	MediaTypePolicyV2                = "application/vnd.agentsuite.policy.v2+json"
-	MediaTypeEvaluationIndex         = "application/vnd.agentsuite.eval.index.v1+json"
-	MediaTypeEvaluationCase          = "application/vnd.agentsuite.eval.case.v1+json"
-	MediaTypeToolProviderCatalog     = "application/vnd.agentsuite.tool.provider.catalog.v1+json"
-	MediaTypeToolProvider            = "application/vnd.agentsuite.tool.provider.v1+json"
-	MediaTypeToolProviderComposition = "application/vnd.agentsuite.tool.provider.composition.v1+json"
-	MediaTypeComposition             = "application/vnd.agentsuite.composition.v1+json"
-	MediaTypeBuildProfile            = "application/vnd.agentsuite.build.profile.v1+json"
-	MediaTypeRuntimeProfile          = "application/vnd.agentsuite.runtime.profile.v1+json"
-	MediaTypeInstructions            = "text/markdown; charset=utf-8"
-	MediaTypeJSONSchema              = "application/schema+json"
-
-	ExecutionSharedSandbox = "shared-sandbox"
+	// Deprecated: use core.ExecutionSharedSandbox.
+	ExecutionSharedSandbox = core.ExecutionSharedSandbox
+	// Deprecated: use core.LayoutVersion.
+	LayoutVersion = core.LayoutVersion
+	// Deprecated: use core.MediaTypeAgent.
+	MediaTypeAgent = core.MediaTypeAgent
+	// Deprecated: use core.MediaTypeArtifact.
+	MediaTypeArtifact = core.MediaTypeArtifact
+	// Deprecated: use core.MediaTypeBuildProfile.
+	MediaTypeBuildProfile = core.MediaTypeBuildProfile
+	// Deprecated: use core.MediaTypeComposition.
+	MediaTypeComposition = core.MediaTypeComposition
+	// Deprecated: use core.MediaTypeContent.
+	MediaTypeContent = core.MediaTypeContent
+	// Deprecated: use core.MediaTypeEmptyConfig.
+	MediaTypeEmptyConfig = core.MediaTypeEmptyConfig
+	// Deprecated: use core.MediaTypeEvaluationCase.
+	MediaTypeEvaluationCase = core.MediaTypeEvaluationCase
+	// Deprecated: use core.MediaTypeEvaluationIndex.
+	MediaTypeEvaluationIndex = core.MediaTypeEvaluationIndex
+	// Deprecated: use core.MediaTypeInstructions.
+	MediaTypeInstructions = core.MediaTypeInstructions
+	// Deprecated: use core.MediaTypeJSONSchema.
+	MediaTypeJSONSchema = core.MediaTypeJSONSchema
+	// Deprecated: use core.MediaTypePolicyV1.
+	MediaTypePolicyV1 = core.MediaTypePolicyV1
+	// Deprecated: use core.MediaTypePolicyV2.
+	MediaTypePolicyV2 = core.MediaTypePolicyV2
+	// Deprecated: use core.MediaTypeRuntimeProfile.
+	MediaTypeRuntimeProfile = core.MediaTypeRuntimeProfile
+	// Deprecated: use core.MediaTypeSuite.
+	MediaTypeSuite = core.MediaTypeSuite
+	// Deprecated: use core.MediaTypeToolProvider.
+	MediaTypeToolProvider = core.MediaTypeToolProvider
+	// Deprecated: use core.MediaTypeToolProviderCatalog.
+	MediaTypeToolProviderCatalog = core.MediaTypeToolProviderCatalog
+	// Deprecated: use core.MediaTypeToolProviderComposition.
+	MediaTypeToolProviderComposition = core.MediaTypeToolProviderComposition
+	// Deprecated: use core.SpecVersion.
+	SpecVersion = core.SpecVersion
 )
 
-// Descriptor is an OCI-compatible content descriptor: a named, nested
-// property on a suite-local reference that carries the referenced content's
-// media type, digest, and size, plus optional descriptive annotations.
-// Outer selector fields (such as id, version, agent, platform, and path)
-// stay on the enclosing reference; Descriptor only describes the referenced
-// bytes.
-type Descriptor struct {
-	MediaType   string            `json:"mediaType"`
-	Digest      string            `json:"digest"`
-	Size        int64             `json:"size"`
-	Annotations map[string]string `json:"annotations,omitempty"`
-}
+// Agent is the portable core definition.
+//
+// Deprecated: use core.Agent.
+type Agent = core.Agent
 
-// descriptorAlias decodes Descriptor without recursing back into
-// UnmarshalJSON.
-type descriptorAlias Descriptor
+// AgentInvoke is the portable core definition.
+//
+// Deprecated: use core.AgentInvoke.
+type AgentInvoke = core.AgentInvoke
 
-// descriptorKnownFields enumerates the closed set of properties the
-// Descriptor schema fragment permits (additionalProperties: false).
-var descriptorKnownFields = map[string]bool{
-	"mediaType":   true,
-	"digest":      true,
-	"size":        true,
-	"annotations": true,
-}
+// AgentPlatform is the portable core definition.
+//
+// Deprecated: use core.AgentPlatform.
+type AgentPlatform = core.AgentPlatform
 
-// UnmarshalJSON requires mediaType, digest, and size to be present in the
-// document. A present size of zero is a legitimate empty-content descriptor;
-// an omitted size is rejected. Both would otherwise decode to the same Go
-// zero value, so presence is checked explicitly against the raw fields
-// before the normal typed decode. It also rejects any object key outside
-// the closed descriptor shape, and rejects an explicit JSON null for
-// mediaType, digest, size, or a present annotations key, which would
-// otherwise silently decode to the same Go zero values as legitimate
-// values (notably null size and size: 0 both decode to 0).
-func (d *Descriptor) UnmarshalJSON(data []byte) error {
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(data, &fields); err != nil {
-		return err
-	}
-	for name := range fields {
-		if !descriptorKnownFields[name] {
-			return fmt.Errorf("descriptor has unknown field %q", name)
-		}
-	}
-	for _, name := range []string{"mediaType", "digest", "size"} {
-		if _, ok := fields[name]; !ok {
-			return fmt.Errorf("descriptor is missing required field %q", name)
-		}
-	}
-	for _, name := range []string{"mediaType", "digest", "size"} {
-		if isJSONNull(fields[name]) {
-			return fmt.Errorf("descriptor field %q must not be null", name)
-		}
-	}
-	if raw, ok := fields["annotations"]; ok && isJSONNull(raw) {
-		return fmt.Errorf("descriptor field %q must not be null", "annotations")
-	}
-	var alias descriptorAlias
-	if err := json.Unmarshal(data, &alias); err != nil {
-		return err
-	}
-	*d = Descriptor(alias)
-	return nil
-}
+// BrokeredCredential is the portable core definition.
+//
+// Deprecated: use core.BrokeredCredential.
+type BrokeredCredential = core.BrokeredCredential
 
-// isJSONNull reports whether raw is the literal JSON value null.
-func isJSONNull(raw json.RawMessage) bool {
-	return bytes.Equal(bytes.TrimSpace(raw), []byte("null"))
-}
+// BuildProfile is the portable core definition.
+//
+// Deprecated: use core.BuildProfile.
+type BuildProfile = core.BuildProfile
 
-type Platform struct {
-	OS           string `json:"os"`
-	Architecture string `json:"architecture"`
-	Variant      string `json:"variant,omitempty"`
-}
+// Composition is the portable core definition.
+//
+// Deprecated: use core.Composition.
+type Composition = core.Composition
 
-func (p Platform) String() string {
-	if p.Variant == "" {
-		return p.OS + "/" + p.Architecture
-	}
-	return p.OS + "/" + p.Architecture + "/" + p.Variant
-}
+// CompositionRef is the portable core definition.
+//
+// Deprecated: use core.CompositionRef.
+type CompositionRef = core.CompositionRef
 
-type AgentPlatform struct {
-	ID        string     `json:"id"`
-	Platforms []Platform `json:"platforms"`
-}
+// CompositionSelection is the portable core definition.
+//
+// Deprecated: use core.CompositionSelection.
+type CompositionSelection = core.CompositionSelection
 
-type Extension struct {
-	Name     string `json:"name"`
-	Critical bool   `json:"critical"`
-	Digest   string `json:"digest,omitempty"`
-}
+// DelegatedAuthorization is the portable core definition.
+//
+// Deprecated: use core.DelegatedAuthorization.
+type DelegatedAuthorization = core.DelegatedAuthorization
 
-// requireExtensionCritical is used only at boundaries whose schemas constrain
-// extension records. Agent extensions intentionally retain their existing rules.
-func requireExtensionCritical(raw json.RawMessage) error {
-	if len(raw) == 0 {
-		return nil
-	}
-	var extensions []map[string]json.RawMessage
-	if err := json.Unmarshal(raw, &extensions); err != nil {
-		return err
-	}
-	for i, extension := range extensions {
-		if critical, present := extension["critical"]; !present || isJSONNull(critical) {
-			return fmt.Errorf("extension %d requires non-null critical", i)
-		}
-	}
-	return nil
-}
+// Descriptor is the portable core definition.
+//
+// Deprecated: use core.Descriptor.
+type Descriptor = core.Descriptor
 
-type Suite struct {
-	SchemaVersion            string                       `json:"schemaVersion"`
-	MediaType                string                       `json:"mediaType"`
-	Name                     string                       `json:"name"`
-	Agents                   []ManifestRef                `json:"agents"`
-	ToolProviderCatalog      ManifestRef                  `json:"toolProviderCatalog"`
-	ToolProviderCompositions []ToolProviderCompositionRef `json:"toolProviderCompositions,omitempty"`
-	Compositions             []CompositionRef             `json:"compositions"`
-	BuildProfiles            []ManifestRef                `json:"buildProfiles"`
-	RuntimeProfiles          []ManifestRef                `json:"runtimeProfiles,omitempty"`
-	Capabilities             []string                     `json:"capabilities,omitempty"`
-	Extensions               []Extension                  `json:"extensions,omitempty"`
-}
+// EnvironmentName is the portable core definition.
+//
+// Deprecated: use core.EnvironmentName.
+type EnvironmentName = core.EnvironmentName
 
-type ManifestRef struct {
-	ID         string     `json:"id"`
-	Version    string     `json:"version,omitempty"`
-	Path       string     `json:"path"`
-	Descriptor Descriptor `json:"descriptor"`
-}
+// EvaluationAssertion is the portable core definition.
+//
+// Deprecated: use core.EvaluationAssertion.
+type EvaluationAssertion = core.EvaluationAssertion
 
-type CompositionRef struct {
-	RuntimeProfile string     `json:"runtimeProfile,omitempty"`
-	Agent          string     `json:"agent"`
-	Platform       Platform   `json:"platform"`
-	Path           string     `json:"path"`
-	Descriptor     Descriptor `json:"descriptor"`
-}
+// EvaluationCase is the portable core definition.
+//
+// Deprecated: use core.EvaluationCase.
+type EvaluationCase = core.EvaluationCase
 
-type ToolProviderCompositionRef struct {
-	ID         string     `json:"id"`
-	Version    string     `json:"version"`
-	Platform   Platform   `json:"platform"`
-	Path       string     `json:"path"`
-	Descriptor Descriptor `json:"descriptor"`
-}
+// EvaluationIndex is the portable core definition.
+//
+// Deprecated: use core.EvaluationIndex.
+type EvaluationIndex = core.EvaluationIndex
 
-type Agent struct {
-	SchemaVersion string                    `json:"schemaVersion"`
-	MediaType     string                    `json:"mediaType"`
-	ID            string                    `json:"id"`
-	Description   string                    `json:"description,omitempty"`
-	Instructions  FileRef                   `json:"instructions"`
-	Model         ModelRequirement          `json:"model"`
-	ToolProviders []ToolProviderRequirement `json:"toolProviders,omitempty"`
-	Invokes       []AgentInvoke             `json:"invokes,omitempty"`
-	Evals         []FileRef                 `json:"evals,omitempty"`
-	Policy        *FileRef                  `json:"policy,omitempty"`
-	Extensions    []Extension               `json:"extensions,omitempty"`
-}
+// EvaluationLimits is the portable core definition.
+//
+// Deprecated: use core.EvaluationLimits.
+type EvaluationLimits = core.EvaluationLimits
 
-type EvaluationIndex struct {
-	SchemaVersion string           `json:"schemaVersion"`
-	MediaType     string           `json:"mediaType"`
-	Agent         string           `json:"agent"`
-	Cases         []FileRef        `json:"cases"`
-	Limits        EvaluationLimits `json:"limits"`
-}
+// Extension is the portable core definition.
+//
+// Deprecated: use core.Extension.
+type Extension = core.Extension
 
-type EvaluationLimits struct {
-	MaxCases     int `json:"maxCases"`
-	MaxCaseBytes int `json:"maxCaseBytes"`
-}
+// FileRef is the portable core definition.
+//
+// Deprecated: use core.FileRef.
+type FileRef = core.FileRef
 
-type EvaluationCase struct {
-	SchemaVersion string                `json:"schemaVersion"`
-	MediaType     string                `json:"mediaType"`
-	ID            string                `json:"id"`
-	Input         string                `json:"input"`
-	Runs          *int                  `json:"runs,omitempty"`
-	MinPasses     *int                  `json:"minPasses,omitempty"`
-	Assertions    []EvaluationAssertion `json:"assertions"`
-}
+// InventoryEntry is the portable core definition.
+//
+// Deprecated: use core.InventoryEntry.
+type InventoryEntry = core.InventoryEntry
 
-type EvaluationAssertion struct {
-	ID           string `json:"id"`
-	Type         string `json:"type"`
-	Critical     *bool  `json:"critical,omitempty"`
-	Value        string `json:"value,omitempty"`
-	Pattern      string `json:"pattern,omitempty"`
-	Tool         string `json:"tool,omitempty"`
-	Rubric       string `json:"rubric,omitempty"`
-	MinScore     *int   `json:"minScore,omitempty"`
-	JudgeModel   string `json:"judgeModel,omitempty"`
-	JudgeVersion string `json:"judgeVersion,omitempty"`
-}
+// ManifestRef is the portable core definition.
+//
+// Deprecated: use core.ManifestRef.
+type ManifestRef = core.ManifestRef
 
-type FileRef struct {
-	Path       string     `json:"path"`
-	Descriptor Descriptor `json:"descriptor"`
-}
+// ModelRequirement is the portable core definition.
+//
+// Deprecated: use core.ModelRequirement.
+type ModelRequirement = core.ModelRequirement
 
-type ModelRequirement struct {
-	Protocol     string                 `json:"protocol"`
-	Model        string                 `json:"model,omitempty"`
-	Capabilities *InferenceRequirements `json:"capabilities,omitempty"`
-	EndpointEnv  string                 `json:"endpointEnv,omitempty"`
-	SecretRefs   []string               `json:"secretRefs,omitempty"`
-}
+// NetworkAccess is the portable core definition.
+//
+// Deprecated: use core.NetworkAccess.
+type NetworkAccess = core.NetworkAccess
 
-// UnmarshalJSON checks property presence before optional zero values can erase
-// the model schema's exclusive selection and deployment-binding restrictions.
-func (m *ModelRequirement) UnmarshalJSON(data []byte) error {
-	type wire ModelRequirement
-	var decoded wire
-	if err := Unmarshal(data, &decoded); err != nil {
-		return err
-	}
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(data, &fields); err != nil {
-		return err
-	}
-	_, hasModel := fields["model"]
-	_, hasCapabilities := fields["capabilities"]
-	if hasModel == hasCapabilities {
-		return fmt.Errorf("model requires exactly one of model or capabilities")
-	}
-	if hasCapabilities && isJSONNull(fields["capabilities"]) {
-		return fmt.Errorf("model capabilities must not be null")
-	}
-	if hasCapabilities {
-		for _, name := range []string{"endpointEnv", "secretRefs"} {
-			if _, present := fields[name]; present {
-				return fmt.Errorf("capability-based inference forbids %s", name)
-			}
-		}
-	}
-	*m = ModelRequirement(decoded)
-	return nil
-}
+// Platform is the portable core definition.
+//
+// Deprecated: use core.Platform.
+type Platform = core.Platform
 
-type ToolProviderRequirement struct {
-	ID            string `json:"id"`
-	Version       string `json:"version"`
-	ExecutionMode string `json:"executionMode"`
-}
+// PlatformImage is the portable core definition.
+//
+// Deprecated: use core.PlatformImage.
+type PlatformImage = core.PlatformImage
 
-type AgentInvoke struct {
-	Agent         string `json:"agent"`
-	MaxConcurrent int    `json:"maxConcurrent,omitempty"`
-	MaxDepth      int    `json:"maxDepth,omitempty"`
-}
+// RemoteHeader is the portable core definition.
+//
+// Deprecated: use core.RemoteHeader.
+type RemoteHeader = core.RemoteHeader
 
-type ToolProviderCatalog struct {
-	SchemaVersion string        `json:"schemaVersion"`
-	MediaType     string        `json:"mediaType"`
-	ToolProviders []ManifestRef `json:"toolProviders"`
-}
+// RemoteNetworkRequirement is the portable core definition.
+//
+// Deprecated: use core.RemoteNetworkRequirement.
+type RemoteNetworkRequirement = core.RemoteNetworkRequirement
 
-// ToolProvider is a versioned contract and its bundled or remote implementations.
-// The abstraction is protocol-neutral; the declared protocol contributes to identity.
-type ToolProvider struct {
-	SchemaVersion string                `json:"schemaVersion"`
-	MediaType     string                `json:"mediaType"`
-	ID            string                `json:"id"`
-	Version       string                `json:"version"`
-	Retained      *bool                 `json:"retained,omitempty"`
-	Protocol      string                `json:"protocol"`
-	Revision      string                `json:"revision"`
-	Tools         []Tool                `json:"tools"`
-	Variants      []ToolProviderVariant `json:"variants,omitempty"`
-	Remote        *RemoteToolProvider   `json:"remote,omitempty"`
-	Extensions    []Extension           `json:"extensions,omitempty"`
-}
+// RemoteTimeouts is the portable core definition.
+//
+// Deprecated: use core.RemoteTimeouts.
+type RemoteTimeouts = core.RemoteTimeouts
 
-// UnmarshalJSON preserves presence-sensitive provider constraints before slices
-// and pointers can turn explicit empty/null properties into omitted values.
-func (p *ToolProvider) UnmarshalJSON(data []byte) error {
-	type wire ToolProvider
-	var value wire
-	if err := Unmarshal(data, &value); err != nil {
-		return err
-	}
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(data, &fields); err != nil {
-		return err
-	}
-	if err := requireExtensionCritical(fields["extensions"]); err != nil {
-		return err
-	}
-	if _, present := fields["variants"]; present && len(value.Variants) == 0 {
-		return fmt.Errorf("variants must be a nonempty array")
-	}
-	var tools []map[string]json.RawMessage
-	if raw, present := fields["tools"]; present {
-		if err := json.Unmarshal(raw, &tools); err != nil {
-			return err
-		}
-	}
-	for i, tool := range tools {
-		if raw, present := tool["outputSchema"]; present && isJSONNull(raw) {
-			return fmt.Errorf("tool %d outputSchema must not be null", i)
-		}
-	}
-	*p = ToolProvider(value)
-	return nil
-}
+// RemoteToolProvider is the portable core definition.
+//
+// Deprecated: use core.RemoteToolProvider.
+type RemoteToolProvider = core.RemoteToolProvider
 
-// Tool is one model-callable function exposed by a ToolProvider.
-type Tool struct {
-	Name                   string                  `json:"name"`
-	Description            string                  `json:"description,omitempty"`
-	InputSchema            FileRef                 `json:"inputSchema"`
-	OutputSchema           *FileRef                `json:"outputSchema,omitempty"`
-	Effects                []string                `json:"effects,omitempty"`
-	Effect                 string                  `json:"effect,omitempty"`
-	Approval               string                  `json:"approval,omitempty"`
-	DelegatedAuthorization *DelegatedAuthorization `json:"delegatedAuthorization,omitempty"`
-}
+// Report is the portable core definition.
+//
+// Deprecated: use core.Report.
+type Report = core.Report
 
-// DelegatedAuthorization declares that a Tool requires delegated-user
-// authorization before it may be called. It never contains a credential
-// value, consent state, token lifecycle state, or a deployment-specific
-// Connection identifier; the deployment/runtime resolves the requirement to
-// a verified requester and a live user-owned connection.
-type DelegatedAuthorization struct {
-	Service    string             `json:"service"`
-	Scope      string             `json:"scope"`
-	Credential BrokeredCredential `json:"credential"`
-}
+// ResolvedToolProvider is the portable core definition.
+//
+// Deprecated: use core.ResolvedToolProvider.
+type ResolvedToolProvider = core.ResolvedToolProvider
 
-// BrokeredCredential declares that credential resolution and injection for a
-// delegated-user authorization requirement are brokered entirely by the
-// runtime. It never contains a credential value.
-type BrokeredCredential struct {
-	Resolution string `json:"resolution"`
-	BindingRef string `json:"bindingRef"`
-}
+// RuntimeRequirement is the portable core definition.
+//
+// Deprecated: use core.RuntimeRequirement.
+type RuntimeRequirement = core.RuntimeRequirement
 
-type RemoteToolProvider struct {
-	Transport    string                     `json:"transport"`
-	EndpointRef  string                     `json:"endpointRef"`
-	Headers      []RemoteHeader             `json:"headers,omitempty"`
-	Network      []RemoteNetworkRequirement `json:"network"`
-	Timeouts     RemoteTimeouts             `json:"timeouts"`
-	Cancellation string                     `json:"cancellation"`
-	Connection   string                     `json:"connection"`
-}
+// SecretKeyRef is the portable core definition.
+//
+// Deprecated: use core.SecretKeyRef.
+type SecretKeyRef = core.SecretKeyRef
 
-type RemoteHeader struct {
-	Name      string       `json:"name"`
-	SecretRef SecretKeyRef `json:"secretRef"`
-}
+// Suite is the portable core definition.
+//
+// Deprecated: use core.Suite.
+type Suite = core.Suite
 
-type SecretKeyRef struct {
-	Name string `json:"name"`
-	Key  string `json:"key"`
-}
+// Tool is the portable core definition.
+//
+// Deprecated: use core.Tool.
+type Tool = core.Tool
 
-type RemoteNetworkRequirement struct {
-	DestinationRef string `json:"destinationRef"`
-}
+// ToolProvider is the portable core definition.
+//
+// Deprecated: use core.ToolProvider.
+type ToolProvider = core.ToolProvider
 
-type RemoteTimeouts struct {
-	ConnectMilliseconds int `json:"connectMilliseconds"`
-	RequestMilliseconds int `json:"requestMilliseconds"`
-}
+// ToolProviderCatalog is the portable core definition.
+//
+// Deprecated: use core.ToolProviderCatalog.
+type ToolProviderCatalog = core.ToolProviderCatalog
 
-type ToolProviderVariant struct {
-	Platform      Platform                 `json:"platform"`
-	VariantDigest string                   `json:"variantDigest"`
-	InstallRoot   string                   `json:"installRoot"`
-	Relocatable   bool                     `json:"relocatable,omitempty"`
-	PayloadRoot   string                   `json:"payloadRoot"`
-	Entrypoint    string                   `json:"entrypoint"`
-	Arguments     []string                 `json:"arguments,omitempty"`
-	SearchPath    []string                 `json:"searchPath,omitempty"`
-	Environment   []EnvironmentName        `json:"environment,omitempty"`
-	WritablePaths []string                 `json:"writablePaths,omitempty"`
-	Network       []NetworkAccess          `json:"network,omitempty"`
-	Runtime       RuntimeRequirement       `json:"runtime"`
-	Files         []InventoryEntry         `json:"files"`
-	Dependencies  []ToolProviderDependency `json:"dependencies,omitempty"`
-	SBOM          *Descriptor              `json:"sbom,omitempty"`
-	Provenance    *Descriptor              `json:"provenance,omitempty"`
-}
+// ToolProviderComposition is the portable core definition.
+//
+// Deprecated: use core.ToolProviderComposition.
+type ToolProviderComposition = core.ToolProviderComposition
 
-type EnvironmentName struct {
-	Name     string `json:"name"`
-	Required bool   `json:"required,omitempty"`
-	Secret   bool   `json:"secret,omitempty"`
-	Delivery string `json:"delivery,omitempty"`
-}
+// ToolProviderCompositionRef is the portable core definition.
+//
+// Deprecated: use core.ToolProviderCompositionRef.
+type ToolProviderCompositionRef = core.ToolProviderCompositionRef
 
-type NetworkAccess struct {
-	Scheme string `json:"scheme"`
-	Host   string `json:"host"`
-	Port   int    `json:"port"`
-}
+// ToolProviderDependency is the portable core definition.
+//
+// Deprecated: use core.ToolProviderDependency.
+type ToolProviderDependency = core.ToolProviderDependency
 
-type RuntimeRequirement struct {
-	ABI           string   `json:"abi"`
-	ABIVersion    string   `json:"abiVersion,omitempty"`
-	CPUBaseline   string   `json:"cpuBaseline"`
-	RequiredPaths []string `json:"requiredBasePaths,omitempty"`
-}
+// ToolProviderRequirement is the portable core definition.
+//
+// Deprecated: use core.ToolProviderRequirement.
+type ToolProviderRequirement = core.ToolProviderRequirement
 
-type InventoryEntry struct {
-	Path       string `json:"path"`
-	Type       string `json:"type"`
-	Mode       uint32 `json:"mode"`
-	UID        int    `json:"uid"`
-	GID        int    `json:"gid"`
-	Size       int64  `json:"size,omitempty"`
-	Digest     string `json:"digest,omitempty"`
-	LinkTarget string `json:"linkTarget,omitempty"`
-	Component  string `json:"component,omitempty"`
-}
+// ToolProviderVariant is the portable core definition.
+//
+// Deprecated: use core.ToolProviderVariant.
+type ToolProviderVariant = core.ToolProviderVariant
 
-// UnmarshalJSON requires path, type, mode, uid, and gid to be present and
-// non-null. Mode 0 and uid/gid 0 are legitimate authored values, so an omitted
-// or null property would otherwise be indistinguishable from them after typed
-// decoding. The shared strict decoder still rejects unknown and duplicate keys.
-func (e *InventoryEntry) UnmarshalJSON(data []byte) error {
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(data, &fields); err != nil {
-		return err
-	}
-	for _, name := range []string{"path", "type", "mode", "uid", "gid"} {
-		raw, ok := fields[name]
-		if !ok {
-			return fmt.Errorf("inventory entry is missing required field %q", name)
-		}
-		if isJSONNull(raw) {
-			return fmt.Errorf("inventory entry field %q must not be null", name)
-		}
-	}
-	type wire InventoryEntry
-	var decoded wire
-	if err := Unmarshal(data, &decoded); err != nil {
-		return err
-	}
-	*e = InventoryEntry(decoded)
-	return nil
-}
-
-type ToolProviderDependency struct {
-	ID            string `json:"id"`
-	Version       string `json:"version"`
-	VariantDigest string `json:"variantDigest"`
-}
-
-type PlatformImage struct {
-	Platform Platform   `json:"platform"`
-	ImageRef string     `json:"imageRef"`
-	Image    Descriptor `json:"image"`
-}
-
-type Composition struct {
-	RuntimeProfile string                 `json:"runtimeProfile,omitempty"`
-	SchemaVersion  string                 `json:"schemaVersion"`
-	MediaType      string                 `json:"mediaType"`
-	Agent          string                 `json:"agent"`
-	Platform       Platform               `json:"platform"`
-	BuildProfile   string                 `json:"buildProfile"`
-	ToolProviders  []ResolvedToolProvider `json:"toolProviders"`
-}
-
-type ResolvedToolProvider struct {
-	ID             string `json:"id"`
-	Version        string `json:"version"`
-	ManifestDigest string `json:"manifestDigest"`
-	VariantDigest  string `json:"variantDigest,omitempty"`
-	ExecutionMode  string `json:"executionMode"`
-}
-
-type ToolProviderComposition struct {
-	SchemaVersion  string   `json:"schemaVersion"`
-	MediaType      string   `json:"mediaType"`
-	ID             string   `json:"id"`
-	Version        string   `json:"version"`
-	ManifestDigest string   `json:"manifestDigest"`
-	Platform       Platform `json:"platform"`
-	VariantDigest  string   `json:"variantDigest"`
-	BuildProfile   string   `json:"buildProfile"`
-}
-
-type BuildProfile struct {
-	Execution     *ExecutionContract `json:"execution,omitempty"`
-	SchemaVersion string             `json:"schemaVersion"`
-	MediaType     string             `json:"mediaType"`
-	ID            string             `json:"id"`
-	RuntimeBase   []PlatformImage    `json:"runtimeBase"`
-	Harness       []PlatformImage    `json:"harness"`
-	SourceEpoch   int64              `json:"sourceEpoch"`
-}
-
-// UnmarshalJSON rejects a null execution property; a pointer decoder would
-// otherwise treat it as omission without invoking the contract's decoder.
-func (p *BuildProfile) UnmarshalJSON(data []byte) error {
-	type wire BuildProfile
-	var decoded wire
-	if err := Unmarshal(data, &decoded); err != nil {
-		return err
-	}
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(data, &fields); err != nil {
-		return err
-	}
-	if raw, present := fields["execution"]; present && isJSONNull(raw) {
-		return fmt.Errorf("build profile execution must not be null")
-	}
-	*p = BuildProfile(decoded)
-	return nil
-}
+func isJSONNull(raw json.RawMessage) bool { return contract.IsJSONNull(raw) }

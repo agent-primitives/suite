@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/agent-primitives/suite/internal/contract"
 )
 
 const (
@@ -15,10 +17,7 @@ const (
 )
 
 var (
-	evidenceTokenPattern   = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
-	evidencePrivatePattern = regexp.MustCompile(`(?i)^(sk[-_]|gh[pousr]_|github_pat_|AKIA|ASIA|eyJ)|^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$`)
-	evidenceIPPattern      = regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$`)
-	evidenceTimePattern    = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,9})?Z$`)
+	evidenceTimePattern = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,9})?Z$`)
 )
 
 // UnmarshalJSON adds required-presence checks to the package's existing strict
@@ -102,19 +101,9 @@ func evidenceShape(data []byte, kind string) error {
 		required = "model version policy"
 		children["policy"] = "policy"
 	}
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(data, &fields); err != nil || fields == nil {
-		return evidenceRefuse("malformed")
-	}
-	for _, key := range strings.Fields(required) {
-		if _, ok := fields[key]; !ok {
-			return evidenceRefuse("missing")
-		}
-	}
-	for _, value := range fields {
-		if isJSONNull(value) {
-			return evidenceRefuse("malformed")
-		}
+	fields, code := contract.RequiredObject(data, required)
+	if code != "" {
+		return evidenceRefuse(code)
 	}
 	for key, child := range children {
 		if value, ok := fields[key]; ok {
@@ -137,11 +126,9 @@ func evidenceShape(data []byte, kind string) error {
 	return nil
 }
 
-func evidenceToken(value string) bool {
-	return evidenceTokenPattern.MatchString(value) && !evidencePrivatePattern.MatchString(value) && !evidenceIPPattern.MatchString(value)
-}
+func evidenceToken(value string) bool { return contract.EvidenceToken(value) }
 func evidenceImplementation(v EvidenceImplementation) bool {
-	return evidenceToken(v.ID) && evidenceToken(v.Version) && IsValidDigest(v.Digest)
+	return contract.EvidenceImplementation(v.ID, v.Version, v.Digest)
 }
 func evidencePolicy(v EvidencePolicy) bool {
 	return evidenceToken(v.ID) && evidenceToken(v.Version) && IsValidDigest(v.ConfigurationDigest)

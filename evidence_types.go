@@ -1,5 +1,7 @@
 package agentsuite
 
+import "github.com/agent-primitives/suite/core"
+
 const (
 	MediaTypeEvaluationEvidence = "application/vnd.agentsuite.eval.evidence.v1+json"
 	EvidenceSchemaVersion       = "1.0.0"
@@ -50,11 +52,10 @@ type EvidenceSubject struct {
 	Platform           EvidencePlatform   `json:"platform"`
 }
 
-type EvidenceImplementation struct {
-	ID      string `json:"id"`
-	Version string `json:"version"`
-	Digest  string `json:"digest"`
-}
+// EvidenceImplementation is the portable implementation identity.
+//
+// Deprecated: use core.EvidenceImplementation.
+type EvidenceImplementation = core.EvidenceImplementation
 
 type EvidenceModel struct {
 	Protocol            string `json:"protocol"`

@@ -15,13 +15,15 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/agent-primitives/suite/internal/contract"
 )
 
 const (
 	maxContentEntries        = 100_000
 	maxContentBytes          = int64(4 << 30)
 	maxRetainedMetadataBytes = int64(256 << 20)
-	maxPathBytes             = 1024
+	maxPathBytes             = contract.MaxPathBytes
 )
 
 type contentEntry struct {
@@ -358,24 +360,7 @@ func addRetainedMetadata(retained, size int64) (int64, error) {
 	return retained + size, nil
 }
 
-func validateContentPath(value string) (string, error) {
-	if value == "" || len(value) > maxPathBytes || !utf8.ValidString(value) || strings.ContainsRune(value, '\x00') {
-		return "", fmt.Errorf("unsafe content path %q", value)
-	}
-	if strings.Contains(value, "\\") || strings.HasPrefix(value, "/") {
-		return "", fmt.Errorf("content path must be relative POSIX syntax: %q", value)
-	}
-	clean := path.Clean(value)
-	if clean != value || clean == "." || clean == ".." || strings.HasPrefix(clean, "../") {
-		return "", fmt.Errorf("content path is not normalized below the root: %q", value)
-	}
-	for _, part := range strings.Split(clean, "/") {
-		if part == "" || part == "." || part == ".." {
-			return "", fmt.Errorf("content path contains an unsafe segment: %q", value)
-		}
-	}
-	return clean, nil
-}
+func validateContentPath(value string) (string, error) { return contract.ValidateContentPath(value) }
 
 func validateLinkTarget(name, target string) error {
 	if target == "" || len(target) > maxPathBytes || !utf8.ValidString(target) || strings.ContainsRune(target, '\x00') ||

@@ -1,12 +1,10 @@
 package agentsuite
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
-	"strings"
 
+	"github.com/agent-primitives/suite/core"
+	"github.com/agent-primitives/suite/internal/contract"
 	"github.com/agent-primitives/suite/internal/jsoncodec"
 	"github.com/gowebpki/jcs"
 )
@@ -23,14 +21,18 @@ var (
 )
 
 // Marshal serializes value as JSON Canonicalization Scheme (JCS) JSON.
-func Marshal(value any) ([]byte, error) { return jsoncodec.Marshal(value) }
+//
+// Deprecated: use core.Marshal.
+func Marshal(value any) ([]byte, error) { return core.Marshal(value) }
 
 // Unmarshal decodes one strict AgentSuite JSON document.
 //
 // It rejects duplicate or unknown fields, invalid UTF-8, lossy JCS number
 // representations, trailing values, and documents exceeding the format's
 // declared implementation limits.
-func Unmarshal(data []byte, out any) error { return jsoncodec.Unmarshal(data, out) }
+//
+// Deprecated: use core.Unmarshal.
+func Unmarshal(data []byte, out any) error { return core.Unmarshal(data, out) }
 
 func decodeStrict(data []byte, out any) error { return Unmarshal(data, out) }
 
@@ -39,14 +41,9 @@ func decodeJSONValue(data []byte) (any, error) { return jsoncodec.DecodeValue(da
 func sameExactJSONValue(a, b any) bool { return jsoncodec.SameExactValue(a, b) }
 
 // Digest returns the SHA-256 digest of the JCS representation of data.
-func Digest(data []byte) (string, error) {
-	canonical, err := jcs.Transform(data)
-	if err != nil {
-		return "", fmt.Errorf("canonicalize JSON: %w", err)
-	}
-	sum := sha256.Sum256(canonical)
-	return "sha256:" + hex.EncodeToString(sum[:]), nil
-}
+//
+// Deprecated: use core.Digest.
+func Digest(data []byte) (string, error) { return core.Digest(data) }
 
 func canonicalDigest(data []byte) (string, error) {
 	return Digest(data)
@@ -80,8 +77,10 @@ func descriptorSizeAndDigestMatch(data []byte, descriptor Descriptor) bool {
 // checks). It does not confirm that data is itself stored in canonical form;
 // callers that parse data after this check still need
 // MatchesCanonicalDescriptor to enforce that invariant.
+//
+// Deprecated: use core.DescriptorSizeAndDigestMatch.
 func DescriptorSizeAndDigestMatch(data []byte, descriptor Descriptor) bool {
-	return int64(len(data)) == descriptor.Size && digestBytes(data) == descriptor.Digest
+	return core.DescriptorSizeAndDigestMatch(data, descriptor)
 }
 
 // matchesCanonicalDescriptor reports whether data is itself stored as its
@@ -105,35 +104,15 @@ func matchesCanonicalDescriptor(data []byte, descriptor Descriptor) bool {
 // Callers outside this package (for example builders that re-read pinned
 // child manifests) should use this instead of re-deriving digest/size checks
 // by hand, so every consumer enforces the same stored-byte identity rule.
+//
+// Deprecated: use core.MatchesCanonicalDescriptor.
 func MatchesCanonicalDescriptor(data []byte, descriptor Descriptor) bool {
-	// Reject on raw length and raw-byte digest first: cheap checks that avoid
-	// canonicalizing data at all when it plainly cannot match. If data is
-	// itself already canonical (the required storage form), its raw SHA-256
-	// digest equals the canonical digest, so this is not merely a shortcut
-	// for the common case, it rules out any non-canonically stored document
-	// too, since such a document's raw bytes cannot hash to the canonical
-	// digest of a differently formatted equivalent.
-	if int64(len(data)) != descriptor.Size || digestBytes(data) != descriptor.Digest {
-		return false
-	}
-	canonical, err := jcs.Transform(data)
-	return err == nil && bytes.Equal(data, canonical)
+	return core.MatchesCanonicalDescriptor(data, descriptor)
 }
 
-func digestBytes(data []byte) string {
-	sum := sha256.Sum256(data)
-	return "sha256:" + hex.EncodeToString(sum[:])
-}
+func digestBytes(data []byte) string { return contract.DigestBytes(data) }
 
 // IsValidDigest reports whether value is a canonical AgentSuite SHA-256 digest.
-func IsValidDigest(value string) bool {
-	if !strings.HasPrefix(value, "sha256:") || len(value) != len("sha256:")+64 {
-		return false
-	}
-	for _, r := range value[len("sha256:"):] {
-		if r < '0' || r > '9' && r < 'a' || r > 'f' {
-			return false
-		}
-	}
-	return true
-}
+//
+// Deprecated: use core.IsValidDigest.
+func IsValidDigest(value string) bool { return core.IsValidDigest(value) }

@@ -8,36 +8,19 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/agent-primitives/suite/internal/contract"
 )
 
 var (
-	identifierPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]{0,127}$`)
+	identifierPattern = contract.IdentifierPattern
 	versionPattern    = regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$`)
-	envPattern        = regexp.MustCompile(`^[A-Z_][A-Z0-9_]*$`)
+	envPattern        = contract.EnvPattern
 	capabilityPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]{0,127}$`)
 	schemePattern     = regexp.MustCompile(`^[a-z][a-z0-9+.-]*$`)
 	headerNamePattern = regexp.MustCompile("^[!#$%&'*+.^_`|~0-9A-Za-z-]+$")
 	secretKeyPattern  = regexp.MustCompile(`^[A-Za-z0-9._-]{1,253}$`)
 )
-
-type Report struct {
-	Name                     string                 `json:"name"`
-	Agents                   int                    `json:"agents"`
-	ToolProviders            int                    `json:"toolProviders"`
-	ToolProviderCompositions int                    `json:"toolProviderCompositions"`
-	Compositions             int                    `json:"compositions"`
-	Capabilities             []string               `json:"capabilities"`
-	AgentPlatforms           []AgentPlatform        `json:"agentPlatforms"`
-	CompositionSelections    []CompositionSelection `json:"compositionSelections"`
-}
-
-type CompositionSelection struct {
-	RuntimeProfile string   `json:"runtimeProfile,omitempty"`
-	Agent          string   `json:"agent"`
-	Platform       Platform `json:"platform"`
-	BuildProfile   string   `json:"buildProfile"`
-	Digest         string   `json:"digest"`
-}
 
 type validator struct {
 	content                  *contentSet
@@ -1086,9 +1069,7 @@ func sameInstallEntry(a, b InventoryEntry) bool {
 		a.Size == b.Size && a.Digest == b.Digest && a.LinkTarget == b.LinkTarget
 }
 
-func unsafeInjectionEnv(name string) bool {
-	return strings.HasPrefix(name, "LD_") || name == "PYTHONPATH" || name == "NODE_OPTIONS" || name == "BASH_ENV"
-}
+func unsafeInjectionEnv(name string) bool { return contract.UnsafeInjectionEnv(name) }
 
 func validateComposition(composition Composition) error {
 	var errs []error

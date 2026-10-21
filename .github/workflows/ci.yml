@@ -185,7 +185,7 @@ jobs:
           print(f"Portable identity gate: {len(required)} required tests passed; no skips")
           PY
       - name: Platform-independent package tests
-        run: go test -count=1 ./internal/jsoncodec ./policy
+        run: go test -count=1 ./core ./internal/contract ./internal/jsoncodec ./policy
 
   typescript:
     name: TypeScript policy parity

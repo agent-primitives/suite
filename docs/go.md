@@ -13,6 +13,40 @@ explicit alias:
 import agentsuite "github.com/agent-primitives/suite"
 ```
 
+## Portable core (main, not yet released)
+
+The `github.com/agent-primitives/suite/core` package owns portable manifests,
+profiles, evaluation definitions, report/selection types and JSON/identity
+helpers. It does not load directories or OCI layouts, verify evidence or execute
+agents. The published pin above predates this package; keep using the root
+import with that release. To work on main locally, use the
+[outside-tree workspace instructions](../CONTRIBUTING.md#local-development-across-repositories).
+
+After a release containing `core`, model and JSON code can migrate without
+conversions:
+
+```go
+import (
+    agentsuite "github.com/agent-primitives/suite"
+    "github.com/agent-primitives/suite/core"
+)
+
+var suite core.Suite
+if err := core.Unmarshal(data, &suite); err != nil {
+    return err
+}
+report, err := agentsuite.ValidateDirectory(directory)
+```
+
+Moved root types remain true aliases and moved functions remain forwarders.
+Their deprecated root exports are retained for one minor release; their later
+removal requires a separate pre-1.0 minor. Type methods and JSON contracts stay
+unchanged, but reflection reports the new defining package (including `%T`
+output). Code relying on the old defining-package name must migrate separately.
+The root still owns graph/OCI validation, evidence, semantic diff and explicitly
+selected experimental flow APIs in this stage. The existing `policy` import is
+unchanged.
+
 ## Validate content offline
 
 `ValidatePath` accepts an extracted content directory or an OCI image-layout
@@ -155,4 +189,6 @@ Extracted with portable history from
 See [contributing](../CONTRIBUTING.md) for local cross-repository development and
 maintainer-owned root release tags.
 
-[Go API reference](https://pkg.go.dev/github.com/agent-primitives/suite)
+[Root API reference](https://pkg.go.dev/github.com/agent-primitives/suite) ·
+[Core API reference](https://pkg.go.dev/github.com/agent-primitives/suite/core)
+(available after a release containing `core`)

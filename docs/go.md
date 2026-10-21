@@ -22,20 +22,21 @@ agents. The published pin above predates this package; keep using the root
 import with that release. To work on main locally, use the
 [outside-tree workspace instructions](../CONTRIBUTING.md#local-development-across-repositories).
 
-After a release containing `core`, model and JSON code can migrate without
-conversions:
+Main also provides focused `oci`, `evidence` and `experimental/flow` packages.
+After a release containing these packages, model, JSON and validation code can
+migrate without conversions:
 
 ```go
 import (
-    agentsuite "github.com/agent-primitives/suite"
     "github.com/agent-primitives/suite/core"
+    "github.com/agent-primitives/suite/oci"
 )
 
 var suite core.Suite
 if err := core.Unmarshal(data, &suite); err != nil {
     return err
 }
-report, err := agentsuite.ValidateDirectory(directory)
+report, err := oci.ValidateDirectory(directory)
 ```
 
 Moved root types remain true aliases and moved functions remain forwarders.
@@ -43,9 +44,23 @@ Their deprecated root exports are retained for one minor release; their later
 removal requires a separate pre-1.0 minor. Type methods and JSON contracts stay
 unchanged, but reflection reports the new defining package (including `%T`
 output). Code relying on the old defining-package name must migrate separately.
-The root still owns graph/OCI validation, evidence, semantic diff and explicitly
-selected experimental flow APIs in this stage. The existing `policy` import is
-unchanged.
+Import by responsibility:
+
+- `core`: portable types, strict JSON and content identity helpers.
+- `oci`: `ValidateDirectory`, `ValidatePath`, `DiffPaths` and semantic-diff types.
+- `evidence`: evidence types, `VerifyEvaluation` and the explicitly selected
+  `VerifyEvaluationFlowV1Alpha1` verifier.
+- `experimental/flow`: stored v1alpha1 flow types, selectors and validation.
+- `policy`: existing standalone policy resolution, unchanged.
+
+The three facades share `internal/artifact`; the evidence/diff algorithms stay
+beside the private graph inventory. Ordinary validation still compiles the
+experimental validator: this boundary separates public APIs, not independent
+feature engines. Their types alias that internal implementation, so reflection
+shows its defining package and pkg.go.dev may show aliases rather than fields.
+Portable manifest fields are documented in `core`. Keep existing exported
+identifier spellings when migrating; no conversion or wire-format rewrite is
+needed. The remaining examples below use the root API for the published pin.
 
 ## Validate content offline
 
@@ -190,5 +205,8 @@ See [contributing](../CONTRIBUTING.md) for local cross-repository development an
 maintainer-owned root release tags.
 
 [Root API reference](https://pkg.go.dev/github.com/agent-primitives/suite) ·
-[Core API reference](https://pkg.go.dev/github.com/agent-primitives/suite/core)
-(available after a release containing `core`)
+[Core API reference](https://pkg.go.dev/github.com/agent-primitives/suite/core) ·
+[OCI API reference](https://pkg.go.dev/github.com/agent-primitives/suite/oci) ·
+[Evidence API reference](https://pkg.go.dev/github.com/agent-primitives/suite/evidence) ·
+[Experimental flow API reference](https://pkg.go.dev/github.com/agent-primitives/suite/experimental/flow)
+(new package references become available after a release containing them)

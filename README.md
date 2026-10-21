@@ -22,7 +22,7 @@ With Git and Go installed, check a bundled three-agent package:
 ```sh
 git clone https://github.com/agent-primitives/suite.git
 cd suite
-GOWORK=off go test -count=1 -run '^TestCoordinatorWorkersFixtureIsConformant$' -v .
+GOWORK=off go test -count=1 -run '^TestCoordinatorWorkersFixtureIsConformant$' -v ./internal/artifact
 ```
 
 Expect **PASS**. This checks the [coordinator, writer and reviewer package](testdata/coordinator-workers/);

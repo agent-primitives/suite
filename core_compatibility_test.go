@@ -229,7 +229,7 @@ func TestCoreCompatibilityDeprecations(t *testing.T) {
 		}
 		t.Errorf("%s has no tooling-recognised deprecation paragraph", name)
 	}
-	aliases, forwarders := 0, 0
+	aliases, forwarders, constants := 0, 0, 0
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go") || strings.HasSuffix(entry.Name(), "_test.go") {
 			continue
@@ -239,29 +239,45 @@ func TestCoreCompatibilityDeprecations(t *testing.T) {
 			t.Fatal(err)
 		}
 		for _, declaration := range file.Decls {
-			if function, ok := declaration.(*ast.FuncDecl); ok && (function.Name.Name == "ValidateExecutionContract" || function.Name.Name == "ValidateImageReference") {
+			if function, ok := declaration.(*ast.FuncDecl); ok && ast.IsExported(function.Name.Name) {
 				forwarders++
 				check(function.Name.Name, function.Doc)
 			}
 			decl, ok := declaration.(*ast.GenDecl)
-			if !ok || decl.Tok != token.TYPE {
+			if !ok {
 				continue
 			}
 			for _, spec := range decl.Specs {
-				typeSpec := spec.(*ast.TypeSpec)
-				if typeSpec.Assign.IsValid() && ast.IsExported(typeSpec.Name.Name) {
-					aliases++
-					doc := typeSpec.Doc
-					if doc == nil {
-						doc = decl.Doc
+				switch spec := spec.(type) {
+				case *ast.TypeSpec:
+					if spec.Assign.IsValid() && ast.IsExported(spec.Name.Name) {
+						aliases++
+						doc := spec.Doc
+						if doc == nil {
+							doc = decl.Doc
+						}
+						check(spec.Name.Name, doc)
 					}
-					check(typeSpec.Name.Name, doc)
+				case *ast.ValueSpec:
+					if decl.Tok != token.CONST {
+						continue
+					}
+					for _, name := range spec.Names {
+						if ast.IsExported(name.Name) {
+							constants++
+							doc := spec.Doc
+							if doc == nil {
+								doc = decl.Doc
+							}
+							check(name.Name, doc)
+						}
+					}
 				}
 			}
 		}
 	}
-	if aliases != 45 || forwarders != 2 {
-		t.Fatalf("deprecation coverage: %d aliases and %d forwarders, want 45 and 2", aliases, forwarders)
+	if aliases != 79 || forwarders != 15 || constants != 35 {
+		t.Fatalf("deprecation coverage: %d aliases, %d forwarders, %d constants; want 79, 15, 35", aliases, forwarders, constants)
 	}
 }
 

@@ -1,191 +1,141 @@
 package agentsuite
 
-import "github.com/agent-primitives/suite/core"
-
-const (
-	MediaTypeEvaluationEvidence = "application/vnd.agentsuite.eval.evidence.v1+json"
-	EvidenceSchemaVersion       = "1.0.0"
-	// EvidencePolicyID names text contains/notContains/RE2 semantics, all-known
-	// assertion conjunction and the unknown veto, including non-critical checks.
-	EvidencePolicyID      = "agentsuite-text-v1"
-	EvidencePolicyVersion = "1.0.0"
-	// EvidenceJudgePolicyID requires exactly two independent scores: both at or
-	// above minScore pass, both below fail, and a split remains unknown.
-	EvidenceJudgePolicyID      = "agentsuite-double-score-v1"
-	EvidenceJudgePolicyVersion = "1.0.0"
+import (
+	"github.com/agent-primitives/suite/core"
+	"github.com/agent-primitives/suite/evidence"
 )
 
-// EvaluationEvidence is an unsigned, payload-free claim about one evaluation.
-// Decoding validates the closed wire shape, not execution or a full pass.
-// VerifyEvaluation additionally checks independently supplied expectations and
-// the local OCI artifact. No prompts, answers or arbitrary metadata belong here.
-type EvaluationEvidence struct {
-	SchemaVersion string               `json:"schemaVersion"`
-	MediaType     string               `json:"mediaType"`
-	Subject       EvidenceSubject      `json:"subject"`
-	Execution     EvidenceExecution    `json:"execution"`
-	Evaluation    EvidenceEvaluation   `json:"evaluation"`
-	Evaluator     EvidenceEvaluator    `json:"evaluator"`
-	Results       []EvidenceCaseResult `json:"results"`
-}
+// EvidenceJudgePolicyID is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceJudgePolicyID.
+const EvidenceJudgePolicyID = evidence.EvidenceJudgePolicyID
 
-// EvidenceDescriptor deliberately excludes OCI annotations and remote locations.
-// The manifest descriptor hashes raw bytes; index/case descriptors use JCS.
-type EvidenceDescriptor struct {
-	MediaType string `json:"mediaType"`
-	Digest    string `json:"digest"`
-	Size      int64  `json:"size"`
-}
+// EvidenceJudgePolicyVersion is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceJudgePolicyVersion.
+const EvidenceJudgePolicyVersion = evidence.EvidenceJudgePolicyVersion
 
-type EvidencePlatform struct {
-	OS           string `json:"os"`
-	Architecture string `json:"architecture"`
-	Variant      string `json:"variant"`
-}
+// EvidencePolicyID is the evidence definition.
+//
+// Deprecated: use evidence.EvidencePolicyID.
+const EvidencePolicyID = evidence.EvidencePolicyID
 
-type EvidenceSubject struct {
-	Manifest           EvidenceDescriptor `json:"manifest"`
-	MemberID           string             `json:"memberID"`
-	MemberDigest       string             `json:"memberDigest"`
-	CompositionDigest  string             `json:"compositionDigest"`
-	BuildProfileDigest string             `json:"buildProfileDigest"`
-	Platform           EvidencePlatform   `json:"platform"`
-}
+// EvidencePolicyVersion is the evidence definition.
+//
+// Deprecated: use evidence.EvidencePolicyVersion.
+const EvidencePolicyVersion = evidence.EvidencePolicyVersion
 
-// EvidenceImplementation is the portable implementation identity.
+// EvidenceSchemaVersion is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceSchemaVersion.
+const EvidenceSchemaVersion = evidence.EvidenceSchemaVersion
+
+// MediaTypeEvaluationEvidence is the evidence definition.
+//
+// Deprecated: use evidence.MediaTypeEvaluationEvidence.
+const MediaTypeEvaluationEvidence = evidence.MediaTypeEvaluationEvidence
+
+// EvaluationEvidence is the evidence definition.
+//
+// Deprecated: use evidence.EvaluationEvidence.
+type EvaluationEvidence = evidence.EvaluationEvidence
+
+// EvidenceAssertionResult is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceAssertionResult.
+type EvidenceAssertionResult = evidence.EvidenceAssertionResult
+
+// EvidenceCaseRef is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceCaseRef.
+type EvidenceCaseRef = evidence.EvidenceCaseRef
+
+// EvidenceCaseResult is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceCaseResult.
+type EvidenceCaseResult = evidence.EvidenceCaseResult
+
+// EvidenceDescriptor is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceDescriptor.
+type EvidenceDescriptor = evidence.EvidenceDescriptor
+
+// EvidenceEvaluation is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceEvaluation.
+type EvidenceEvaluation = evidence.EvidenceEvaluation
+
+// EvidenceEvaluator is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceEvaluator.
+type EvidenceEvaluator = evidence.EvidenceEvaluator
+
+// EvidenceEvaluatorIdentity is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceEvaluatorIdentity.
+type EvidenceEvaluatorIdentity = evidence.EvidenceEvaluatorIdentity
+
+// EvidenceExecution is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceExecution.
+type EvidenceExecution = evidence.EvidenceExecution
+
+// EvidenceFileRef is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceFileRef.
+type EvidenceFileRef = evidence.EvidenceFileRef
+
+// EvidenceImplementation is the portable core definition.
 //
 // Deprecated: use core.EvidenceImplementation.
 type EvidenceImplementation = core.EvidenceImplementation
 
-type EvidenceModel struct {
-	Protocol            string `json:"protocol"`
-	ID                  string `json:"id"`
-	ConfigurationDigest string `json:"configurationDigest"`
-}
+// EvidenceJudgeConfiguration is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceJudgeConfiguration.
+type EvidenceJudgeConfiguration = evidence.EvidenceJudgeConfiguration
 
-// EvidenceExecution distinguishes runtime/harness implementations, model
-// inference settings and the renderer/execution profile. Configuration digests
-// must hash documented non-secret projections, never credentials or endpoints.
-type EvidenceExecution struct {
-	Runtime             EvidenceImplementation `json:"runtime"`
-	Model               EvidenceModel          `json:"model"`
-	Harness             EvidenceImplementation `json:"harness"`
-	Renderer            EvidenceImplementation `json:"renderer"`
-	Profile             EvidenceImplementation `json:"profile"`
-	ConfigurationDigest string                 `json:"configurationDigest"`
-}
+// EvidenceJudgeResult is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceJudgeResult.
+type EvidenceJudgeResult = evidence.EvidenceJudgeResult
 
-type EvidencePolicy struct {
-	ID                  string `json:"id"`
-	Version             string `json:"version"`
-	ConfigurationDigest string `json:"configurationDigest"`
-}
+// EvidenceModel is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceModel.
+type EvidenceModel = evidence.EvidenceModel
 
-type EvidenceEvaluatorIdentity struct {
-	ID      string         `json:"id"`
-	Version string         `json:"version"`
-	Policy  EvidencePolicy `json:"policy"`
-}
+// EvidencePlatform is the evidence definition.
+//
+// Deprecated: use evidence.EvidencePlatform.
+type EvidencePlatform = evidence.EvidencePlatform
 
-type EvidenceEvaluator struct {
-	Identity    EvidenceEvaluatorIdentity `json:"identity"`
-	StartedAt   string                    `json:"startedAt"`
-	CompletedAt string                    `json:"completedAt"`
-}
+// EvidencePolicy is the evidence definition.
+//
+// Deprecated: use evidence.EvidencePolicy.
+type EvidencePolicy = evidence.EvidencePolicy
 
-type EvidenceFileRef struct {
-	Path       string             `json:"path"`
-	Descriptor EvidenceDescriptor `json:"descriptor"`
-}
+// EvidenceRefusal is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceRefusal.
+type EvidenceRefusal = evidence.EvidenceRefusal
 
-type EvidenceCaseRef struct {
-	ID         string             `json:"id"`
-	Path       string             `json:"path"`
-	Descriptor EvidenceDescriptor `json:"descriptor"`
-	Runs       int                `json:"runs"`
-	MinPasses  int                `json:"minPasses"`
-}
+// EvidenceRunResult is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceRunResult.
+type EvidenceRunResult = evidence.EvidenceRunResult
 
-type EvidenceEvaluation struct {
-	Index EvidenceFileRef   `json:"index"`
-	Cases []EvidenceCaseRef `json:"cases"`
-}
+// EvidenceSubject is the evidence definition.
+//
+// Deprecated: use evidence.EvidenceSubject.
+type EvidenceSubject = evidence.EvidenceSubject
 
-type EvidenceCaseResult struct {
-	ID      string              `json:"id"`
-	Outcome string              `json:"outcome"`
-	Runs    []EvidenceRunResult `json:"runs"`
-}
+// ExpectedEvaluation is the evidence definition.
+//
+// Deprecated: use evidence.ExpectedEvaluation.
+type ExpectedEvaluation = evidence.ExpectedEvaluation
 
-type EvidenceRunResult struct {
-	Number     int                       `json:"number"`
-	Status     string                    `json:"status"`
-	Outcome    string                    `json:"outcome"`
-	Assertions []EvidenceAssertionResult `json:"assertions"`
-}
-
-type EvidenceAssertionResult struct {
-	ID      string               `json:"id"`
-	Type    string               `json:"type"`
-	Outcome string               `json:"outcome"`
-	Judge   *EvidenceJudgeResult `json:"judge,omitempty"`
-}
-
-// EvidenceJudgeConfiguration names authored model/version requirements and an
-// independently accepted judge policy and non-secret configuration projection.
-type EvidenceJudgeConfiguration struct {
-	Model   string         `json:"model"`
-	Version string         `json:"version"`
-	Policy  EvidencePolicy `json:"policy"`
-}
-
-// EvidenceJudgeResult keeps authored configuration distinct from declared
-// observed response model identities. Neither identity is attested. Each
-// observed model must exactly equal model or model + "-" + version. Scores and
-// observedModels are either both empty (unavailable) or both length two.
-// Producers must initialize empty slices rather than leave them nil: JSON null
-// is malformed; non-null empty arrays represent an unavailable observation.
-type EvidenceJudgeResult struct {
-	Configuration  EvidenceJudgeConfiguration `json:"configuration"`
-	ObservedModels []string                   `json:"observedModels"`
-	Scores         []int                      `json:"scores"`
-	MinScore       int                        `json:"minScore"`
-}
-
-// ExpectedEvaluation must be resolved independently, never copied from claims.
-// All subject/execution/evaluator fields are required; Judges is an explicit
-// allowlist of complete configurations, empty only when no judge is accepted.
-// Evaluation times are deliberately not caller expectations.
-type ExpectedEvaluation struct {
-	Subject   EvidenceSubject              `json:"subject"`
-	Execution EvidenceExecution            `json:"execution"`
-	Evaluator EvidenceEvaluatorIdentity    `json:"evaluator"`
-	Judges    []EvidenceJudgeConfiguration `json:"judges"`
-}
-
-// VerifiedEvaluation summarizes consistency, not authenticity, truth, freshness
-// or deployment readiness. It contains no raw unverified evidence inputs.
-type VerifiedEvaluation struct {
-	Subject     EvidenceSubject `json:"subject"`
-	Cases       int             `json:"cases"`
-	Runs        int             `json:"runs"`
-	CompletedAt string          `json:"completedAt"`
-	Unsigned    bool            `json:"unsigned"`
-}
-
-// EvidenceRefusal exposes a stable code without untrusted text or wrapped causes.
-// Codes: missing, malformed, unsupported, limit, artifact, subject, coverage,
-// policy, unknown, not-passing.
-type EvidenceRefusal struct{ Code string }
-
-func (e *EvidenceRefusal) Error() string {
-	if e != nil {
-		switch e.Code {
-		case "missing", "malformed", "unsupported", "limit", "artifact", "subject", "coverage", "policy", "unknown", "not-passing":
-			return "evaluation evidence refused: " + e.Code
-		}
-	}
-	return "evaluation evidence refused"
-}
-
-func evidenceRefuse(code string) error { return &EvidenceRefusal{Code: code} }
+// VerifiedEvaluation is the evidence definition.
+//
+// Deprecated: use evidence.VerifiedEvaluation.
+type VerifiedEvaluation = evidence.VerifiedEvaluation

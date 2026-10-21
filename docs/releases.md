@@ -9,6 +9,88 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
+## [v0.7.0](https://github.com/agent-primitives/suite/releases/tag/v0.7.0) — 2026-10-21 — focused Go packages
+
+### Summary
+- **Focused imports:** portable `core`, directory/OCI/diff `oci`, evaluation `evidence` and explicitly selected `experimental/flow`; existing `policy` is unchanged.
+- **Root compatibility through v0.7.x:** migrate before the planned breaking removal in v0.8.0, before module 1.0.
+- **Fresh `/schema/v0.7/` IDs:** validation constraints, wire/JSON contracts, canonical artifact identities and dependencies are unchanged.
+
+### What moved
+
+The standalone Go module remains `github.com/agent-primitives/suite`, with one root module tag `v0.7.0`. PRs [#47](https://github.com/agent-primitives/suite/pull/47) and [#48](https://github.com/agent-primitives/suite/pull/48) split its root package into focused public imports:
+
+| Import | Responsibility / examples |
+| --- | --- |
+| `github.com/agent-primitives/suite/core` | Portable manifests, profiles, evaluation definitions and reports; strict `Marshal`/`Unmarshal`, digest/descriptor helpers and value validation such as `ValidateExecutionContract` and `ValidateImageReference`. |
+| `github.com/agent-primitives/suite/oci` | `ValidatePath`, `ValidateDirectory`, `DiffPaths` and semantic-diff types. |
+| `github.com/agent-primitives/suite/evidence` | Evaluation claim types, `VerifyEvaluation` and the explicitly selected `VerifyEvaluationFlowV1Alpha1`. |
+| `github.com/agent-primitives/suite/experimental/flow` | Stored `FlowV1Alpha1` types/selectors, `FlowV1Alpha1Graph`, `ValidatePathFlowV1Alpha1` and `ValidateDirectoryFlowV1Alpha1`. |
+| `github.com/agent-primitives/suite/policy` | Existing standalone policy APIs; import path unchanged. |
+
+The three artifact-facing facades share `internal/artifact`, keeping loaders, evidence/diff algorithms and private validated graph state together without new graph accessors. Consumers must not import the internal engine. `core` does not load directories/OCI layouts, verify claims or execute agents. Ordinary artifact validation still compiles the experimental validator in the shared engine; this is a public API split, not independent feature engines.
+
+### Compatibility window: v0.7.x, then removal in v0.8.0
+
+All existing root imports (`agentsuite "github.com/agent-primitives/suite"`) remain supported throughout **v0.7.x** through deprecated true type aliases, constant aliases and real function forwarders. There are 79 root type aliases, 35 constants and 15 function forwarders in the checked source. No root-export removal belongs in a v0.7 patch.
+
+**Migrate during v0.7.x. The planned removal is v0.8.0**, a separately reviewed breaking minor release before module 1.0. This is one minor-version compatibility window, not an extra minor after v0.7.x. The removal is tracked from the [1.0 checklist #30](https://github.com/agent-primitives/suite/issues/30), following [#45](https://github.com/agent-primitives/suite/issues/45).
+
+Within v0.7, aliases preserve assignability between root and focused imports, methods, JSON behavior and `errors.As` identity. **Defining-package reflection names are not preserved**: `reflect.Type.PkgPath` and `%T` can now name `core` or the internal implementation rather than the former root package. Audit code that keys registries or persists reflection/type-name strings; do not use those names as wire identifiers. The artifact facades' pkg.go.dev pages may display aliases rather than their fields; portable manifest fields are documented in `core`.
+
+### Consumer migration
+
+Update the single module pin, then migrate imports by responsibility:
+
+```sh
+go get github.com/agent-primitives/suite@v0.7.0
+GOWORK=off go test ./...
+```
+
+Do not use separate `core/v0.7.0` or `oci/v0.7.0` tags. Keep existing exported identifier spellings; no model conversions or artifact rewrites are needed.
+
+| Former root use | Focused use |
+| --- | --- |
+| `agentsuite.Suite`, `agentsuite.RuntimeProfile`, `agentsuite.Report` | `core.Suite`, `core.RuntimeProfile`, `core.Report` |
+| `agentsuite.Marshal`, `Unmarshal`, `Digest`, descriptor helpers | Corresponding `core` functions |
+| `agentsuite.ValidateExecutionContract`, `ValidateImageReference` | Corresponding `core` functions |
+| `agentsuite.EvidenceImplementation` | `core.EvidenceImplementation` (the canonical portable identity) |
+| `agentsuite.ValidatePath`, `ValidateDirectory`, `DiffPaths` | Corresponding `oci` functions; diff types also live in `oci` |
+| `agentsuite.ExpectedEvaluation`, `EvidenceRefusal`, `VerifyEvaluation` | Corresponding `evidence` types/functions |
+| `agentsuite.VerifyEvaluationFlowV1Alpha1` | `evidence.VerifyEvaluationFlowV1Alpha1`, not the flow package |
+| Root `FlowV1Alpha1` types/selectors and the two explicit flow validators | Same names from `experimental/flow` (usually imported as `flow`) |
+
+For example, model/JSON code and directory/OCI validation no longer need the root package:
+
+```go
+import (
+    "github.com/agent-primitives/suite/core"
+    "github.com/agent-primitives/suite/oci"
+)
+
+var suite core.Suite
+if err := core.Unmarshal(data, &suite); err != nil {
+    return err
+}
+report, err := oci.ValidatePath(path)
+```
+
+Pin published versions and verify in a clean checkout with `GOWORK=off`; a local workspace is only a rehearsal, not proof the new tag can be fetched. The older Sessions example import `github.com/kaimahi-agents/kaimahi/agentsuite` is a different legacy path and is not automatically migrated by these aliases.
+
+### Behavior, schema and stability boundaries
+
+The package moves do not change validation acceptance, security policy, evidence refusal ordering, semantic diff behavior, wire/JSON shapes, media types or canonical content/OCI digest rules. Existing artifact bytes, descriptors, signatures and evidence must not be rewritten for an import migration. Go module dependencies and the Go 1.26.0 minimum are unchanged from v0.6.0.
+
+The split PRs left schema, fixture and published catalog bytes untouched. Separately, [#49](https://github.com/agent-primitives/suite/pull/49) froze all 15 reference schemas under `https://suite.agent-primitives.dev/schema/v0.7/` for this release, changing only root IDs and matching test/documentation expectations, not constraints or instance JSON. [#50](https://github.com/agent-primitives/suite/pull/50) consolidated the root compatibility exports into `compat.go` plus one package-level deprecation note without changing the API. The v0.7.0 tag points to that merge; [#51](https://github.com/agent-primitives/suite/pull/51) subsequently restored main's unstable draft IDs. Historical v0.5/v0.6 bundles stay byte-identical. New schema URLs are not available merely because source IDs or a tag exist: the schema release asset, a reviewed additive catalog update and verified Pages publication are separate required steps.
+
+This remains pre-1.0. Suite document `1.0.0-draft`, evidence and policy versioning are not promoted by the module tag. `experimental/flow` still requires explicit selection; default readers refuse its critical extension. Offline graph/claim validation does not execute agents, authenticate the evaluator, enforce runtime policy or prove whole-flow success.
+
+### Verification
+
+The release tag points to reviewed merge `c268bbc747a5a6f7838595d961dc839a60c419cd`. Its [CI run](https://github.com/agent-primitives/suite/actions/runs/39658551570) passed all seven jobs, including native Linux/macOS/Windows identity/security, Go/conformance/race/vet/staticcheck, umask 077, TypeScript parity and documentation checks.
+
+Fresh independent `GOWORK=off` checks on that exact merge also passed: uncached Go suites under umask 022 and 077 (1,229 named passes and all 22 required conformance cases, no skips), full race tests, static checks, cross-platform builds/test compilation, actual JS/Wasm security refusal, TypeScript parity, schema/release-tool selftests, docs/link/build and browser/accessibility checks. Native CI logs confirmed all 11 required Windows identity/security tests, including all five ACL cases, and all eight macOS cases without skips. The official v0.7.0 pre-tag schema check passed. Cross-compilation is not native execution, and these offline library checks are not downstream runtime qualification.
+
 ## [v0.6.0](https://github.com/agent-primitives/suite/releases/tag/v0.6.0) — 2026-10-20 — portable loose-directory identity and experimental flow
 
 ### Summary

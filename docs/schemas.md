@@ -26,6 +26,7 @@ diagnostic API is required.
 | v0.4.0 | [v0.4.0/schema](https://github.com/agent-primitives/suite/tree/v0.4.0/schema) | Runtime profiles |
 | v0.5.0 | [v0.5.0/schema](https://github.com/agent-primitives/suite/tree/v0.5.0/schema) | Frozen minor-scoped schema IDs |
 | v0.6.0 | [v0.6.0/schema](https://github.com/agent-primitives/suite/tree/v0.6.0/schema) | Portable loose-directory identity and opt-in experimental flow |
+| v0.7.0 | [v0.7.0/schema](https://github.com/agent-primitives/suite/tree/v0.7.0/schema) | Focused Go packages; frozen schema IDs, unchanged validation constraints |
 | main (current draft source) | [schema/](https://github.com/agent-primitives/suite/tree/main/schema) | Unstable draft IDs for further development; downloads below |
 
 The site downloads track main, not the latest release. The historical
@@ -34,10 +35,10 @@ some serve immutable v0.1.0 copies and others are not hosted. For example, the
 v0.1.0 Agent schema does not accept the policy binding added in v0.3.0. Fetching
 that historical ID cannot validate a v0.4.0 Agent with a policy binding.
 The [schema identity contract](../spec.md#54-schema-identity-and-contract-selection)
-defines the minor-scoped namespace. The released v0.5.0 and v0.6.0 bundles use
-frozen `/schema/v0.5/` and `/schema/v0.6/` IDs and are listed in the catalog below.
-The [v0.7.0 tag](https://github.com/agent-primitives/suite/tree/v0.7.0/schema)
-freezes the `/schema/v0.7/` source IDs; it does not publish their canonical URLs.
+defines the minor-scoped namespace. The released v0.5.0, v0.6.0 and v0.7.0 bundles
+use frozen `/schema/v0.5/`, `/schema/v0.6/` and `/schema/v0.7/` IDs and are listed
+in the catalog below. The v0.7.0 asset preserves the exact tagged schema bytes;
+canonical URL availability still requires this catalog to deploy and be verified.
 Main uses unstable `/schema/draft/` IDs for further development; its downloads
 track main, not an immutable tag.
 An ID in source does not mean its URL is published: the asset workflow,

@@ -3,7 +3,7 @@
 Use Go 1.26.0 or newer. Pin a published module version:
 
 ```bash
-go get github.com/agent-primitives/suite@v0.4.0
+go get github.com/agent-primitives/suite@v0.7.0
 ```
 
 The module path ends in `suite`; the package name is `agentsuite`. Use an
@@ -13,18 +13,19 @@ explicit alias:
 import agentsuite "github.com/agent-primitives/suite"
 ```
 
-## Portable core (main, not yet released)
+<a id="portable-core-main-not-yet-released"></a>
+
+## Focused packages (v0.7.0)
 
 The `github.com/agent-primitives/suite/core` package owns portable manifests,
 profiles, evaluation definitions, report/selection types and JSON/identity
 helpers. It does not load directories or OCI layouts, verify evidence or execute
-agents. The published pin above predates this package; keep using the root
-import with that release. To work on main locally, use the
+agents. The published pin above includes these packages. To work on main
+locally instead, use the
 [outside-tree workspace instructions](../CONTRIBUTING.md#local-development-across-repositories).
 
-Main also provides focused `oci`, `evidence` and `experimental/flow` packages.
-After a release containing these packages, model, JSON and validation code can
-migrate without conversions:
+v0.7.0 also provides focused `oci`, `evidence` and `experimental/flow` packages.
+Model, JSON and validation code can migrate without conversions:
 
 ```go
 import (
@@ -40,8 +41,8 @@ report, err := oci.ValidateDirectory(directory)
 ```
 
 Moved root types remain true aliases and moved functions remain forwarders.
-Their deprecated root exports are retained for one minor release; their later
-removal requires a separate pre-1.0 minor. Type methods and JSON contracts stay
+Their deprecated root exports are retained throughout v0.7.x; removal is planned
+for the separately reviewed breaking v0.8.0 minor before module 1.0. Type methods and JSON contracts stay
 unchanged, but reflection reports the new defining package (including `%T`
 output). Code relying on the old defining-package name must migrate separately.
 Import by responsibility:

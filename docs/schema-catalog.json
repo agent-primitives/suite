@@ -134,10 +134,80 @@
           "sha256": "72be8746607f667d66903cf9f2a8385316d1ee5f8a326cfb673a9223712110a6"
         }
       }
+    },
+    {
+      "path": "v0.7",
+      "release": "v0.7.0",
+      "sourceCommit": "c268bbc747a5a6f7838595d961dc839a60c419cd",
+      "assetUrl": "https://github.com/agent-primitives/suite/releases/download/v0.7.0/schemas-v0.7.0.json",
+      "sha256": "148909e4c0b9c5ba3e691fe1979b185a37b7f11af3cd67bb92ea8995c5fc6aa4",
+      "schemas": {
+        "administrative-policy-v2.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/administrative-policy-v2.schema.json",
+          "sha256": "50db2f88b12f2a7b090a47d433d161808c96bbf3ea09d6712d4733b8151468ed"
+        },
+        "agent.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/agent.schema.json",
+          "sha256": "17e6e7837b8b2997517c12804604bddacf3af59f8eff1c4444c371df490c4b58"
+        },
+        "build-profile.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/build-profile.schema.json",
+          "sha256": "4d2a551486942d76539f089dd47c397f3a0575fa2dafdf1955ed60f2f86dfeb7"
+        },
+        "composition.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/composition.schema.json",
+          "sha256": "84fd8d03e667a24c7aa978f4ac9d67ae34f2daa48834fefd4aa87fd8b2e111d9"
+        },
+        "eval-case.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/eval-case.schema.json",
+          "sha256": "b566afb3fc80240cbac00c94171c432d732419f97465fc71b108b29952578e84"
+        },
+        "eval-evidence.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/eval-evidence.schema.json",
+          "sha256": "061b3f8e676f0dedb9110a611fcffd19aa16ab8bf21a09cf00708644d3207197"
+        },
+        "eval-index.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/eval-index.schema.json",
+          "sha256": "da7b4e5b2a7badaebfacaa3c758d2ad1f234fc51e35f10db8b2476e86ab1eb6c"
+        },
+        "execution.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/execution.schema.json",
+          "sha256": "2d5a5c544b8276c366619d02c347216c9ecea75ebe2580693f64e5145f4ab02d"
+        },
+        "inference.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/inference.schema.json",
+          "sha256": "79b1a05ea3d632cada7ed5f17c6af5f751b2cf68bd4e787a7444c5094a4449d0"
+        },
+        "kmx-flow-v1alpha1.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/kmx-flow-v1alpha1.schema.json",
+          "sha256": "68696653c6b6c0d0bde24c8e7acf52baf10b69d2c40cff8acf0c7ba0c352befa"
+        },
+        "policy-v2.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/policy-v2.schema.json",
+          "sha256": "3a4f2ada08fb46c441a41f7c2726f251907cdd414d904b465fa602b2abe7f56e"
+        },
+        "runtime-profile.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/runtime-profile.schema.json",
+          "sha256": "bfb1fb91e9ef07e3d1db4bc7926e47bfdb05c176d591fcdac19e28fac2faba7a"
+        },
+        "suite.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/suite.schema.json",
+          "sha256": "091ebd4b6ea6a4ef0cb8b314de8644d347f1dc60ab82fdaba6867cacb9ff9d28"
+        },
+        "tool-provider-composition.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/tool-provider-composition.schema.json",
+          "sha256": "27f9eef5efb36129dafbf78bbb73a5185cb18612ece59b7854d7e673485b8ac8"
+        },
+        "tool-provider.schema.json": {
+          "id": "https://suite.agent-primitives.dev/schema/v0.7/tool-provider.schema.json",
+          "sha256": "824ec482b203c86740c14313aa2c6a398456a3a3d2ba2f2885c95fa64795d6f2"
+        }
+      }
     }
   ],
   "releases": {
     "v0.5.0": "v0.5",
-    "v0.6.0": "v0.6"
+    "v0.6.0": "v0.6",
+    "v0.7.0": "v0.7"
   }
 }

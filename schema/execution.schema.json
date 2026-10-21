@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/v0.7/execution.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/draft/execution.schema.json",
   "title": "Agent image execution contract",
   "description": "Experimental BuildProfile.execution record selected by kind http-v1 and protocol openai-chat-v1; outside the intended wire-1.0 stable core. See spec sections 1.1.1 and 6.2.",
   "$comment": "Full conformance also requires semantic validation: input names and environment destinations must each be unique. JSON Schema cannot express uniqueness by a selected property.",

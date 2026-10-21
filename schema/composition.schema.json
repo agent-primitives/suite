@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/v0.7/composition.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/draft/composition.schema.json",
   "title": "AgentSuite composition manifest",
   "type": "object",
   "additionalProperties": false,

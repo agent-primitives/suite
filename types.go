@@ -1,11 +1,6 @@
 package agentsuite
 
-import (
-	"encoding/json"
-
-	"github.com/agent-primitives/suite/core"
-	"github.com/agent-primitives/suite/internal/contract"
-)
+import "github.com/agent-primitives/suite/core"
 
 const (
 	// Deprecated: use core.ExecutionSharedSandbox.
@@ -249,5 +244,3 @@ type ToolProviderRequirement = core.ToolProviderRequirement
 //
 // Deprecated: use core.ToolProviderVariant.
 type ToolProviderVariant = core.ToolProviderVariant
-
-func isJSONNull(raw json.RawMessage) bool { return contract.IsJSONNull(raw) }

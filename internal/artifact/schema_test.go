@@ -1,0 +1,517 @@
+package artifact
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
+	"sync/atomic"
+	"testing"
+
+	"github.com/google/jsonschema-go/jsonschema"
+)
+
+const referenceSchemaPrefix = "https://suite.agent-primitives.dev/schema/draft/"
+
+var referenceSchemaNames = []string{
+	"administrative-policy-v2.schema.json", "agent.schema.json", "build-profile.schema.json",
+	"composition.schema.json", "eval-case.schema.json", "eval-evidence.schema.json",
+	"eval-index.schema.json", "execution.schema.json", "inference.schema.json", "kmx-flow-v1alpha1.schema.json",
+	"policy-v2.schema.json", "runtime-profile.schema.json", "suite.schema.json",
+	"tool-provider-composition.schema.json", "tool-provider.schema.json",
+}
+
+func TestReferenceSchemaIdentityInventory(t *testing.T) {
+	entries, err := os.ReadDir("../../schema")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, entry := range entries {
+		names = append(names, entry.Name())
+	}
+	if !slices.Equal(names, referenceSchemaNames) {
+		t.Fatalf("schema inventory = %v; want %v", names, referenceSchemaNames)
+	}
+	for _, name := range referenceSchemaNames {
+		t.Run(name, func(t *testing.T) {
+			resolved := compileReferenceSchema(t, name)
+			if got := resolved.Schema().ID; got != referenceSchemaPrefix+name {
+				t.Errorf("schema ID = %q; want %q", got, referenceSchemaPrefix+name)
+			}
+			if _, err := resolveReferenceSchemaJSON([]byte(fmt.Sprintf(`{"$ref":%q}`, referenceSchemaPrefix+name))); err != nil {
+				t.Fatalf("absolute local reference: %v", err)
+			}
+		})
+	}
+}
+
+func TestReferenceSchemaResolutionRefusesUnknownResourcesOffline(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		requests.Add(1)
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+	for _, uri := range []string{
+		server.URL + "/schema.json",
+		"https://kaimahi.dev/schemas/agentsuite/v1/suite.schema.json",
+		"https://suite.agent-primitives.dev/schema/v0.4/suite.schema.json",
+		"https://suite.agent-primitives.dev/schema/v0.5/suite.schema.json",
+		"https://suite.agent-primitives.dev/schema/v0.6/suite.schema.json",
+		"https://suite.agent-primitives.dev.evil.invalid/schema/draft/suite.schema.json",
+		referenceSchemaPrefix + "unknown.schema.json",
+		referenceSchemaPrefix + "suite.schema.json?other=1",
+		"file:///schema/suite.schema.json",
+	} {
+		if _, err := resolveReferenceSchemaJSON([]byte(fmt.Sprintf(`{"$ref":%q}`, uri))); err == nil || !strings.Contains(err.Error(), "unsupported schema reference") {
+			t.Errorf("reference %q: want unsupported resource, got %v", uri, err)
+		}
+	}
+	if got := requests.Load(); got != 0 {
+		t.Fatalf("offline resolver made %d HTTP requests", got)
+	}
+}
+
+func TestToolProviderSchemaDefinesBundledImplementation(t *testing.T) {
+	schema := compileReferenceSchema(t, "tool-provider.schema.json")
+	valid := `{
+	  "schemaVersion":"1.0.0-draft",
+	  "mediaType":"application/vnd.agentsuite.tool.provider.v1+json",
+	  "id":"datetime",
+	  "version":"1.0.0",
+	  "protocol":"mcp",
+	  "revision":"2025-06-18",
+	  "tools":[{
+	      "name":"current_time",
+	      "inputSchema":{"path":"schemas/input.json","descriptor":{"mediaType":"application/schema+json","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","size":123}},
+	      "outputSchema":{"path":"schemas/output.json","descriptor":{"mediaType":"application/schema+json","digest":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","size":456}},
+	      "effects":["reads-system-clock"]
+	    }],
+	  "variants":[{
+	    "platform":{"os":"linux","architecture":"amd64"},
+	    "variantDigest":"sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+	    "installRoot":"/opt/agentsuite/tool-providers/datetime/1.0.0",
+	    "relocatable":false,
+	    "payloadRoot":"tool-providers/datetime/1.0.0/linux-amd64",
+	    "entrypoint":"/opt/agentsuite/tool-providers/datetime/1.0.0/bin/datetime",
+	    "arguments":[],
+	    "searchPath":[],
+	    "environment":[],
+	    "writablePaths":[],
+	    "network":[],
+	    "runtime":{"abi":"static","cpuBaseline":"x86-64-v1"},
+	    "files":[{
+	      "path":"bin/datetime",
+	      "type":"file",
+	      "mode":493,
+	      "uid":0,
+	      "gid":0,
+	      "size":123456,
+	      "digest":"sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+	      "component":"datetime"
+	    }],
+	    "dependencies":[]
+	  }],
+	  "extensions":[]
+	}`
+	validateSchemaJSON(t, schema, valid, true)
+	retained := strings.Replace(valid, `"protocol":`, `"retained":true,"protocol":`, 1)
+	validateSchemaJSON(t, schema, retained, true)
+	validateSchemaJSON(t, schema, strings.Replace(retained, `"retained":true`, `"retained":false`, 1), false)
+	withRemote := strings.Replace(valid, `"extensions":[]`, `"remote":{
+	    "transport":"streamable-http",
+	    "endpointRef":"datetime-mcp-endpoint",
+	    "network":[{"destinationRef":"datetime-mcp-egress"}],
+	    "timeouts":{"connectMilliseconds":5000,"requestMilliseconds":60000},
+	    "cancellation":"propagate",
+	    "connection":"session-aware"
+	  },
+	  "extensions":[]`, 1)
+	validateSchemaJSON(t, schema, withRemote, true)
+	withoutFileDigest := strings.Replace(
+		valid,
+		`"digest":"sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"`,
+		`"notDigest":"sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"`,
+		1,
+	)
+	validateSchemaJSON(t, schema, withoutFileDigest, false)
+}
+
+func TestExecutionSchemaKeepsServingAndMountedABIConsistent(t *testing.T) {
+	schema := compileReferenceSchema(t, "execution.schema.json")
+	valid := `{"kind":"http-v1","protocol":"openai-chat-v1","port":8080,"healthPath":"/healthz","inputs":[],"configuration":"agentkit-v0-mounted-v1"}`
+	validateSchemaJSON(t, schema, valid, true)
+	for _, invalid := range []string{
+		strings.Replace(valid, `"http-v1"`, `"kubernetes-http-v1"`, 1),
+		strings.Replace(valid, `8080`, `9090`, 1),
+		strings.Replace(valid, `"/healthz"`, `"/ready"`, 1),
+	} {
+		validateSchemaJSON(t, schema, invalid, false)
+		var contract ExecutionContract
+		if err := Unmarshal([]byte(invalid), &contract); err == nil && ValidateExecutionContract(contract) == nil {
+			t.Fatal("semantic validator accepted incompatible serving/configuration contract")
+		}
+	}
+}
+
+func TestImageContractSchemaAndDecoderRequiredFields(t *testing.T) {
+	inference := `{"api":"openai-chat-completions-v1","contextTokens":8192,"outputTokens":1024,"streaming":false,"toolCalling":false}`
+	execution := `{"kind":"http-v1","protocol":"openai-chat-v1","port":8080,"healthPath":"/healthz","inputs":[{"name":"model-key","environment":"MODEL_KEY","secret":false}]}`
+	for _, tc := range []struct {
+		name, schema, document string
+		valid                  bool
+	}{
+		{"inference", "inference", inference, true},
+		{"missing streaming", "inference", strings.Replace(inference, `,"streaming":false`, "", 1), false},
+		{"missing toolCalling", "inference", strings.Replace(inference, `,"toolCalling":false`, "", 1), false},
+		{"null streaming", "inference", strings.Replace(inference, `"streaming":false`, `"streaming":null`, 1), false},
+		{"execution", "execution", execution, true},
+		{"mounted configuration", "execution", strings.Replace(execution, `{`, `{"configuration":"agentkit-v0-mounted-v1",`, 1), true},
+		{"empty configuration", "execution", strings.Replace(execution, `{`, `{"configuration":"",`, 1), false},
+		{"empty configuration unpinned serving", "execution", `{"configuration":"","kind":"http-v1","protocol":"openai-chat-v1","port":9090,"healthPath":"/ready","inputs":[]}`, false},
+		{"null configuration", "execution", strings.Replace(execution, `{`, `{"configuration":null,`, 1), false},
+		{"empty inputs", "execution", strings.Replace(execution, `[{"name":"model-key","environment":"MODEL_KEY","secret":false}]`, `[]`, 1), true},
+		{"missing inputs", "execution", `{"kind":"http-v1","protocol":"openai-chat-v1","port":8080,"healthPath":"/healthz"}`, false},
+		{"null inputs", "execution", strings.Replace(execution, `[{"name":"model-key","environment":"MODEL_KEY","secret":false}]`, `null`, 1), false},
+		{"missing secret", "execution", strings.Replace(execution, `,"secret":false`, "", 1), false},
+		{"reserved env", "execution", strings.Replace(execution, `MODEL_KEY`, `PATH`, 1), false},
+		{"injection env", "execution", strings.Replace(execution, `MODEL_KEY`, `LD_PRELOAD`, 1), false},
+		{"path traversal", "execution", strings.Replace(execution, `/healthz`, `/health/../healthz`, 1), false},
+		{"repeated separator", "execution", strings.Replace(execution, `/healthz`, `//healthz`, 1), false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			validateSchemaJSON(t, compileReferenceSchema(t, tc.schema+".schema.json"), tc.document, tc.valid)
+			var err error
+			if tc.schema == "inference" {
+				var record InferenceRequirements
+				err = Unmarshal([]byte(tc.document), &record)
+				if err == nil {
+					err = record.Validate()
+				}
+			} else {
+				var record ExecutionContract
+				err = Unmarshal([]byte(tc.document), &record)
+				if err == nil {
+					err = ValidateExecutionContract(record)
+				}
+			}
+			if (err == nil) != tc.valid {
+				t.Fatalf("decoder/semantic parity: %v", err)
+			}
+		})
+	}
+}
+
+func TestImageContractCrossFieldConformanceRequiresSemantics(t *testing.T) {
+	// These structurally valid documents require rules beyond standard JSON Schema.
+	inference := `{"api":"openai-chat-completions-v1","contextTokens":1,"outputTokens":2,"streaming":false,"toolCalling":false}`
+	validateSchemaJSON(t, compileReferenceSchema(t, "inference.schema.json"), inference, true)
+	var requirements InferenceRequirements
+	if err := Unmarshal([]byte(inference), &requirements); err != nil {
+		t.Fatal(err)
+	}
+	if requirements.Validate() == nil {
+		t.Fatal("oversized output accepted")
+	}
+	for _, inputs := range []string{
+		`[{"name":"a","environment":"KEY","secret":false},{"name":"b","environment":"KEY","secret":true}]`,
+		`[{"name":"a","environment":"KEY","secret":false},{"name":"a","environment":"OTHER_KEY","secret":true}]`,
+	} {
+		execution := `{"kind":"http-v1","protocol":"openai-chat-v1","port":8080,"healthPath":"/healthz","inputs":` + inputs + `}`
+		validateSchemaJSON(t, compileReferenceSchema(t, "execution.schema.json"), execution, true)
+		var contract ExecutionContract
+		if err := Unmarshal([]byte(execution), &contract); err != nil {
+			t.Fatal(err)
+		}
+		if ValidateExecutionContract(contract) == nil {
+			t.Fatal("duplicate binding identity accepted")
+		}
+	}
+}
+
+func TestToolProviderSchemaAcceptsMultiFileCLIBundles(t *testing.T) {
+	schema := compileReferenceSchema(t, "tool-provider.schema.json")
+	for _, name := range []string{"kubectl-tool-provider.json", "azure-cli-tool-provider.json", "opa-tool-provider.json"} {
+		t.Run(name, func(t *testing.T) {
+			data, err := os.ReadFile(filepath.Join("../../testdata", "tool-providers", name))
+			if err != nil {
+				t.Fatal(err)
+			}
+			validateSchemaJSON(t, schema, string(data), true)
+		})
+	}
+}
+
+func TestToolProviderSchemaDefinesRemoteMCPImplementation(t *testing.T) {
+	schema := compileReferenceSchema(t, "tool-provider.schema.json")
+	data, err := os.ReadFile(filepath.Join("../../testdata", "remote-mcp", "tool-provider.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	valid := string(data)
+	validateSchemaJSON(t, schema, valid, true)
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"streamable-http"`, `"sse"`, 1), false)
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"search-mcp-endpoint"`, `"https://example.test/mcp"`, 1), false)
+	for _, header := range []string{"Authorization", "Cookie", "X-API-Key"} {
+		t.Run(header, func(t *testing.T) {
+			withHeader := strings.Replace(valid, `"Authorization"`, `"`+header+`"`, 1)
+			plaintext := strings.Replace(
+				withHeader,
+				`"secretRef": {
+          "name": "search-mcp-auth",
+          "key": "token"
+        }`,
+				`"value": "plaintext-secret"`,
+				1,
+			)
+			validateSchemaJSON(t, schema, plaintext, false)
+		})
+	}
+}
+
+func TestToolProviderSchemaDefinesDelegatedAuthorization(t *testing.T) {
+	schema := compileReferenceSchema(t, "tool-provider.schema.json")
+	data, err := os.ReadFile(filepath.Join("../../testdata", "remote-mcp", "tool-provider.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	valid := string(data)
+	validateSchemaJSON(t, schema, valid, true)
+
+	// A deployment-specific Connection identifier, consent state, or credential
+	// value MUST be rejected by the closed delegatedAuthorization schema.
+	forbidden := map[string]string{
+		"connectionId": `"connectionId": "conn-12345",`,
+		"accessToken":  `"accessToken": "eyJhbGciOi...",`,
+		"refreshToken": `"refreshToken": "rt-abcdef",`,
+		"clientSecret": `"clientSecret": "super-secret",`,
+		"consentState": `"consentState": "granted",`,
+		"tokenExpiry":  `"expiresAt": "2026-01-01T00:00:00Z",`,
+	}
+	for name, field := range forbidden {
+		t.Run(name, func(t *testing.T) {
+			tampered := strings.Replace(
+				valid,
+				`"credential": {`,
+				`"credential": {
+          `+field,
+				1,
+			)
+			validateSchemaJSON(t, schema, tampered, false)
+		})
+	}
+
+	// credential resolution must be the single brokered value.
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"resolution": "runtime-brokered"`, `"resolution": "client-managed"`, 1), false)
+	// Classification is Tool-level and explicit for delegated authorization.
+	for _, field := range []string{`"approval": "policy-controlled",`, `"effect": "read-only",`} {
+		validateSchemaJSON(t, schema, strings.Replace(valid, field, "", 1), false)
+	}
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"approval": "policy-controlled"`, `"approval": "required"`, 1), true)
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"approval": "policy-controlled"`, `"approval": false`, 1), false)
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"approval": "policy-controlled"`, `"approval": "optional"`, 1), false)
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"effect": "mutating"`, `"effect": "consequential"`, 1), false)
+	validateSchemaJSON(t, schema, strings.Replace(
+		valid,
+		`"resolution": "runtime-brokered",
+          "bindingRef": "search-delegated-connection"
+        }`,
+		`"resolution": "runtime-brokered"
+        }`,
+		1,
+	), false)
+}
+
+func TestAgentSchemaDefinesSharedSandboxMode(t *testing.T) {
+	schema := compileReferenceSchema(t, "agent.schema.json")
+	valid := `{
+	  "schemaVersion":"1.0.0-draft",
+	  "mediaType":"application/vnd.agentsuite.agent.v1+json",
+	  "id":"writer",
+	  "instructions":{
+	    "path":"instructions/writer.md",
+	    "descriptor":{"mediaType":"text/markdown; charset=utf-8","digest":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","size":15}
+	  },
+	  "model":{"protocol":"openai-compatible","model":"example"},
+	  "toolProviders":[{
+	    "id":"datetime",
+	    "version":"1.0.0",
+	    "executionMode":"shared-sandbox"
+	  }]
+	}`
+	validateSchemaJSON(t, schema, valid, true)
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"shared-sandbox"`, `"unsupported"`, 1), false)
+}
+
+func TestCompositionSchemaDefinesSharedSandboxResolution(t *testing.T) {
+	schema := compileReferenceSchema(t, "composition.schema.json")
+	base := `{
+	  "schemaVersion":"1.0.0-draft",
+	  "mediaType":"application/vnd.agentsuite.composition.v1+json",
+	  "agent":"writer",
+	  "platform":{"os":"linux","architecture":"amd64"},
+	  "buildProfile":"default",
+	  "toolProviders":[%s]
+	}`
+	resolved := `{
+	  "id":"datetime",
+	  "version":"1.0.0",
+	  "manifestDigest":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+	  "variantDigest":"sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+	  "executionMode":"shared-sandbox"
+	}`
+	validateSchemaJSON(t, schema, strings.Replace(base, "%s", resolved, 1), true)
+	validateSchemaJSON(t, schema, strings.Replace(base, "%s", strings.Replace(resolved, `"variantDigest":"sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",`, "", 1), 1), false)
+	validateSchemaJSON(t, schema, strings.Replace(base, "%s", strings.Replace(resolved, `"shared-sandbox"`, `"unsupported"`, 1), 1), false)
+}
+
+func TestToolProviderCompositionSchemaDefinesStandaloneSandboxInput(t *testing.T) {
+	schema := compileReferenceSchema(t, "tool-provider-composition.schema.json")
+	data, err := os.ReadFile(filepath.Join("../../testdata", "tool-providers", "opa-tool-provider-composition.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	valid := string(data)
+	validateSchemaJSON(t, schema, valid, true)
+	validateSchemaJSON(t, schema, strings.Replace(valid, `"variantDigest"`, `"notVariantDigest"`, 1), false)
+}
+
+func TestBuildProfileSchemaRequiresDigestAddressedImageReferences(t *testing.T) {
+	schema := compileReferenceSchema(t, "build-profile.schema.json")
+	for _, name := range []string{"minimal", "coordinator-workers"} {
+		t.Run(name, func(t *testing.T) {
+			data, err := os.ReadFile(filepath.Join("../../testdata", name, "build-profiles", "default.json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			valid := string(data)
+			validateSchemaJSON(t, schema, valid, true)
+			validateSchemaJSON(t, schema, strings.Replace(valid, `"imageRef":`, `"notImageRef":`, 1), false)
+			validateSchemaJSON(t, schema, strings.Replace(valid, `@sha256:`, `:latest@sha256:`, 1), false)
+		})
+	}
+}
+
+func TestProviderTerminologyRejectsEarlierDraftFields(t *testing.T) {
+	tests := []struct {
+		name    string
+		schema  string
+		fixture string
+		raw     string
+		current string
+		legacy  string
+		target  any
+	}{
+		{"suite catalog", "suite.schema.json", "minimal/agentsuite.json", "", "toolProviderCatalog", "toolCatalog", &Suite{}},
+		{"agent requirements", "agent.schema.json", "", `{
+	  "schemaVersion":"1.0.0-draft",
+	  "mediaType":"application/vnd.agentsuite.agent.v1+json",
+	  "id":"writer",
+	  "instructions":{
+	    "path":"instructions/writer.md",
+	    "descriptor":{"mediaType":"text/markdown; charset=utf-8","digest":"sha256:516ff360a8ebb5e36e87f0d401a3cc7436ad2ad1059aae64670aff1078171df8","size":15}
+	  },
+	  "model":{"protocol":"openai-compatible","model":"example-model"},
+	  "toolProviders":[{"id":"datetime","version":"1.0.0","executionMode":"shared-sandbox"}]
+	}`, "toolProviders", "tools", &Agent{}},
+		{"composition resolutions", "composition.schema.json", "minimal/compositions/writer-linux-amd64.json", "", "toolProviders", "tools", &Composition{}},
+		{"callable tools", "tool-provider.schema.json", "remote-mcp/tool-provider.json", "", "tools", "operations", &ToolProvider{}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			raw := []byte(test.raw)
+			if test.fixture != "" {
+				var err error
+				raw, err = os.ReadFile(filepath.Join("../../testdata", test.fixture))
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			schema := compileReferenceSchema(t, test.schema)
+			validateSchemaJSON(t, schema, string(raw), true)
+			if err := decodeStrict(raw, test.target); err != nil {
+				t.Fatalf("current field rejected: %v", err)
+			}
+			legacy := strings.Replace(string(raw), `"`+test.current+`"`, `"`+test.legacy+`"`, 1)
+			validateSchemaJSON(t, schema, legacy, false)
+			if err := decodeStrict([]byte(legacy), test.target); err == nil || !strings.Contains(err.Error(), "unknown field") {
+				t.Fatalf("legacy field must fail closed, got %v", err)
+			}
+		})
+	}
+
+	for _, test := range []struct {
+		name   string
+		raw    string
+		target any
+	}{
+		{"nested provider", `{"provider":{"protocol":"mcp","revision":"2025-06-18","operations":[]}}`, &ToolProvider{}},
+		{"catalog entries", `{"tools":[]}`, &ToolProviderCatalog{}},
+		{"suite compositions", `{"toolCompositions":[]}`, &Suite{}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if err := decodeStrict([]byte(test.raw), test.target); err == nil || !strings.Contains(err.Error(), "unknown field") {
+				t.Fatalf("legacy field must fail closed, got %v", err)
+			}
+		})
+	}
+}
+
+func compileReferenceSchema(t *testing.T, name string) *jsonschema.Resolved {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join("../../schema", name))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return compileReferenceSchemaJSON(t, data)
+}
+
+func compileReferenceSchemaJSON(t *testing.T, data []byte) *jsonschema.Resolved {
+	t.Helper()
+	resolved, err := resolveReferenceSchemaJSON(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return resolved
+}
+
+func resolveReferenceSchemaJSON(data []byte) (*jsonschema.Resolved, error) {
+	var schema jsonschema.Schema
+	if err := json.Unmarshal(data, &schema); err != nil {
+		return nil, err
+	}
+	return schema.Resolve(&jsonschema.ResolveOptions{Loader: func(uri *url.URL) (*jsonschema.Schema, error) {
+		name := filepath.Base(uri.Path)
+		if uri.String() != referenceSchemaPrefix+name || !slices.Contains(referenceSchemaNames, name) {
+			return nil, fmt.Errorf("unsupported schema reference")
+		}
+		data, err := os.ReadFile(filepath.Join("../../schema", name))
+		if err != nil {
+			return nil, err
+		}
+		var referenced jsonschema.Schema
+		err = json.Unmarshal(data, &referenced)
+		return &referenced, err
+	}})
+}
+
+func validateSchemaJSON(t *testing.T, schema *jsonschema.Resolved, document string, valid bool) {
+	t.Helper()
+	var value any
+	if err := json.Unmarshal([]byte(document), &value); err != nil {
+		t.Fatal(err)
+	}
+	err := schema.Validate(value)
+	if valid && err != nil {
+		t.Fatalf("schema rejected valid document: %v", err)
+	}
+	if !valid && err == nil {
+		t.Fatal("schema accepted invalid document")
+	}
+}

@@ -82,9 +82,22 @@ jobs:
           node-version: '22'
       - name: Unsupported platforms fail closed
         run: |
-          GOOS=js GOARCH=wasm go test -count=1 -exec="$(go env GOROOT)/lib/wasm/go_js_wasm_exec" -run '^TestUnsupportedDirectorySecurity$' .
-          GOOS=plan9 GOARCH=amd64 go test -c -o "$RUNNER_TEMP/suite-plan9.test" .
-          GOOS=wasip1 GOARCH=wasm go test -c -o "$RUNNER_TEMP/suite-wasip1.test" .
+          set -euo pipefail
+          GOOS=js GOARCH=wasm go test -count=1 -json -exec="$(go env GOROOT)/lib/wasm/go_js_wasm_exec" -run '^TestUnsupportedDirectorySecurity$' ./internal/artifact | tee "$RUNNER_TEMP/unsupported-security.jsonl"
+          python3 - "$RUNNER_TEMP/unsupported-security.jsonl" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          events = [json.loads(line) for line in Path(sys.argv[1]).read_text().splitlines()]
+          passed = any(event.get("Action") == "pass" and event.get("Test") == "TestUnsupportedDirectorySecurity" for event in events)
+          skipped = any(event.get("Action") == "skip" for event in events)
+          if not passed or skipped:
+              raise SystemExit("Unsupported directory-security test must pass without skips")
+          PY
+          mkdir -p "$RUNNER_TEMP/plan9-tests" "$RUNNER_TEMP/wasip1-tests"
+          GOOS=plan9 GOARCH=amd64 go test -c -o "$RUNNER_TEMP/plan9-tests/" . ./oci ./evidence ./experimental/flow ./internal/artifact
+          GOOS=wasip1 GOARCH=wasm go test -c -o "$RUNNER_TEMP/wasip1-tests/" . ./oci ./evidence ./experimental/flow ./internal/artifact
       - name: Race detector
         run: go test -race -count=1 ./...
       - name: Vet
@@ -148,7 +161,7 @@ jobs:
           TEST_RESULTS: ${{ runner.temp }}/portable-identity.jsonl
         run: |
           set -euo pipefail
-          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity)' . | tee "$TEST_RESULTS"
+          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity)' ./internal/artifact | tee "$TEST_RESULTS"
           python3 - <<'PY'
           import json
           import os
@@ -185,7 +198,7 @@ jobs:
           print(f"Portable identity gate: {len(required)} required tests passed; no skips")
           PY
       - name: Platform-independent package tests
-        run: go test -count=1 ./core ./internal/contract ./internal/jsoncodec ./policy
+        run: go test -count=1 . ./oci ./evidence ./experimental/flow ./core ./internal/contract ./internal/jsoncodec ./policy
 
   typescript:
     name: TypeScript policy parity

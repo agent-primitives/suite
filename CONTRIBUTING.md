@@ -10,11 +10,12 @@ Follow the [Code of Conduct](CODE_OF_CONDUCT.md) and report vulnerabilities usin
 The normative contract is [spec.md](spec.md), with closed reference schemas in
 [schema/](schema/) and conformance fixtures in [testdata/](testdata/).
 Portable Go types, JSON/identity helpers and value-level validation live in
-`github.com/agent-primitives/suite/core`. The root package remains `agentsuite`,
-imported as `agentsuite "github.com/agent-primitives/suite"`, and retains graph
-validation, OCI, evidence, diff and experimental flow APIs. Moved root exports
-are deprecated aliases/forwarders, retained for one minor release before a
-separate pre-1.0 removal. See the [Go migration guide](docs/go.md#portable-core-main-not-yet-released)
+`github.com/agent-primitives/suite/core`. Focused `oci`, `evidence` and
+`experimental/flow` packages expose the shared internal artifact engine, which
+keeps graph validation, secure loaders, evidence and diff algorithms beside
+private validated state. The root package remains `agentsuite`, imported as
+`agentsuite "github.com/agent-primitives/suite"`; its deprecated aliases and
+forwarders are retained for one minor release before a separate pre-1.0 removal. See the [Go migration guide](docs/go.md#portable-core-main-not-yet-released)
 for the defining-package reflection caveat and unreleased-package boundary.
 Keep `core` independent of artifact loaders and the root package; share only
 low-level contract checks below their callers. Builders, registry transfer,

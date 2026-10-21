@@ -216,20 +216,7 @@ func TestCoreCompatibilityDeprecations(t *testing.T) {
 		t.Fatal(err)
 	}
 	var parsed comment.Parser
-	check := func(name string, doc *ast.CommentGroup) {
-		t.Helper()
-		if doc != nil {
-			for _, block := range parsed.Parse(doc.Text()).Content {
-				if paragraph, ok := block.(*comment.Paragraph); ok && len(paragraph.Text) != 0 {
-					if text, ok := paragraph.Text[0].(comment.Plain); ok && strings.HasPrefix(string(text), "Deprecated:") {
-						return
-					}
-				}
-			}
-		}
-		t.Errorf("%s has no tooling-recognised deprecation paragraph", name)
-	}
-	aliases, forwarders, constants := 0, 0, 0
+	aliases, forwarders, constants, deprecations := 0, 0, 0, 0
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go") || strings.HasSuffix(entry.Name(), "_test.go") {
 			continue
@@ -238,10 +225,42 @@ func TestCoreCompatibilityDeprecations(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		for _, group := range file.Comments {
+			for _, block := range parsed.Parse(group.Text()).Content {
+				paragraph, ok := block.(*comment.Paragraph)
+				if !ok {
+					continue
+				}
+				var plain strings.Builder
+				for _, part := range paragraph.Text {
+					if text, ok := part.(comment.Plain); ok {
+						plain.WriteString(string(text))
+					}
+				}
+				note := plain.String()
+				if !strings.HasPrefix(note, "Deprecated:") {
+					continue
+				}
+				deprecations++
+				if group != file.Doc {
+					t.Errorf("%s: deprecation must be in the package documentation", entry.Name())
+				}
+				for _, want := range []string{
+					"github.com/agent-primitives/suite/core",
+					"github.com/agent-primitives/suite/oci",
+					"github.com/agent-primitives/suite/evidence",
+					"github.com/agent-primitives/suite/experimental/flow",
+					"v0.7.x", "v0.8.0",
+				} {
+					if !strings.Contains(note, want) {
+						t.Errorf("package deprecation does not explain %q", want)
+					}
+				}
+			}
+		}
 		for _, declaration := range file.Decls {
 			if function, ok := declaration.(*ast.FuncDecl); ok && ast.IsExported(function.Name.Name) {
 				forwarders++
-				check(function.Name.Name, function.Doc)
 			}
 			decl, ok := declaration.(*ast.GenDecl)
 			if !ok {
@@ -250,34 +269,29 @@ func TestCoreCompatibilityDeprecations(t *testing.T) {
 			for _, spec := range decl.Specs {
 				switch spec := spec.(type) {
 				case *ast.TypeSpec:
-					if spec.Assign.IsValid() && ast.IsExported(spec.Name.Name) {
-						aliases++
-						doc := spec.Doc
-						if doc == nil {
-							doc = decl.Doc
+					if ast.IsExported(spec.Name.Name) {
+						if !spec.Assign.IsValid() {
+							t.Errorf("%s must remain a true alias", spec.Name.Name)
 						}
-						check(spec.Name.Name, doc)
+						aliases++
 					}
 				case *ast.ValueSpec:
-					if decl.Tok != token.CONST {
-						continue
-					}
-					for _, name := range spec.Names {
-						if ast.IsExported(name.Name) {
-							constants++
-							doc := spec.Doc
-							if doc == nil {
-								doc = decl.Doc
+					if decl.Tok == token.CONST {
+						for _, name := range spec.Names {
+							if ast.IsExported(name.Name) {
+								constants++
 							}
-							check(name.Name, doc)
 						}
 					}
 				}
 			}
 		}
 	}
+	if deprecations != 1 {
+		t.Errorf("want one package deprecation, got %d", deprecations)
+	}
 	if aliases != 79 || forwarders != 15 || constants != 35 {
-		t.Fatalf("deprecation coverage: %d aliases, %d forwarders, %d constants; want 79, 15, 35", aliases, forwarders, constants)
+		t.Fatalf("compatibility coverage: %d aliases, %d forwarders, %d constants; want 79, 15, 35", aliases, forwarders, constants)
 	}
 }
 

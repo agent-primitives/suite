@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/draft/administrative-policy-v2.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/v0.7/administrative-policy-v2.schema.json",
   "title": "AgentSuite network-only administrative policy v2",
   "description": "Omitted network imposes no additional restriction. Supplied tuple set intersects the suite set; explicit empty denies all.",
   "type": "object",

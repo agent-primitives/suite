@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suite.agent-primitives.dev/schema/draft/runtime-profile.schema.json",
+  "$id": "https://suite.agent-primitives.dev/schema/v0.7/runtime-profile.schema.json",
   "title": "AgentSuite runtime profile",
   "type": "object",
   "additionalProperties": false,

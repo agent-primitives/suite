@@ -13,10 +13,11 @@ Portable Go types, JSON/identity helpers and value-level validation live in
 `github.com/agent-primitives/suite/core`. Focused `oci`, `evidence` and
 `experimental/flow` packages expose the shared internal artifact engine, which
 keeps graph validation, secure loaders, evidence and diff algorithms beside
-private validated state. The root package remains `agentsuite`, imported as
-`agentsuite "github.com/agent-primitives/suite"`; its deprecated aliases and
-forwarders are retained for one minor release before a separate pre-1.0 removal. See the [Go migration guide](docs/go.md#portable-core-main-not-yet-released)
-for the defining-package reflection caveat and unreleased-package boundary.
+private validated state. The root `agentsuite` package is documentation-only
+and exports no API on main, targeting the breaking v0.8.0 minor. Use focused
+imports, not a replacement root compatibility layer. See the
+[Go migration guide](docs/go.md#portable-core-main-not-yet-released) for canonical
+imports, the v0.7.x migration window and the defining-package reflection caveat.
 Keep `core` independent of artifact loaders and the root package; share only
 low-level contract checks below their callers. Builders, registry transfer,
 runtime execution and enforcement belong to consumers.
@@ -149,7 +150,9 @@ While the module is v0, breaking Go API changes, changes to validation acceptanc
 wire shapes, canonicalization/digests or semantic-diff contracts require an
 explicitly documented **minor** release. Compatible additions use a minor release;
 compatible fixes use a patch release. Document compatibility effects and migration
-guidance in release notes. Wire-format versions remain independent of schema
+guidance in release notes. All v0.7.x patches must retain the root compatibility
+API; prepare them from the released v0.7 line, not main after its removal.
+Wire-format versions remain independent of schema
 IDs and Go module tags. Schema IDs select minor-scoped shape contracts, not a
 new wire-format version or every behavior of a validator/library release.
 

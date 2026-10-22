@@ -1949,7 +1949,7 @@ arbitrary annotations MUST NOT appear. Public configuration digests MUST use a
 documented non-secret projection, never credentials or resolved secret values.
 Producers MUST construct allowlisted fields rather than redact private receipts.
 
-**Verification.** `agentsuite.VerifyEvaluation` takes a local OCI layout,
+**Verification.** `evidence.VerifyEvaluation` takes a local OCI layout,
 independently supplied expected subject and evaluator policy, and evidence reader.
 Expected execution identities MUST come from the caller, not copied claims;
 there are no wildcards. Verification MUST validate local manifest/blob bytes and

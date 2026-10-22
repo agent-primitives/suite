@@ -9,6 +9,35 @@ The first published module tag is
 [v0.1.0](https://github.com/agent-primitives/suite/tree/v0.1.0).
 Tags live at the repository root, not under an `agentsuite/` prefix.
 
+## v0.8.0 — UNRELEASED — root Go compatibility removal
+
+**Breaking Go API change:** main removes all 79 deprecated root type aliases,
+35 constants and 15 function forwarders. The root `agentsuite` package remains
+documentation-only with zero exports; there is no replacement reexport layer.
+This is the removal following the one-minor v0.7.x migration window, not a
+v0.7 patch. All v0.7.x patches retain compatibility and must be prepared from
+the released v0.7 line after main removes it.
+
+Before adopting v0.8.0, migrate consumers to the focused packages already
+published in v0.7.0. Use `core` for portable models, JSON/identity helpers and
+value validation; `oci` for directory/OCI validation and semantic diff;
+`evidence` for claim types and both evidence verifiers; and
+`experimental/flow` for stored-flow types and explicit validation.
+`policy` is unchanged. In particular, `EvidenceImplementation` migrates to
+canonical `core.EvidenceImplementation`, and `VerifyEvaluationFlowV1Alpha1`
+migrates to `evidence`, not `experimental/flow`.
+See the [migration table](#consumer-migration) and [Go guide](go.md).
+
+Focused API signatures, alias identity, method sets, typed errors, validation
+acceptance/refusals and runtime behavior are unchanged. No stored instance JSON,
+wire fields, media types, canonical identity, semantic-diff contracts, schemas,
+fixtures or historical catalog entries change with this removal. The shared
+private engine and internal core bridges remain intact.
+
+These are draft notes, not a published release. Consumer migration must finish
+before adoption; minor-release schema freezing and tag publication are separate
+maintainer-owned release steps.
+
 ## [v0.7.0](https://github.com/agent-primitives/suite/releases/tag/v0.7.0) — 2026-10-21 — focused Go packages
 
 ### Summary

@@ -6,12 +6,10 @@ Use Go 1.26.0 or newer. Pin a published module version:
 go get github.com/agent-primitives/suite@v0.7.0
 ```
 
-The module path ends in `suite`; the package name is `agentsuite`. Use an
-explicit alias:
-
-```go
-import agentsuite "github.com/agent-primitives/suite"
-```
+The module path stays `github.com/agent-primitives/suite`. Import its focused
+packages by responsibility, not the standalone root. These imports work with
+the published v0.7.0 pin and with main, where root exports have been removed for
+the unreleased breaking v0.8.0 minor.
 
 <a id="portable-core-main-not-yet-released"></a>
 
@@ -40,17 +38,22 @@ if err := core.Unmarshal(data, &suite); err != nil {
 report, err := oci.ValidateDirectory(directory)
 ```
 
-Moved root types remain true aliases and moved functions remain forwarders.
-Their deprecated root exports are retained throughout v0.7.x; removal is planned
-for the separately reviewed breaking v0.8.0 minor before module 1.0. Type methods and JSON contracts stay
-unchanged, but reflection reports the new defining package (including `%T`
-output). Code relying on the old defining-package name must migrate separately.
+v0.7.x retains deprecated root aliases and function forwarders as the one-minor
+migration window. Main removes all 79 root type aliases, 35 constants and 15
+forwarders for the unreleased breaking v0.8.0 minor, before module 1.0. The root
+package is documentation-only; there is no replacement shim. v0.7.x patches must
+come from the released minor line and keep the compatibility API.
+
+Migrate before adopting v0.8.0. Type methods and JSON contracts stay unchanged,
+but the v0.7.0 split changed defining-package reflection (including `%T` output).
+Code relying on the old defining-package name must migrate separately.
 Import by responsibility:
 
 - `core`: portable types, strict JSON and content identity helpers.
 - `oci`: `ValidateDirectory`, `ValidatePath`, `DiffPaths` and semantic-diff types.
 - `evidence`: evidence types, `VerifyEvaluation` and the explicitly selected
-  `VerifyEvaluationFlowV1Alpha1` verifier.
+  `VerifyEvaluationFlowV1Alpha1` verifier. Migrate `EvidenceImplementation` to
+  canonical `core.EvidenceImplementation`, not an evidence-owned model.
 - `experimental/flow`: stored v1alpha1 flow types, selectors and validation.
 - `policy`: existing standalone policy resolution, unchanged.
 
@@ -61,7 +64,7 @@ feature engines. Their types alias that internal implementation, so reflection
 shows its defining package and pkg.go.dev may show aliases rather than fields.
 Portable manifest fields are documented in `core`. Keep existing exported
 identifier spellings when migrating; no conversion or wire-format rewrite is
-needed. The remaining examples below use the root API for the published pin.
+needed. The examples below use supported focused APIs with the published pin.
 
 ## Validate content offline
 
@@ -69,7 +72,7 @@ needed. The remaining examples below use the root API for the published pin.
 directory:
 
 ```go
-report, err := agentsuite.ValidatePath("./example-suite")
+report, err := oci.ValidatePath("./example-suite")
 if err != nil {
     return err
 }
@@ -84,11 +87,11 @@ sockets and symlinks refuse before opening; blob directories must not be
 symlinks. These rules also apply to the OCI reads used by `VerifyEvaluation`.
 The content layer's own symlink inventory rules are separate and unchanged.
 
-Use `ValidateDirectory` for extracted content without OCI auto-detection.
-Use `Unmarshal` rather than `encoding/json` directly when strict JSON decoding
+Use `oci.ValidateDirectory` for extracted content without OCI auto-detection.
+Use `core.Unmarshal` rather than `encoding/json` directly when strict JSON decoding
 is required, including duplicate-key and closed-field enforcement.
 
-`Marshal` produces JCS-canonical JSON; `Digest` computes the corresponding
+`core.Marshal` produces JCS-canonical JSON; `core.Digest` computes the corresponding
 content digest. Canonicalization, descriptors and the closed graph are defined
 by the [specification](../spec.md).
 
@@ -105,7 +108,7 @@ Select the exact member/platform/profile tuple, not the first composition.
 Reports preserve both selections while deduplicating `AgentPlatforms`.
 `DiffPaths` emits `runtimeProfile` records and profile-aware composition IDs.
 
-`VerifyEvaluation` retains evidence v1 and resolves the composition digest to
+`evidence.VerifyEvaluation` retains evidence v1 and resolves the composition digest to
 its profile before checking runtime/harness/renderer and profile identities.
 Two profiles need two detached passes against the exact same OCI manifest;
 passing one never qualifies the other. Expectations must be independently resolved.
@@ -122,12 +125,12 @@ later. See
 ## Standalone policy contracts
 
 The `github.com/agent-primitives/suite/policy` package owns policy resolution,
-canonical bytes and the policy-specific framed digest. `ValidatePath` validates
+canonical bytes and the policy-specific framed digest. `oci.ValidatePath` validates
 optional `Agent.Policy` FileRefs and reuses the same policy semantic decoder.
 The root artifact content digest and policy-specific framed digest stay distinct.
 
-The network-only v2 API was introduced in v0.3.0 and is included in the v0.4.0
-pin above. V1 filesystem policies remain supported without conversion.
+The network-only v2 API was introduced in v0.3.0 and is included in v0.7.0
+and later pins. V1 filesystem policies remain supported without conversion.
 
 Use `DecodeSuitePolicy` to read the explicit version, then
 `DecodeAdministrativePolicyForVersion(data, suite.Version)`, `Resolve` and
@@ -205,9 +208,7 @@ Extracted with portable history from
 See [contributing](../CONTRIBUTING.md) for local cross-repository development and
 maintainer-owned root release tags.
 
-[Root API reference](https://pkg.go.dev/github.com/agent-primitives/suite) ·
 [Core API reference](https://pkg.go.dev/github.com/agent-primitives/suite/core) ·
 [OCI API reference](https://pkg.go.dev/github.com/agent-primitives/suite/oci) ·
 [Evidence API reference](https://pkg.go.dev/github.com/agent-primitives/suite/evidence) ·
 [Experimental flow API reference](https://pkg.go.dev/github.com/agent-primitives/suite/experimental/flow)
-(new package references become available after a release containing them)

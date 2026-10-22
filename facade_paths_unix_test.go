@@ -4,9 +4,10 @@ package agentsuite_test
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
-	agentsuite "github.com/agent-primitives/suite"
+	"github.com/agent-primitives/suite/core"
 	"github.com/agent-primitives/suite/experimental/flow"
 	"github.com/agent-primitives/suite/oci"
 )
@@ -15,35 +16,30 @@ import (
 // in internal/artifact; checkout fixtures have no such ACL guarantee.
 func TestFacadeDirectoryAndDiff(t *testing.T) {
 	const path = "testdata/minimal"
-	before, err := agentsuite.ValidateDirectory(path)
+	report, err := oci.ValidateDirectory(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	after, err := oci.ValidateDirectory(path)
-	if err != nil || !reflect.DeepEqual(before, after) {
-		t.Fatalf("directory differs: %v %v", after, err)
+	if report.Name != "minimal" || report.Agents != 1 || report.Compositions != 1 {
+		t.Fatalf("unexpected minimal report: %+v", report)
 	}
 	detected, err := oci.ValidatePath(path)
-	if err != nil || !reflect.DeepEqual(after, detected) {
+	if err != nil || !reflect.DeepEqual(report, detected) {
 		t.Fatalf("path differs: %v %v", detected, err)
 	}
-	old, err := agentsuite.DiffPaths(path, path)
+	current, err := oci.DiffPaths(path, path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	current, err := oci.DiffPaths(path, path)
-	if err != nil || !reflect.DeepEqual(old, current) || current.HasChanges() {
-		t.Fatalf("diff differs: %v %v", current, err)
+	if current.HasChanges() || current.Summary != (oci.DiffSummary{}) || current.Before != current.After || !core.IsValidDigest(current.Before.ContentDigest) {
+		t.Fatalf("self-diff changed identity: %+v", current)
 	}
 	// Default validation accepts this core graph; explicit flow must not silently
 	// fall back when its critical selector is missing.
-	_, oldErr := agentsuite.ValidateDirectoryFlowV1Alpha1(path)
-	_, newErr := flow.ValidateDirectoryFlowV1Alpha1(path)
-	if oldErr == nil || newErr == nil || oldErr.Error() != newErr.Error() {
-		t.Fatalf("explicit flow refusal differs: %v %v", oldErr, newErr)
-	}
-	_, pathErr := flow.ValidatePathFlowV1Alpha1(path)
-	if pathErr == nil || pathErr.Error() != newErr.Error() {
-		t.Fatalf("flow path silently changed contract: %v", pathErr)
+	for _, validate := range []func(string) (*flow.FlowV1Alpha1Graph, error){flow.ValidateDirectoryFlowV1Alpha1, flow.ValidatePathFlowV1Alpha1} {
+		graph, err := validate(path)
+		if graph != nil || err == nil || !strings.Contains(err.Error(), "experimental flow selector is missing") {
+			t.Fatalf("explicit flow must refuse missing selector: %v %v", graph, err)
+		}
 	}
 }

@@ -56,7 +56,7 @@ suite's tuple set, never unions or grants extra endpoints. Restrictions from the
 other profile refuse rather than being dropped. Lists are bounded at 4096
 entries before deduplication; canonical output retains the v1 4 MiB limit.
 
-The root package validates optional [Agent policy bindings](../spec.md#83-agent-policy-binding)
+The `oci` package validates optional [Agent policy bindings](../spec.md#83-agent-policy-binding)
 at `policies/<agent-id>.json` in extracted and OCI content. These descriptors
 commit exact authored JCS bytes with ordinary content SHA-256, not this package's
 framed effective-policy digest. Authored array order/duplicates remain byte-bound;
@@ -87,7 +87,7 @@ wire-format edge cases there.
 Both versions use the **unchanged** `agentsuite-effective-policy\0v1\0` domain,
 uint64 big-endian byte-length framing and SHA-256. Here `v1` identifies the digest
 framing; the bytes already commit to the policy version. Do not substitute the
-root artifact digest function. Payload outer/inner versions and capabilities
+`core.Digest` content digest function. Payload outer/inner versions and capabilities
 must match, and the policy bytes must be exactly canonical, not merely have a
 matching digest.
 

@@ -24,12 +24,12 @@ execution status, judge scores/configuration, JSON shape and resource bounds.
 Failed runs within passing repeat policies remain visible; errors, cancellation,
 missing observations, split judging and unknown outcomes cannot qualify.
 
-For consumers, call `agentsuite.VerifyEvaluation(layoutPath, expected, reader)`.
+For consumers, call `evidence.VerifyEvaluation(layoutPath, expected, reader)`.
 Resolve `ExpectedEvaluation` from the intended suite/member/composition and
 execution/evaluator configuration, not by copying the evidence. Its `Judges`
 field is an explicit configuration allowlist, never a wildcard. A successful
 `VerifiedEvaluation` contains a validated subject, case/run counts, completion
-time and `Unsigned: true`. On `*agentsuite.EvidenceRefusal`, use `Code` rather
+time and `Unsigned: true`. On `*evidence.EvidenceRefusal`, use `Code` rather
 than parse the error text; a UI can show `evaluation: not verified` with that
 safe category, and CI should fail closed.
 

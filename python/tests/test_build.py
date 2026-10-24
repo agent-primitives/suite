@@ -10,6 +10,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def test_schema_checkout_bytes_are_portable():
+    for path in (ROOT / "schema").glob("*.schema.json"):
+        ref = "HEAD:schema/" + path.name
+        committed = subprocess.check_output(["git", "show", ref], cwd=ROOT)
+        windows = subprocess.check_output(
+            ["git", "-c", "core.autocrlf=true", "cat-file", "--filters", ref], cwd=ROOT
+        )
+        assert windows == committed, f"checkout conversion changes schema bytes: {path.name}"
+        assert path.read_bytes() == committed, f"schema checkout differs from provenance: {path.name}"
+
+
 def test_wheel_and_sdist_preserve_exact_offline_bundle(tmp_path):
     source = ROOT / "python"
     assert (source / "pyproject.toml").exists(), "Python build metadata missing"

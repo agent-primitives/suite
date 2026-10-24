@@ -6,6 +6,7 @@ REQUIRED = {
     "test_go_numeric_differential", "test_member_and_byte_boundaries",
     "test_offline_registry_resolves_all_bundled_refs",
     "test_wheel_and_sdist_preserve_exact_offline_bundle",
+    "test_schema_checkout_bytes_are_portable",
 }
 PASSED = set()
 SKIPPED = []

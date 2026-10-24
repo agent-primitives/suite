@@ -1998,7 +1998,8 @@ NOT be presented as authenticated provenance.
 
 ## 5. Policy
 
-Agent-bound authored policy and standalone policy resolution are specified separately below.
+Agent-bound authored policy, standalone policy resolution and deployment scope
+ownership are specified separately below.
 
 <a id="83-agent-policy-binding"></a>
 
@@ -2217,6 +2218,39 @@ safety are distinct runtime claims; neither valid policy bytes nor a provider
 payload establishes any of them. Runtime wiring, held-start and drift stopping
 remain outside these contracts. Section 5.1's authored policy binding does not
 establish any runtime guarantee.
+
+### 5.3 Policy scopes and enforcement ownership
+
+The Suite declares the agent's policy requirements and safety limits, not
+permission grants. Organization policy is owned by the organization's
+administrators and sets the outer limit. Host/personal policy is owned by the
+host operator or user; agent policy is authored with the agent and bound as in
+[§5.1](#51-agent-policy-binding). The deployer's composition of these scopes
+(organization → host/personal → agent) MUST only narrow the preceding limits,
+never broaden them. For an unattended agent, the deployer MUST use the
+deployment's policy in place of the host/personal scope; organization and agent
+scopes still apply.
+
+The deployer MUST resolve the effective policy across applicable scopes and
+translate it into the target runtime's native configuration. For composition
+of an authored policy with an administrative policy, the existing
+version-specific rules in [§5.2](#52-standalone-policy-contracts-normative)
+apply. Those rules define two-input composition, not a general multi-scope or
+cross-version policy engine. Administrative policy sources supply documents
+under those existing contracts; this specification defines no source-specific
+translation format. An omitted agent policy does not remove applicable
+administrative limits. The deployer MUST NOT silently drop a scope or safeguard
+that those composition rules cannot represent, and MUST refuse deployment if
+the target cannot meet a required need or enforce the effective policy's
+safeguards and required capabilities. This does not change §5.2's intersection
+semantics or turn authored allowances into permission grants.
+
+The runtime MUST enforce the policy through its native configuration, without
+reading the Suite for policy resolution or enforcement. This boundary does not
+prohibit reading Suite-derived bindings for other runtime responsibilities.
+These deployment and runtime responsibilities do not change artifact validation
+or frozen [draft-reader acceptance](docs/legacy-draft.md). Successful validation
+does not establish deployment support or runtime enforcement.
 
 ## 6. Experimental contracts
 

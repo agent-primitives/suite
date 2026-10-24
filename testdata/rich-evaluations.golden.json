@@ -1,0 +1,148 @@
+{
+  "package": {
+    "name": "rich-evaluations",
+    "path": "rich-evaluations",
+    "form": "directory",
+    "valid": true,
+    "contentDigest": "sha256:31a86768a30e48cdbabb8a27bc1f50b1913194b35d608500ec2ba367fe51eea6",
+    "manifestDigest": "",
+    "rootDigest": "sha256:acbcc68b1099d0aacd0fc484756355b8f7a8622efd70af234eb5f08e5cf2bf4f"
+  },
+  "documents": [
+    {
+      "path": "agentsuite.json",
+      "schema": "suite.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.manifest.v1+json",
+        "digest": "sha256:acbcc68b1099d0aacd0fc484756355b8f7a8622efd70af234eb5f08e5cf2bf4f",
+        "size": 1172
+      }
+    },
+    {
+      "path": "agents/writer.json",
+      "schema": "agent.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.agent.v1+json",
+        "digest": "sha256:810b0b978dc8737fe5364dcc5f0b58f4851343dc0dff218a17a7e7680c1dba2b",
+        "size": 871
+      }
+    },
+    {
+      "path": "build-profiles/default.json",
+      "schema": "build-profile.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.build.profile.v1+json",
+        "digest": "sha256:a7e6136d7e7daf2fcd7e61a149000382032dcbf140f2dda1076d2ee85d0a62cd",
+        "size": 820
+      }
+    },
+    {
+      "path": "compositions/writer-linux-amd64.json",
+      "schema": "composition.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.composition.v1+json",
+        "digest": "sha256:dd290cfe819441ea0ee17f9dc9e64e1d241e897c9dd1f2d7866a93e7fdde53ce",
+        "size": 449
+      }
+    },
+    {
+      "path": "evals/writer/cases/format.json",
+      "schema": "eval-case.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.eval.case.v1+json",
+        "digest": "sha256:83a4935ca415703ce14e5bb98fdf838ef8cf427369d8b1f61eca875b25f79224",
+        "size": 294
+      }
+    },
+    {
+      "path": "evals/writer/cases/offline.json",
+      "schema": "eval-case.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.eval.case.v1+json",
+        "digest": "sha256:8ac95ac327dfb658b3937cd3956eeddb4dca359ab1292ce613c053257631a603",
+        "size": 328
+      }
+    },
+    {
+      "path": "evals/writer/cases/retrieve.json",
+      "schema": "eval-case.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.eval.case.v1+json",
+        "digest": "sha256:c02ef79a4a6a13b78b19de7d3702ffddcfc70ed79b00541abb3ebbd7a467da6b",
+        "size": 307
+      }
+    },
+    {
+      "path": "evals/writer/cases/summarize.json",
+      "schema": "eval-case.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.eval.case.v1+json",
+        "digest": "sha256:29e2d8da286783af1b7ffde95396443a18be07c1f48f9d9856f99ca41ca23364",
+        "size": 518
+      }
+    },
+    {
+      "path": "evals/writer/index.json",
+      "schema": "eval-index.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.eval.index.v1+json",
+        "digest": "sha256:f6246771d2653ca4d2484a0a7d689b906e2d5bd6355ff76124e1c65194451db0",
+        "size": 1013
+      }
+    },
+    {
+      "path": "instructions/writer.md",
+      "schema": "",
+      "descriptor": {
+        "mediaType": "text/markdown; charset=utf-8",
+        "digest": "sha256:3c74697a89e23be91f2b5f2b8c9d3d686d8816672ae49088e42b88edf07f3b64",
+        "size": 71
+      }
+    },
+    {
+      "path": "policies/writer.json",
+      "schema": "policy-v2.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.policy.v2+json",
+        "digest": "sha256:9579149c9e7bdecb5b49b67c6dd279e434e4d8a1feb28c517299750b96ffcd8b",
+        "size": 213
+      }
+    },
+    {
+      "path": "schemas/lookup-input.json",
+      "schema": "",
+      "descriptor": {
+        "mediaType": "application/schema+json",
+        "digest": "sha256:9c2fe9762111c1e93a19017a10e9403fb537083419ba45c46312aafe8b95aaab",
+        "size": 122
+      }
+    },
+    {
+      "path": "tool-providers/catalog.json",
+      "schema": "",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.tool.provider.catalog.v1+json",
+        "digest": "sha256:74d942892f592a1a5879cdbe5ed833e70cf166eabe4262976331110a7c635224",
+        "size": 383
+      }
+    },
+    {
+      "path": "tool-providers/lookup/1.0.0/linux-amd64/bin/lookup",
+      "schema": "",
+      "descriptor": {
+        "mediaType": "application/octet-stream",
+        "digest": "sha256:9e24b8ca3385c586ecc9b467ee6f9f8f23539fc0db584dd5949fe1c0c445193b",
+        "size": 45
+      }
+    },
+    {
+      "path": "tool-providers/lookup/1.0.0/tool-provider.json",
+      "schema": "tool-provider.schema.json",
+      "descriptor": {
+        "mediaType": "application/vnd.agentsuite.tool.provider.v1+json",
+        "digest": "sha256:6d3c4eac2b9c2ca9a0e22f99c8cdfcf904c6f68df4d56afca0397c81d267c862",
+        "size": 1027
+      }
+    }
+  ]
+}

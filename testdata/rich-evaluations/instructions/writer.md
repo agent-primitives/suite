@@ -1,0 +1,1 @@
+Use lookup for retrieval. Keep summaries grounded; do not invent facts.

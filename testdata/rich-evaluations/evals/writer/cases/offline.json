@@ -1,0 +1,1 @@
+{"assertions":[{"id":"no-lookup","tool":"lookup","type":"toolNotCalled"},{"id":"offline-scope","type":"contains","value":"offline"}],"id":"offline","input":"Explain how to inspect a local package offline. Do not look up external sources.","mediaType":"application/vnd.agentsuite.eval.case.v1+json","schemaVersion":"1.0.0-draft"}

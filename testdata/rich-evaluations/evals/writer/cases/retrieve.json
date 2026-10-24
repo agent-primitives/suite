@@ -1,0 +1,1 @@
+{"assertions":[{"id":"lookup-used","tool":"lookup","type":"toolCalled"},{"id":"citation","type":"contains","value":"source:"}],"id":"retrieve","input":"Find a source about migrating a package and cite its identifier.","mediaType":"application/vnd.agentsuite.eval.case.v1+json","schemaVersion":"1.0.0-draft"}

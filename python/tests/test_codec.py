@@ -85,6 +85,10 @@ def test_go_number_lexeme_semantics(lexeme, canonical):
     b'"\\ud800"', b'"\\udc00"', b'{"a":1,"\\u0061":2}', b"\xef\xbb\xbf{}",
     b"\xff", b"{} {}", b"{}x", b"[" * 101 + b"0" + b"]" * 101,
     b" " * (4 * 1024 * 1024) + b"0",
+], ids=[
+    "empty", "lossy-integer", "int64-rounding", "overflow", "nan", "infinity",
+    "high-surrogate", "low-surrogate", "duplicate-key", "bom", "invalid-utf8",
+    "trailing-value", "trailing-junk", "excessive-depth", "oversized-document",
 ])
 def test_strict_refusals(data):
     from agent_suite._json import decode

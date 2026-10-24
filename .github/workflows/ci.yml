@@ -206,6 +206,32 @@ jobs:
       - name: Platform-independent package tests
         run: go test -count=1 . ./oci ./evidence ./experimental/flow ./core ./internal/contract ./internal/jsoncodec ./policy
 
+  python:
+    name: Python (${{ matrix.os }}, ${{ matrix.python }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ['3.10', '3.14']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install development dependencies and the distribution
+        run: python -m pip install -r python/requirements-dev.txt ./python
+      - name: Shared vectors, Go differential checks and isolated wheel/sdist install
+        run: python -m pytest python/tests -q
+      - name: Typecheck private implementation
+        run: python -m mypy --config-file python/pyproject.toml python/src/agent_suite
+
   typescript:
     name: TypeScript policy parity
     runs-on: ubuntu-latest

@@ -51,16 +51,37 @@ type packageConformanceCase struct {
 	RootDigest     string `json:"rootDigest"`
 }
 
+func decodePackageConformance(data []byte) ([]packageConformanceCase, error) {
+	var cases []packageConformanceCase
+	err := decodeStrict(data, &cases)
+	return cases, err
+}
+
+func TestPackageCorpusRejectsTrailingData(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "testdata", "conformance", "packages.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := decodePackageConformance(data); err != nil {
+		t.Fatalf("valid corpus refused: %v", err)
+	}
+	for _, suffix := range []string{" []", " trailing-garbage"} {
+		t.Run(suffix, func(t *testing.T) {
+			if _, err := decodePackageConformance(append(bytes.Clone(data), suffix...)); err == nil {
+				t.Fatal("accepted trailing corpus data")
+			}
+		})
+	}
+}
+
 func packageConformanceCases(t *testing.T) []packageConformanceCase {
 	t.Helper()
 	data, err := os.ReadFile(filepath.Join("..", "..", "testdata", "conformance", "packages.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	var cases []packageConformanceCase
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&cases); err != nil {
+	cases, err := decodePackageConformance(data)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if len(cases) < 7 {

@@ -14,7 +14,9 @@ evaluation sources, provider contract, tool input schema and authored policy.
 
 [The golden vector](rich-evaluations.golden.json) stays outside the package tree.
 Its `package` row follows the shared corpus's directory-row fields; resolve `path`
-relative to this file's directory. `rootDigest` is the root document's JCS digest.
+relative to this file's directory. The same package is registered in the
+[shared corpus](conformance/packages.json), whose paths are relative to its own
+directory; tests require both rows to agree. `rootDigest` is the root document's JCS digest.
 `contentDigest` is only the Go semantic-diff compatibility identity, not a new public
 format identity. Each `documents` row pins the file's media type, exact canonical
 size and SHA-256 digest (raw bytes for Markdown and payload). `schema` selects the

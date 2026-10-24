@@ -40,6 +40,11 @@ func readRichEvaluationGolden(t *testing.T) richEvaluationGolden {
 		golden.Package.Form != "directory" || !golden.Package.Valid || golden.Package.ManifestDigest != "" || len(golden.Documents) != 15 {
 		t.Fatalf("incomplete fixture vector: %+v", golden)
 	}
+	shared := packageConformanceNamed(t, golden.Package.Name)
+	if shared.Path != "../"+golden.Package.Path || shared.Form != golden.Package.Form || shared.Valid != golden.Package.Valid ||
+		shared.ContentDigest != golden.Package.ContentDigest || shared.RootDigest != golden.Package.RootDigest || shared.ManifestDigest != golden.Package.ManifestDigest {
+		t.Fatalf("shared corpus disagrees with fixture vector: %+v", shared)
+	}
 	return golden
 }
 

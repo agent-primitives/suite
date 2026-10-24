@@ -2,3 +2,5 @@
 /policy/testdata/decode-cases.jsonl text eol=lf
 # Fixture identities bind literal bytes, including Markdown and compressed blobs.
 /testdata/** -text
+# Schema bundles bind committed bytes, independent of checkout newline settings.
+/schema/** -text

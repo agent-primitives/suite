@@ -19,8 +19,10 @@ imports, not a replacement root compatibility layer. See the
 [Go migration guide](docs/go.md#portable-core-main-not-yet-released) for canonical
 imports, the v0.7.x migration window and the defining-package reflection caveat.
 Keep `core` independent of artifact loaders and the root package; share only
-low-level contract checks below their callers. Builders, registry transfer,
-runtime execution and enforcement belong to consumers.
+low-level contract checks below their callers. Sandbox-image builders, runtime
+execution and enforcement belong to consumers. The Python SDK may implement
+package-format readers/writers and digest-preserving registry transfer; this
+exception does not add Go builder or registry APIs.
 
 Preserve published schema bytes and IDs; new minor namespaces follow the
 [release policy](#release-policy). Preserve media types, wire-format versions

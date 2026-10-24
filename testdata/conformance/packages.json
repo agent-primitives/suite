@@ -1,0 +1,65 @@
+[
+  {
+    "name": "minimal",
+    "path": "../minimal",
+    "form": "directory",
+    "valid": true,
+    "contentDigest": "sha256:15e0613bf11e7c70e2255a7f669381343656b0957a9231d0b92e189bf254f3fb",
+    "manifestDigest": "",
+    "rootDigest": "sha256:59b19197bc5a053ec68968dfd9f990d50c24829c5761f251559f26cff6ba0711"
+  },
+  {
+    "name": "coordinator-workers",
+    "path": "../coordinator-workers",
+    "form": "directory",
+    "valid": true,
+    "contentDigest": "sha256:ad0135996326f744c4929365a358048e4306857728b016f6b8035dc1c7d9a9b3",
+    "manifestDigest": "",
+    "rootDigest": "sha256:4657080578bef06a67c1e92bae20564a6d3fddef9ab371cd67cf03ee8e06511e"
+  },
+  {
+    "name": "policy-binding",
+    "path": "../policy-binding",
+    "form": "directory",
+    "valid": true,
+    "contentDigest": "sha256:15b000f0bba3a68dd616466a849fc0f3463e62ab80dbe15c9c810301c6f6a953",
+    "manifestDigest": "",
+    "rootDigest": "sha256:a10fdc4d6125d9c68ac5319d96c45fa62b3ab813e7458e2a49dad8f5ad2964c1"
+  },
+  {
+    "name": "minimal-0644",
+    "path": "oci/minimal-0644",
+    "form": "oci",
+    "valid": true,
+    "contentDigest": "sha256:15e0613bf11e7c70e2255a7f669381343656b0957a9231d0b92e189bf254f3fb",
+    "manifestDigest": "sha256:639383cd876fda67256da0db3b5322424e792c0e083312c2cde8a287b51ce7c5",
+    "rootDigest": ""
+  },
+  {
+    "name": "minimal-0600",
+    "path": "oci/minimal-0600",
+    "form": "oci",
+    "valid": true,
+    "contentDigest": "sha256:f1a58db4c473aef0154dfadb32e69bea3a39f707cef1670e84a57f517f06a65a",
+    "manifestDigest": "sha256:b83aea7383aaf24e86937c428482d2a898fe104dc05b3da124bc004431c00937",
+    "rootDigest": ""
+  },
+  {
+    "name": "minimal-0755",
+    "path": "oci/minimal-0755",
+    "form": "oci",
+    "valid": true,
+    "contentDigest": "sha256:637aa13f65ac4a7944030a8e8057fbc3f0edc13a75fb261b30b103f9c7349325",
+    "manifestDigest": "sha256:5653835738441c5f40f01013d95b6f7e4b842d2ce42cdcca448b392fe0eaf89f",
+    "rootDigest": ""
+  },
+  {
+    "name": "inventory-mode-mismatch",
+    "path": "oci/inventory-mode-mismatch",
+    "form": "oci",
+    "valid": false,
+    "contentDigest": "",
+    "manifestDigest": "",
+    "rootDigest": ""
+  }
+]

@@ -116,9 +116,9 @@ This remains pre-1.0. Suite document `1.0.0-draft`, evidence and policy versioni
 
 ### Verification
 
-The release tag points to reviewed merge `c268bbc747a5a6f7838595d961dc839a60c419cd`. Its [CI run](https://github.com/agent-primitives/suite/actions/runs/39658551570) passed all seven jobs, including native Linux/macOS/Windows identity/security, Go/conformance/race/vet/staticcheck, umask 077, TypeScript parity and documentation checks.
+The release tag points to reviewed merge `c268bbc747a5a6f7838595d961dc839a60c419cd`. Its [CI run](https://github.com/agent-primitives/suite/actions/runs/39658551570) passed all seven jobs, including native Linux/macOS/Windows identity/security, Go/conformance/race/vet/staticcheck, umask 077 and documentation checks.
 
-Fresh independent `GOWORK=off` checks on that exact merge also passed: uncached Go suites under umask 022 and 077 (1,229 named passes and all 22 required conformance cases, no skips), full race tests, static checks, cross-platform builds/test compilation, actual JS/Wasm security refusal, TypeScript parity, schema/release-tool selftests, docs/link/build and browser/accessibility checks. Native CI logs confirmed all 11 required Windows identity/security tests, including all five ACL cases, and all eight macOS cases without skips. The official v0.7.0 pre-tag schema check passed. Cross-compilation is not native execution, and these offline library checks are not downstream runtime qualification.
+Fresh independent `GOWORK=off` checks on that exact merge also passed: uncached Go suites under umask 022 and 077 (1,229 named passes and all 22 required conformance cases, no skips), full race tests, static checks, cross-platform builds/test compilation, actual JS/Wasm security refusal, schema/release-tool selftests, docs/link/build and browser/accessibility checks. Native CI logs confirmed all 11 required Windows identity/security tests, including all five ACL cases, and all eight macOS cases without skips. The official v0.7.0 pre-tag schema check passed. Cross-compilation is not native execution, and these offline library checks are not downstream runtime qualification.
 
 ## [v0.6.0](https://github.com/agent-primitives/suite/releases/tag/v0.6.0) — 2026-10-20 — portable loose-directory identity and experimental flow
 
@@ -275,14 +275,6 @@ the v0 policy. To migrate, explicitly declare extension criticality, omit absent
 variants/output schemas instead of writing empty or null values, and rebind
 changed documents and all ancestor descriptors. Public type shapes, schema IDs,
 media types and canonical identity rules are unchanged. Validation remains offline.
-
-### TypeScript policy identity
-
-A [TypeScript policy package](https://github.com/agent-primitives/suite/tree/main/policy/typescript) is merged on main
-for filesystem v1 and network-only v2 canonicalization, digests and payload
-verification. Its source is included in v0.5.0; it remains a private, unpublished
-ESM package, not an npm release. It does not implement administrative-policy composition or runtime
-enforcement.
 
 ## [v0.4.0](https://github.com/agent-primitives/suite/releases/tag/v0.4.0) — 2026-10-16 — optional runtime profiles
 

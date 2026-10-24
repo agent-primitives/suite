@@ -79,7 +79,7 @@ without adding a newline or parsing/reserializing them before digest verificatio
 `testdata/decode-cases.jsonl` holds one canonical JSON case per line: a `name`, an
 `input` (or `inputHex` for byte-level input such as a BOM or malformed UTF-8),
 whether `DecodeSuitePolicy` accepts it, and for accepted cases the canonical
-bytes and digest. Both the Go and TypeScript tests run every case in this corpus.
+bytes and digest. The Go tests run every case in this corpus.
 The format needs no Go, so another implementation can
 run the same refusal, canonical-bytes and digest expectations; add new
 wire-format edge cases there.
@@ -90,11 +90,3 @@ framing; the bytes already commit to the policy version. Do not substitute the
 `core.Digest` content digest function. Payload outer/inner versions and capabilities
 must match, and the policy bytes must be exactly canonical, not merely have a
 matching digest.
-
-## TypeScript implementation
-
-The small [TypeScript policy package](typescript/README.md) implements strict
-v1/v2 wire decoding, canonicalization, framed digests and payload verification
-without runtime dependencies. Its tests read these same shared vectors and
-compare bounded malformed/boundary inputs directly with Go. It does not provide
-administrative composition, enforcement or a new policy schema.

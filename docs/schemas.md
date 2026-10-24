@@ -227,8 +227,8 @@ remote retrieval, including meta-schema fetching during compilation; preload
 the declared dialect too. Preserve the downloaded schema bytes and their `$id`s.
 Conforming AgentSuite validation MUST NOT fetch schemas or meta-schemas over
 the network and MUST fail closed on unresolved or conflicting resources.
-Equivalent handwritten validation is permitted; the Go Suite and TypeScript
-policy validators do not need a runtime JSON Schema engine.
+Equivalent handwritten validation is permitted; the Go Suite and policy
+validators do not need a runtime JSON Schema engine.
 
 Schema validation checks shape only. The example does not validate the Agent's
 referenced policy contents, descriptor digests or graph closure; use the Go

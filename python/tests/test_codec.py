@@ -133,6 +133,7 @@ def test_descriptor_integer_lexeme(size):
 
 def test_go_numeric_differential():
     import subprocess
+
     from agent_suite._json import canonical_bytes, decode
     from agent_suite._models import Descriptor
 

@@ -2,13 +2,12 @@
 import hashlib
 import importlib.util
 import json
-import os
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-CORPUS = Path(os.environ.get("AGENT_SUITE_CONFORMANCE_ROOT", ROOT / "testdata/conformance"))
+CORPUS = ROOT / "testdata/conformance"
 
 
 def cases(filename, minimum):
@@ -41,7 +40,14 @@ def test_shared_json_conformance():
         try:
             value = decode(data)
             if case["target"] == "descriptor":
-                Descriptor.from_value(value)
+                descriptor = Descriptor.from_value(value)
+                if case["valid"]:
+                    expected = json.loads(case["canonical"])
+                    assert descriptor.media_type == expected["mediaType"]
+                    assert descriptor.digest == expected["digest"]
+                    assert type(descriptor.size) is int and descriptor.size == expected["size"]
+                    assert (None if descriptor.annotations is None else dict(descriptor.annotations)) == (
+                        expected.get("annotations"))
             elif case["target"] == "platform":
                 Platform.from_value(value)
             encoded = canonical_bytes(value)
@@ -53,6 +59,8 @@ def test_shared_json_conformance():
             assert len(encoded) == case["size"]
             assert digest_bytes(encoded) == case["digest"]
     assert all(counts.values())
+    assert Platform.from_value(decode(b'{"os":"linux","architecture":"amd64","variant":"v3"}')) == (
+        Platform("linux", "amd64", "v3"))
 
 
 def test_shared_variant_conformance():

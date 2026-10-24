@@ -22,9 +22,6 @@ class Number(float):
         value.lexeme = lexeme
         return value
 
-    def __reduce__(self) -> tuple[Any, tuple[str]]:
-        return Number, (self.lexeme,)
-
 
 def _number(lexeme: str) -> Number:
     value = Number(lexeme)

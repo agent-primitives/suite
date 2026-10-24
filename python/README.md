@@ -7,8 +7,9 @@ distribution to PyPI.
 Private modules provide strict JSON decoding, RFC 8785 canonicalization, explicit
 literal-byte hashes, raw-preserving common records and offline schema-only
 diagnostics. Schema checks alone do not validate a package's graph or qualify a
-runtime. Bundles must resolve every schema reference, even in optional branches;
-diagnostics retain pointers and constraint codes without copying instance values.
+runtime. Construction checks the owning bundle's references in supported schema
+locations, including optional branches. Unresolved references reached during validation
+are refused. Diagnostics retain pointers and codes without copying instance values.
 Domain readers and full validation are a later change.
 
 Both distribution formats carry exact bytes from the repository's owning

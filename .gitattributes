@@ -1,2 +1,4 @@
 # This shared corpus compares exact canonical JSON lines on every platform.
 /policy/testdata/decode-cases.jsonl text eol=lf
+# Fixture identities bind literal bytes, including Markdown and compressed blobs.
+/testdata/** -text

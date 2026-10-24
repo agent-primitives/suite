@@ -1515,25 +1515,32 @@ func TestOCILayoutRejectsAnExtraIndexDescriptor(t *testing.T) {
 }
 
 func TestRawVariantDigestsPreserveExplicitZeroValues(t *testing.T) {
-	declared := "sha256:" + strings.Repeat("a", 64)
-	raw := []byte(`{"variants":[{"variantDigest":"` + declared + `","relocatable":false,"arguments":[],"files":[{"size":0,"component":""}]}]}`)
-	digests, err := rawVariantDigests(raw)
-	if err != nil {
-		t.Fatal(err)
+	type variantCase struct {
+		Name      string `json:"name"`
+		Input     string `json:"input"`
+		Canonical string `json:"canonical"`
+		Digest    string `json:"digest"`
 	}
-	want, err := canonicalDigest([]byte(`{"variantDigest":"","relocatable":false,"arguments":[],"files":[{"size":0,"component":""}]}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(digests) != 1 || digests[0] != want {
-		t.Fatalf("raw variant digests = %v, want %s", digests, want)
-	}
-	absent, err := rawVariantDigests([]byte(`{"variants":[{"variantDigest":"` + declared + `","files":[{}]}]}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if absent[0] == digests[0] {
-		t.Fatal("explicit zero-valued members did not affect variant identity")
+	seen := map[string]bool{}
+	for _, c := range sharedJSONLines[variantCase](t, "variant-cases.jsonl", 2) {
+		if c.Name == "" || seen[c.Name] {
+			t.Fatalf("empty or duplicate variant case %q", c.Name)
+		}
+		seen[c.Name] = true
+		t.Run(c.Name, func(t *testing.T) {
+			digests, err := rawVariantDigests([]byte(c.Input))
+			if err != nil || len(digests) != 1 || digests[0] != c.Digest {
+				t.Fatalf("raw variant digests=%v, err=%v; want %s", digests, err, c.Digest)
+			}
+			canonical, err := jcs.Transform([]byte(c.Canonical))
+			if err != nil || string(canonical) != c.Canonical {
+				t.Fatalf("expected variant bytes are not canonical: %v", err)
+			}
+			digest, err := canonicalDigest(canonical)
+			if err != nil || digest != c.Digest {
+				t.Fatalf("canonical variant digest=%s, err=%v; want %s", digest, err, c.Digest)
+			}
+		})
 	}
 }
 

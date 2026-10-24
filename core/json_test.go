@@ -88,15 +88,10 @@ func TestDigestUsesCanonicalJSON(t *testing.T) {
 }
 
 func TestDescriptorUnmarshalJSONAcceptsValidShapes(t *testing.T) {
-	cases := map[string]string{
-		"minimal":          `{"mediaType":"text/plain","digest":"sha256:` + strings.Repeat("a", 64) + `","size":2}`,
-		"zero size":        `{"mediaType":"text/plain","digest":"sha256:` + strings.Repeat("a", 64) + `","size":0}`,
-		"with annotations": `{"mediaType":"text/plain","digest":"sha256:` + strings.Repeat("a", 64) + `","size":2,"annotations":{"k":"v"}}`,
-	}
-	for name, doc := range cases {
-		t.Run(name, func(t *testing.T) {
+	for _, c := range descriptorConformanceCases(t, true) {
+		t.Run(c.Name, func(t *testing.T) {
 			var descriptor Descriptor
-			if err := json.Unmarshal([]byte(doc), &descriptor); err != nil {
+			if err := json.Unmarshal(c.inputBytes(t), &descriptor); err != nil {
 				t.Fatalf("UnmarshalJSON() error = %v", err)
 			}
 		})
@@ -104,24 +99,11 @@ func TestDescriptorUnmarshalJSONAcceptsValidShapes(t *testing.T) {
 }
 
 func TestDescriptorUnmarshalJSONRejectsClosedShapeViolations(t *testing.T) {
-	digest := strings.Repeat("a", 64)
-	cases := map[string]string{
-		"unknown field": `{"mediaType":"text/plain","digest":"sha256:` + digest + `","size":2,"extra":true}`,
-		// OCI's inline-content "data" field is unsupported here; reject it too.
-		"data field":        `{"mediaType":"text/plain","digest":"sha256:` + digest + `","size":2,"data":"aGVsbG8="}`,
-		"null mediaType":    `{"mediaType":null,"digest":"sha256:` + digest + `","size":2}`,
-		"null digest":       `{"mediaType":"text/plain","digest":null,"size":2}`,
-		"null size":         `{"mediaType":"text/plain","digest":"sha256:` + digest + `","size":null}`,
-		"null annotations":  `{"mediaType":"text/plain","digest":"sha256:` + digest + `","size":2,"annotations":null}`,
-		"missing size":      `{"mediaType":"text/plain","digest":"sha256:` + digest + `"}`,
-		"missing mediaType": `{"digest":"sha256:` + digest + `","size":2}`,
-		"missing digest":    `{"mediaType":"text/plain","size":2}`,
-	}
-	for name, doc := range cases {
-		t.Run(name, func(t *testing.T) {
+	for _, c := range descriptorConformanceCases(t, false) {
+		t.Run(c.Name, func(t *testing.T) {
 			var descriptor Descriptor
-			if err := json.Unmarshal([]byte(doc), &descriptor); err == nil {
-				t.Fatalf("UnmarshalJSON(%s) = nil error, want rejection", doc)
+			if err := json.Unmarshal(c.inputBytes(t), &descriptor); err == nil {
+				t.Fatal("UnmarshalJSON() accepted invalid descriptor")
 			}
 		})
 	}

@@ -89,6 +89,26 @@ The small offline docs checker covers local links and Markdown heading anchors
 rejected inputs. It does not fetch external URLs or implement a complete
 Markdown renderer. Review external links and rendered Markdown manually too.
 
+## Python format foundation
+
+The [Python implementation](python/README.md) has private codec, common records
+and offline schema-only diagnostics; it does not yet expose a package loader or
+claim graph-validation parity. From the repository root:
+
+```bash
+python -m pip install -r python/requirements-dev.txt ./python
+python -m pytest python/tests -q
+python -m mypy --config-file python/pyproject.toml python/src/agent_suite
+```
+
+The unfiltered **Python** matrix checks Python 3.10 and 3.14 on Linux, macOS and
+Windows. Tests require named passes and no skips, consume the shared JSON/variant
+vectors, compare numeric acceptance with Go, and verify exact schema bytes in
+both direct and sdist-derived wheels before an isolated installed smoke test.
+Package loading, graph checks and OCI conformance remain separate work. Build
+provenance records the schema source revision and SHA-256 inventory; dirty schema
+trees are refused, and runtime resolution never downloads schemas.
+
 ## Documentation site
 
 Use Node.js 22.12 or newer. Run `npm --prefix docs ci --ignore-scripts`, then

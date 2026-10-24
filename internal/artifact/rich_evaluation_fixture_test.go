@@ -258,7 +258,7 @@ func TestRichEvaluationFixtureOrderChangesIdentity(t *testing.T) {
 			if _, err := ValidateDirectory(root); err != nil {
 				t.Fatalf("rebound ordered index: %v", err)
 			}
-			identity, err := DiffPaths(richEvaluationRoot, root)
+			identity, err := DiffPaths(copyRichEvaluationFixture(t), root)
 			if err != nil {
 				t.Fatal(err)
 			}

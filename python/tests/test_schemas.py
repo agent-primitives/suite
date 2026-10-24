@@ -44,12 +44,55 @@ def test_schema_diagnostics_have_source_and_json_pointer():
     assert bundle.validate("one.json", {"a/b~c": "ok"}, Source("agent.json")) == []
 
 
-def test_unknown_reference_fails_closed():
+@pytest.mark.parametrize("reference", ["$ref", "$dynamicRef"])
+def test_unknown_reference_fails_closed(reference):
+    from agent_suite._schema import Bundle
+    schema = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://example.test/one", "type": "object",
+        "properties": {"optional": {reference: "https://unavailable.invalid/schema"}},
+    }
+    with pytest.raises(ValueError, match="reference"):
+        Bundle.from_bytes({"one.json": json.dumps(schema).encode()})
+
+
+@pytest.mark.parametrize("constraint", [
+    {"type": "integer"}, {"pattern": "^allowed$"},
+    {"oneOf": [{"const": "a"}, {"const": "b"}]},
+])
+def test_diagnostics_do_not_copy_instance_values(constraint):
     from agent_suite._models import Source
     from agent_suite._schema import Bundle
-    bundle = Bundle.from_bytes({"one.json": b'{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.test/one","$ref":"https://unavailable.invalid/schema"}'})
-    with pytest.raises(ValueError, match="reference"):
-        bundle.validate("one.json", {}, Source("test.json"))
+    schema = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://example.test/one", **constraint,
+    }
+    bundle = Bundle.from_bytes({"one.json": json.dumps(schema).encode()})
+    result = bundle.validate("one.json", "sample-private-value", Source("agent.json"))
+    assert len(result) == 1
+    assert "sample-private-value" not in result[0].message
+    assert result[0].code == "schema." + next(iter(constraint))
+    assert result[0].source == Source("agent.json")
+
+
+def test_reference_closure_uses_nested_base_scopes_and_ignores_literal_data():
+    from agent_suite._models import Source
+    from agent_suite._schema import Bundle
+    root = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://example.test/root", "type": "object",
+        "$defs": {"nested": {"$id": "nested/child", "$ref": "target"}},
+        "properties": {"item": {"$ref": "#/$defs/nested"}},
+        "examples": [{"$ref": "https://not-a-schema.invalid/example"}],
+    }
+    target = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://example.test/nested/target", "type": "string",
+    }
+    bundle = Bundle.from_bytes({"root.json": json.dumps(root).encode(),
+                               "target.json": json.dumps(target).encode()})
+    assert bundle.validate("root.json", {"item": "ok"}, Source("agent.json")) == []
+    assert bundle.validate("root.json", {"item": 4}, Source("agent.json"))
 
 
 def test_duplicate_schema_identity_is_refused():

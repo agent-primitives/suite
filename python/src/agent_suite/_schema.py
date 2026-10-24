@@ -15,6 +15,17 @@ from ._json import decode, digest_bytes
 from ._models import Diagnostic, Source
 
 
+def _check_references(resource: Resource[Any], resolver: Any) -> None:
+    # Visit schema subresources, not instance data in examples/const/default.
+    contents = resource.contents
+    if isinstance(contents, dict):
+        for keyword in ("$ref", "$dynamicRef"):
+            if keyword in contents:
+                resolver.lookup(contents[keyword])
+    for child in resource.subresources():
+        _check_references(child, resolver.in_subresource(child))
+
+
 @dataclass(frozen=True)
 class Bundle:
     schemas: Mapping[str, Any]
@@ -35,7 +46,13 @@ class Bundle:
             schemas[name] = schema
             resources.append((identity, Resource.from_contents(schema)))
         # Registry's default retriever refuses unknown resources; no HTTP fallback.
-        return cls(schemas, Registry().with_resources(resources))
+        registry = Registry().with_resources(resources).crawl()
+        try:
+            for identity, resource in resources:
+                _check_references(resource, registry.resolver(identity))
+        except Unresolvable as error:
+            raise ValueError("unresolved offline schema reference in bundle") from error
+        return cls(schemas, registry)
 
     @classmethod
     def installed(cls) -> Bundle:
@@ -67,7 +84,7 @@ class Bundle:
                     for part in error.absolute_path
                 )),
                 "schema." + str(error.validator),
-                error.message,
+                f"schema constraint {error.validator} failed",
             )
             for error in errors
         ]

@@ -446,7 +446,7 @@ type RuntimeRequirement struct {
 func (r *RuntimeRequirement) UnmarshalJSON(data []byte) error {
 	type wire RuntimeRequirement
 	decoded := wire(*r)
-	if err := json.Unmarshal(data, &decoded); err != nil {
+	if err := Unmarshal(data, &decoded); err != nil {
 		return err
 	}
 	var fields map[string]json.RawMessage

@@ -65,6 +65,9 @@ ordering or text. Both CI gates require named no-skip passes. Existing presence 
 string-bound cases also run through Python's typed decoder. Suite/provider
 extensions refuse a present-empty digest per their schemas; Agent extension items
 retain their existing separate rules, including an empty optional digest.
+This Go acceptance tightening belongs to the next minor/draft, not a v0.7.x
+backport. Omit an empty optional extension digest or supply a valid SHA-256,
+then canonicalize the affected manifest and refresh its ancestor pins.
 
 Private pin tests distinguish noncanonical roots from canonical pinned children,
 literal from JSON hashes, retained metadata from unretained literal files, and

@@ -160,8 +160,8 @@ verified Suite root identity.
 
 ## OCI envelopes and blobs
 
-[`oci-cases.json`](oci-cases.json) adds 110 named envelope/blob cases, 28 accepted
-and 82 refused. `layout` selects one stored layout above; optional `files` maps
+[`oci-cases.json`](oci-cases.json) adds 112 named envelope/blob cases, 29 accepted
+and 83 refused. `layout` selects one stored layout above; optional `files` maps
 relative paths to replacement literal base64 bytes, or null to remove a file.
 Accepted cases bind `artifactDigest` to the exact manifest bytes and `archiveCase`
 to the complete entry snapshot in `archive-cases.json`. Both languages copy the

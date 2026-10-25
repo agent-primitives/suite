@@ -37,7 +37,8 @@ def _annotations(obj: dict[str, Any]) -> None:
 def _embedded(value: Any) -> bytes:
     if isinstance(value, str):
         raw = value.replace("\r", "").replace("\n", "")
-        if len(raw) % 4:
+        # Older binascii strict decoders allow surplus '=' after full quanta.
+        if len(raw) % 4 or raw.endswith("==="):
             raise ValueError("descriptor data must use padded base64")
         try:
             return base64.b64decode(raw, validate=True)

@@ -162,7 +162,7 @@ func TestSharedOCICases(t *testing.T) {
 			}
 		})
 	}
-	if positives < 15 || negatives < 35 {
+	if positives < 29 || negatives < 83 {
 		t.Fatal("truncated OCI acceptance/refusal corpus")
 	}
 }

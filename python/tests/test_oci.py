@@ -15,8 +15,8 @@ def oci_cases(corpus):
     names = [case['name'] for case in cases]
     assert len(set(names)) == len(names) and all(names)
     assert all(type(case['valid']) is bool for case in cases)
-    assert sum(case['valid'] for case in cases) >= 15
-    assert sum(not case['valid'] for case in cases) >= 35
+    assert sum(case['valid'] for case in cases) >= 29
+    assert sum(not case['valid'] for case in cases) >= 83
     return cases
 
 
@@ -62,7 +62,7 @@ def test_shared_oci_cases(tmp_path):
 def test_oci_corpus_guards():
     corpus = json.loads((ROOT / 'testdata/conformance/oci-cases.json').read_bytes())
     oci_cases(corpus)
-    for cases in [[], corpus['cases'][:1], [corpus['cases'][0]] * 50]:
+    for cases in [[], corpus['cases'][:1], corpus['cases'][:-1], [corpus['cases'][0]] * 50]:
         with pytest.raises(AssertionError):
             oci_cases({'cases': cases})
     for key, value in [('name', ''), ('valid', None), ('valid', 'false')]:

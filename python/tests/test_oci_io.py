@@ -201,12 +201,15 @@ if os.name == 'nt':
 
 if os.name == 'posix':
     def test_oci_posix_special_files(tmp_path):
+        root = tmp_path / ('long-path-' + 'x' * 80)
+        root.mkdir()
         # Killable child: a broken FIFO race guard must not hang the test process.
         code = '''
 import os,socket,sys
 from pathlib import Path
 from agent_suite import _oci_io
 root=Path(sys.argv[1]); target=root/'entry'; outside=root/'outside'
+os.chdir(root)  # AF_UNIX bounds the supplied socket name, not the resolved path.
 outside.write_bytes(b'x')
 for kind in ['fifo','socket','link','dangling','swap-fifo','swap-file','swap-link']:
  if target.exists() or target.is_symlink(): target.unlink()
@@ -214,7 +217,7 @@ for kind in ['fifo','socket','link','dangling','swap-fifo','swap-file','swap-lin
  server=None
  if kind=='fifo': os.mkfifo(target)
  elif kind=='socket':
-  server=socket.socket(socket.AF_UNIX); server.bind(str(target))
+  server=socket.socket(socket.AF_UNIX); server.bind(target.name)
  elif kind in ['link','dangling']: target.symlink_to(outside if kind=='link' else root/'missing')
  else:
   target.write_bytes(b'old')
@@ -236,5 +239,6 @@ for kind in ['fifo','socket','link','dangling','swap-fifo','swap-file','swap-lin
   if (root/'old-entry').exists(): (root/'old-entry').unlink()
 print('OCI_SPECIAL_FILES_OK')
 '''
-        result = subprocess.run([sys.executable, '-c', code, str(tmp_path)], capture_output=True, timeout=10, check=True)
+        result = subprocess.run([sys.executable, '-c', code, str(root)], capture_output=True, timeout=10)
+        assert result.returncode == 0, result.stderr.decode()
         assert b'OCI_SPECIAL_FILES_OK' in result.stdout

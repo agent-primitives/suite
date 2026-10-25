@@ -271,6 +271,9 @@ func (m *ModelRequirement) UnmarshalJSON(data []byte) error {
 			}
 		}
 	}
+	if _, present := fields["endpointEnv"]; present && decoded.EndpointEnv == "" {
+		return fmt.Errorf("model endpointEnv must not be empty when present")
+	}
 	*m = ModelRequirement(decoded)
 	return nil
 }
@@ -337,6 +340,18 @@ func (p *ToolProvider) UnmarshalJSON(data []byte) error {
 		if raw, present := tool["outputSchema"]; present && isJSONNull(raw) {
 			return fmt.Errorf("tool %d outputSchema must not be null", i)
 		}
+		// The graph validator already owns delegatedAuthorization null refusal.
+		delete(tool, "delegatedAuthorization")
+		if err := requireNonNullFields(tool); err != nil {
+			return fmt.Errorf("tool %d: %w", i, err)
+		}
+	}
+	delete(fields, "tools") // Checked above; keep its established empty-list rule.
+	if err := requireNonNullFields(fields); err != nil {
+		return err
+	}
+	if err := requireVariantPresence(fields["variants"]); err != nil {
+		return err
 	}
 	*p = ToolProvider(value)
 	return nil
@@ -472,6 +487,20 @@ type InventoryEntry struct {
 	Component  string `json:"component,omitempty"`
 }
 
+// MarshalJSON keeps size mandatory for regular files, including empty files,
+// without adding zero metadata to directory and link records.
+func (e InventoryEntry) MarshalJSON() ([]byte, error) {
+	type wire InventoryEntry
+	value := struct {
+		wire
+		Size *int64 `json:"size,omitempty"`
+	}{wire: wire(e)}
+	if e.Type == "file" || e.Size != 0 {
+		value.Size = &e.Size
+	}
+	return json.Marshal(value)
+}
+
 // UnmarshalJSON requires path, type, mode, uid, and gid to be present and
 // non-null. Mode 0 and uid/gid 0 are legitimate authored values, so an omitted
 // or null property would otherwise be indistinguishable from them after typed
@@ -494,6 +523,9 @@ func (e *InventoryEntry) UnmarshalJSON(data []byte) error {
 	var decoded wire
 	if err := Unmarshal(data, &decoded); err != nil {
 		return err
+	}
+	if _, present := fields["size"]; decoded.Type == "file" && !present {
+		return fmt.Errorf("inventory file requires size, including zero for an empty file")
 	}
 	if _, present := fields["component"]; present && decoded.Component == "" {
 		return fmt.Errorf("inventory component must not be empty when present")

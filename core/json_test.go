@@ -7,6 +7,15 @@ import (
 	"testing"
 )
 
+func TestAgentPreservesStrictDecoder(t *testing.T) {
+	decoder := json.NewDecoder(strings.NewReader(`{"id":"writer","unknown":true}`))
+	decoder.DisallowUnknownFields()
+	var agent Agent
+	if err := decoder.Decode(&agent); err == nil || !strings.Contains(err.Error(), `unknown field "unknown"`) {
+		t.Fatalf("strict agent decode = %v, want unknown-field refusal", err)
+	}
+}
+
 func TestRuntimeRequirementPreservesStrictDecoder(t *testing.T) {
 	decoder := json.NewDecoder(strings.NewReader(`{"abi":"static","cpuBaseline":"x86-64-v1","abiVerson":"v1"}`))
 	decoder.DisallowUnknownFields()

@@ -23,7 +23,7 @@ REQUIRED |= {
     "test_archive_corpus_guards", "test_pax_linear_work", "test_sparse_map_linear_work",
 }
 REQUIRED |= {"test_shared_oci_cases", "test_oci_corpus_guards", "test_go_oci_differential",
-             "test_oci_native_io", "test_oci_stream_bounds", "test_oci_reparse_types"}
+             "test_oci_native_io", "test_oci_stream_bounds", "test_oci_reparse_types", "test_oci_empty_root"}
 if os.name == "nt":
     REQUIRED |= {"test_oci_windows_io"}
     REQUIRED |= {"test_windows_directory_acl", "test_windows_directory_io", "test_windows_directory_cleanup"}

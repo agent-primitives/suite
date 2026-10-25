@@ -9,6 +9,25 @@ import pytest
 from test_oci import materialize
 
 
+def test_oci_empty_root(tmp_path, monkeypatch):
+    from agent_suite._oci import load_oci_layout
+
+    class EmptyPath:
+        def __fspath__(self):
+            return ''
+
+    root = tmp_path / 'layout'
+    materialize(root, {'layout': 'minimal-0644'})
+    monkeypatch.chdir(root)
+    expected = load_oci_layout('.').artifact_digest
+    assert expected
+    for path in ['', EmptyPath()]:
+        with pytest.raises(ValueError, match='root must not be empty'):
+            load_oci_layout(path)
+    assert load_oci_layout(Path('.')).artifact_digest == expected
+    assert load_oci_layout(Path('')).artifact_digest == expected
+
+
 def test_oci_reparse_types(tmp_path, monkeypatch):
     from types import SimpleNamespace
     import stat

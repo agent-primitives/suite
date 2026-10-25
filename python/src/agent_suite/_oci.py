@@ -56,7 +56,10 @@ def _read_blob(root: Path, descriptor: j.Descriptor) -> bytes:
 
 
 def load_oci_layout(path: str | os.PathLike[str]) -> Content:
-    root = Path(path)
+    raw = os.fspath(path)
+    if not raw:
+        raise ValueError("OCI layout root must not be empty")
+    root = Path(raw)
     if not stat.S_ISDIR(root.stat().st_mode):
         raise ValueError("OCI layout root must be a directory")
     try:

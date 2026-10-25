@@ -49,6 +49,34 @@ policy digests. Do not confuse those effective digests with authored-policy cont
 pins. The selected complete [schema bundle](../../schema/) is also shared;
 validation must never fetch schemas or meta-schemas over the network.
 
+## Authored-document presence and empty files
+
+[document-shape-cases.json](document-shape-cases.json) freezes 32 exact JSON byte
+inputs: five valid controls, two existing refusals and 25 corrected Go/schema
+conflicts. Both languages decode the same base64 bytes. Go installs the child in
+a real package, rebinds ancestors without erasing malformed fields, checks that
+stored bytes are unchanged, and runs full validation. Python runs the complete
+unchanged bundled schemas. Refusals check field context; both jobs require named,
+no-skip passes, including native Go directory validation on all three platforms.
+
+The 25 corrections cover explicit nulls, present-empty model/environment values,
+forbidden authored platform variants and an omitted empty-file inventory size.
+Checks stay at authored boundaries, not the shared OCI codec. Agent extension
+items keep their existing rules; referenced tool-schema JSON may still contain
+literal nulls. Direct and canonical Go serialization now emit `size: 0` for empty
+regular inventory files; nonempty files, directories and links retain their
+canonical representation. Literal JSON/hash goldens and a typed package
+roundtrip verify variant identity and refreshed provider/catalog/Suite pins.
+
+This is a next-minor acceptance and emitted-byte change, not a v0.7.x patch.
+Omit invalid null/empty optional fields, remove authored platform `variant`, and
+include file size even when zero. Rebuild canonical variant and ancestor pins:
+Go-produced packages with empty files get new digests. kmx picks this up when it
+next moves its suite version. No schema bytes or historical bundles change.
+Existing tracked fixtures contain no affected empty-file inventory entries;
+the deliberately malformed regression bytes retain their valid old pins so a
+pin error cannot hide the intended shape refusal.
+
 ## String length bounds
 
 [string-length-cases.json](string-length-cases.json) supplies literal field values

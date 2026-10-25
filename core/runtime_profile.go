@@ -80,6 +80,9 @@ func (s *Suite) UnmarshalJSON(data []byte) error {
 			}
 		}
 	}
+	if err := requireNonNullFields(fields); err != nil {
+		return err
+	}
 	*s = Suite(value)
 	return nil
 }
@@ -113,6 +116,9 @@ func (c *CompositionRef) UnmarshalJSON(data []byte) error {
 func runtimeSelector(data []byte) error {
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if err := requireAuthoredPlatform(fields["platform"]); err != nil {
 		return err
 	}
 	if raw, present := fields["runtimeProfile"]; present {

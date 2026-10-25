@@ -67,8 +67,10 @@ Every row must be exercised, including refusals. The runners reject empty/trunca
 case sets and duplicate names; CI requires their named passing results.
 
 Directory rows reuse [minimal](../minimal/),
-[coordinator-workers](../coordinator-workers/) and [policy-binding](../policy-binding/)
-in place. `minimal` is byte-for-byte identical to the former inline identity fixture,
+[coordinator-workers](../coordinator-workers/), [policy-binding](../policy-binding/)
+and [rich-evaluations](../rich-evaluations.README.md) in place. The rich fixture adds
+four ordered cases with judge, tool and RE2 constraints and repeat policies.
+`minimal` is byte-for-byte identical to the former inline identity fixture,
 including its indented root and the final LF in its instructions. Do not normalize
 or reserialize copied files.
 

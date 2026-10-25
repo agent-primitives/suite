@@ -114,4 +114,4 @@ def test_shared_image_reference_schema():
             for image in images:
                 image["imageRef"] = case["imageRef"]
         result = bundle.validate("build-profile.schema.json", profile, Source("build-profiles/default.json"))
-        assert (not result) == case["valid"], case["name"]
+        assert (not result) == case.get("schemaValid", case["valid"]), case["name"]

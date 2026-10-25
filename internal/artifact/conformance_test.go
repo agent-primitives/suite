@@ -163,9 +163,10 @@ func TestSharedImageReferenceConformance(t *testing.T) {
 		t.Fatal(err)
 	}
 	var cases []struct {
-		Name     string `json:"name"`
-		ImageRef string `json:"imageRef"`
-		Valid    bool   `json:"valid"`
+		Name        string `json:"name"`
+		ImageRef    string `json:"imageRef"`
+		Valid       bool   `json:"valid"`
+		SchemaValid *bool  `json:"schemaValid,omitempty"`
 	}
 	if err := decodeStrict(data, &cases); err != nil {
 		t.Fatal(err)
@@ -190,7 +191,11 @@ func TestSharedImageReferenceConformance(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			validateSchemaJSON(t, schema, string(document), c.Valid)
+			schemaValid := c.Valid
+			if c.SchemaValid != nil {
+				schemaValid = *c.SchemaValid
+			}
+			validateSchemaJSON(t, schema, string(document), schemaValid)
 		})
 	}
 }

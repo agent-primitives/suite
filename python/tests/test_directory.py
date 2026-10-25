@@ -198,13 +198,30 @@ def test_shared_directory_access(tmp_path):
     assert count >= 8
 
 
+def test_windows_root_share_contract(tmp_path, monkeypatch):
+    from agent_suite._directory_windows import Native
+    native = object.__new__(Native)
+    calls = []
+
+    def create(*args):
+        calls.append(args)
+        return 42
+
+    monkeypatch.setattr(native, "_create", create, raising=False)
+    monkeypatch.setattr(native, "_adopt", lambda *args: 42)
+    assert native.open_root(tmp_path) == 42
+    # Go syscall.Open does not share delete on the selected root. Its relative
+    # NT opens do, but that must not relax the root's Windows rename lock.
+    assert calls[0][2] == 3
+
+
 def test_go_casefold_differential():
     from agent_suite._casefold import fold_case
     # A new Unicode endpoint needs full-scalar verification, not a runtime refusal.
     assert unicodedata.unidata_version in {"13.0.0", "14.0.0", "15.0.0", "15.1.0", "16.0.0"}
     result = subprocess.run(
         ["go", "run", str(ROOT / "python/tests/testdata/fold_oracle.go")],
-        cwd=ROOT, check=True, capture_output=True, text=True,
+        cwd=ROOT, check=True, capture_output=True,
     )
     reference = json.loads(result.stdout)
     for scalar in range(0x110000):

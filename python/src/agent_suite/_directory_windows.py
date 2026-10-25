@@ -161,7 +161,8 @@ class Native:
                 resolved = "\\\\?\\UNC\\" + resolved[2:]
             else:
                 resolved = "\\\\?\\" + resolved
-        handle = self._create(resolved, 0x120089, 7, None, 3, 0x02200000, None)
+        # Go syscall.Open locks the selected root against deletion/rename.
+        handle = self._create(resolved, 0x120089, 3, None, 3, 0x02200000, None)
         if handle == _P(-1).value:
             self._require(False, "open directory input root")
         return self._adopt(int(handle), True, True)

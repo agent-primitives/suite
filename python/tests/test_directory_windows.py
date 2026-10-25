@@ -111,19 +111,24 @@ if sys.platform == "win32":
                 native.readlink(fd, name)
             original = native.open_child(fd, name, False)
             try:
-                replacement = root / "replacement"
-                replacement.write_bytes(b"new")
-                set_acl(replacement, "P(A;;FA;;;{owner})")
-                replacement.replace(root / name)
+                before = os.fstat(original)
                 assert os.read(original, 100) == payload
-                assert native.stat(fd, name).st_size == 3
             finally:
                 os.close(original)
-            root.rename(moved)
-            child = native.open_child(fd, name, False)
-            os.close(child)
+            # Classic Win32 replacement does not promise POSIX semantics for
+            # an open destination; the loader race test replaces after lstat.
+            replacement = root / "replacement"
+            replacement.write_bytes(b"new")
+            set_acl(replacement, "P(A;;FA;;;{owner})")
+            replacement.replace(root / name)
+            after = native.stat(fd, name)
+            assert after.st_size == 3
+            assert (before.st_dev, before.st_ino) != (after.st_dev, after.st_ino)
+            with pytest.raises(OSError):
+                root.rename(moved)
         finally:
             os.close(fd)
+        root.rename(moved)
         alias = tmp_path / "alias"
         junction(alias, moved)
         fd = native.open_root(alias)

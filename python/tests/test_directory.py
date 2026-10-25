@@ -11,8 +11,27 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def named_rows(data, key, minimum, name="name"):
+    rows = data[key]
+    assert isinstance(rows, list) and len(rows) >= minimum, "truncated " + key
+    names = [row[name] for row in rows]
+    assert all(names) and len(set(names)) == len(names), "missing/duplicate " + key
+    return rows
+
+
 def corpus():
-    return json.loads((ROOT / "testdata/conformance/directory-cases.json").read_bytes())
+    data = json.loads((ROOT / "testdata/conformance/directory-cases.json").read_bytes())
+    for key, minimum in {"paths": 15, "links": 9, "collisions": 9, "retention": 7, "budgets": 5}.items():
+        named_rows(data, key, minimum)
+    return data
+
+
+def access_corpus():
+    data = json.loads((ROOT / "testdata/conformance/directory-access-cases.json").read_bytes())
+    named_rows(data, "files", 3, "path")
+    for case in named_rows(data, "cases", 20):
+        assert case["platform"] in {"all", "posix", "windows"}, "unknown directory platform"
+    return data
 
 
 def accepts(function, *args):
@@ -142,7 +161,7 @@ def test_directory_changed_file(tmp_path, monkeypatch):
 
 def test_shared_directory_access(tmp_path):
     from agent_suite._directory import load_directory
-    data = json.loads((ROOT / "testdata/conformance/directory-access-cases.json").read_bytes())
+    data = access_corpus()
     platform = "windows" if os.name == "nt" else "posix"
     count = 0
     for case in data["cases"]:
@@ -196,6 +215,25 @@ def test_shared_directory_access(tmp_path):
             assert (entry.kind, entry.mode, entry.size, entry.digest, entry.uid, entry.gid) == ("file", 0o644, len(raw), "sha256:" + hashlib.sha256(raw).hexdigest(), 0, 0)
             assert entry.data == (raw if file["path"].endswith(".json") else None)
     assert count >= 8
+
+
+def test_directory_corpus_guards(monkeypatch):
+    original = Path.read_bytes
+    for filename, loader in (("directory-cases.json", corpus), ("directory-access-cases.json", access_corpus)):
+        data = json.loads((ROOT / "testdata/conformance" / filename).read_bytes())
+        for key in ("paths", "links", "collisions", "retention", "budgets") if loader is corpus else ("files", "cases"):
+            for rows in ([], data[key][:-1], data[key][1:] + data[key][1:2]):
+                bad = {**data, key: rows}
+                with monkeypatch.context() as patch:
+                    patch.setattr(Path, "read_bytes", lambda path: json.dumps(bad).encode() if path.name == filename else original(path))
+                    with pytest.raises(AssertionError):
+                        loader()
+        if loader is access_corpus:
+            data["cases"][-1]["platform"] = "window"
+            with monkeypatch.context() as patch:
+                patch.setattr(Path, "read_bytes", lambda path: json.dumps(data).encode() if path.name == filename else original(path))
+                with pytest.raises(AssertionError, match="platform"):
+                    loader()
 
 
 def test_windows_root_share_contract(tmp_path, monkeypatch):

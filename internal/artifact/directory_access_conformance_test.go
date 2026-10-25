@@ -31,8 +31,19 @@ func TestSharedDirectoryAccess(t *testing.T) {
 		Cases []directoryAccessCase `json:"cases"`
 	}
 	readStrictJSON(t, "../../testdata/conformance/directory-access-cases.json", &corpus)
+	if len(corpus.Files) < 3 || len(corpus.Cases) < 20 {
+		t.Fatal("truncated directory access corpus")
+	}
+	names := map[string]bool{}
+	for _, file := range corpus.Files {
+		requireDirectoryCaseName(t, names, "files", file.Path)
+	}
 	count := 0
 	for _, c := range corpus.Cases {
+		requireDirectoryCaseName(t, names, "cases", c.Name)
+		if c.Platform != "all" && c.Platform != "posix" && c.Platform != "windows" {
+			t.Fatalf("unknown directory platform: %q", c.Platform)
+		}
 		if c.Platform != "all" && c.Platform != directoryCasePlatform {
 			continue
 		}

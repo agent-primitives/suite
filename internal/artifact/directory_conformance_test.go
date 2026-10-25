@@ -5,6 +5,15 @@ import (
 	"testing"
 )
 
+func requireDirectoryCaseName(t *testing.T, names map[string]bool, group, name string) {
+	t.Helper()
+	key := group + "/" + name
+	if name == "" || names[key] {
+		t.Fatalf("missing or duplicate %s case name: %q", group, name)
+	}
+	names[key] = true
+}
+
 func TestSharedDirectoryRules(t *testing.T) {
 	var corpus struct {
 		Limits struct {
@@ -46,10 +55,21 @@ func TestSharedDirectoryRules(t *testing.T) {
 		} `json:"budgets"`
 	}
 	readStrictJSON(t, "../../testdata/conformance/directory-cases.json", &corpus)
+	for name, population := range map[string][2]int{
+		"paths": {len(corpus.Paths), 15}, "links": {len(corpus.Links), 9},
+		"collisions": {len(corpus.Collisions), 9}, "retention": {len(corpus.Retention), 7},
+		"budgets": {len(corpus.Budgets), 5},
+	} {
+		if population[0] < population[1] {
+			t.Fatalf("truncated %s corpus: %d cases", name, population[0])
+		}
+	}
+	names := map[string]bool{}
 	if corpus.Limits.Entries != maxContentEntries || corpus.Limits.ContentBytes != maxContentBytes || corpus.Limits.RetainedBytes != maxRetainedMetadataBytes || corpus.Limits.JSONBytes != maxJSONBytes || corpus.Limits.PathBytes != maxPathBytes {
 		t.Fatal("directory corpus limits disagree with implementation")
 	}
 	for _, c := range corpus.Paths {
+		requireDirectoryCaseName(t, names, "paths", c.Name)
 		t.Run("path/"+c.Name, func(t *testing.T) {
 			value := c.Value
 			if c.Hex != "" {
@@ -65,6 +85,7 @@ func TestSharedDirectoryRules(t *testing.T) {
 		})
 	}
 	for _, c := range corpus.Links {
+		requireDirectoryCaseName(t, names, "links", c.Name)
 		t.Run("link/"+c.Name, func(t *testing.T) {
 			if err := validateLinkTarget(c.Path, c.Target); (err == nil) != c.Valid {
 				t.Fatalf("link error=%v, want valid=%t", err, c.Valid)
@@ -72,6 +93,7 @@ func TestSharedDirectoryRules(t *testing.T) {
 		})
 	}
 	for _, c := range corpus.Collisions {
+		requireDirectoryCaseName(t, names, "collisions", c.Name)
 		t.Run("collision/"+c.Name, func(t *testing.T) {
 			content := &contentSet{entries: map[string]contentEntry{}, folded: map[string]string{}}
 			if err := content.add(contentEntry{Path: c.First}); err != nil {
@@ -83,6 +105,7 @@ func TestSharedDirectoryRules(t *testing.T) {
 		})
 	}
 	for _, c := range corpus.Retention {
+		requireDirectoryCaseName(t, names, "retention", c.Name)
 		t.Run("retention/"+c.Name, func(t *testing.T) {
 			if got := shouldRetainMetadata(c.Path, c.Size); got != c.Retained {
 				t.Fatalf("retained=%t, want %t", got, c.Retained)
@@ -90,6 +113,7 @@ func TestSharedDirectoryRules(t *testing.T) {
 		})
 	}
 	for _, c := range corpus.Budgets {
+		requireDirectoryCaseName(t, names, "budgets", c.Name)
 		t.Run("budget/"+c.Name, func(t *testing.T) {
 			got, err := addRetainedMetadata(c.Current, c.Size)
 			if (err == nil) != c.Valid || c.Valid && got != c.Current+c.Size {

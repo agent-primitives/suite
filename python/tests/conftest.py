@@ -15,7 +15,7 @@ REQUIRED |= {
     "test_shared_directory_rules", "test_private_content_metadata",
     "test_go_casefold_differential", "test_directory_loading",
     "test_directory_limits", "test_directory_changed_file", "test_shared_directory_access",
-    "test_windows_root_share_contract",
+    "test_windows_root_share_contract", "test_directory_corpus_guards",
 }
 if os.name == "nt":
     REQUIRED |= {"test_windows_directory_acl", "test_windows_directory_io", "test_windows_directory_cleanup"}

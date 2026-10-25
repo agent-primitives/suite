@@ -72,6 +72,31 @@ Published schema bundles, IDs and canonical-identity algorithms are unchanged;
 this draft schema correction belongs to a future minor release, not a patch to a
 frozen bundle.
 
+## Directory content loading
+
+[directory-cases.json](directory-cases.json) fixes the portable path/link rules,
+case-collision outcomes, metadata-retention boundaries and retained-byte budget.
+The `limits` object records the shared numeric caps. A path may use literal
+`value` or invalid UTF-8 `hex`; these are lexical tests, not a promise that every
+host filesystem can represent the name. Folding matches the selected Go/x-text
+reference, not normalization or Python's interpreter-dependent default folding.
+
+[directory-access-cases.json](directory-access-cases.json) provides literal file
+bytes as hex and named fixture operations with expected `valid` results. Both
+implementations construct the same bare directory input, apply the operation,
+and compare acceptance plus raw hashes, retained bytes and portable modes.
+`platform` selects applicable POSIX/Windows operations; no native cell is skipped.
+Only test setup assigns temporary permissions/ACLs or creates root aliases and
+junctions. Production must refuse unsafe inputs rather than repair them.
+
+This is content I/O, not package/schema/graph validation: empty directories and
+unparsed JSON can pass this layer. Payloads and Markdown are streamed but not
+retained; only lowercase `.json` files up to 4 MiB count toward retained metadata.
+Root aliases resolve once, descendants stay under opened directory capabilities,
+and links are never followed. File/observed-directory replacements detected while
+opening and file-size changes while reading are refused. The loader does not
+promise an immutable or coherent snapshot against concurrent same-size writes.
+
 ## Packages and OCI layouts
 
 [packages.json](packages.json) is an array with unique `name`, `path`, `form`
@@ -130,7 +155,7 @@ Go acceptance/refusal parity, share its applicable remaining vectors too:
 | Authored-policy reference/document/namespace failures and stale ancestors | [policy_binding_test.go](../../internal/artifact/policy_binding_test.go) |
 | Bundle closure, install collisions, variant refusals, OCI envelope/descriptor failures and JSON resource boundaries | [validate_test.go](../../internal/artifact/validate_test.go) |
 | Inventory presence and declared-mode conflicts | [inventory_presence_test.go](../../internal/artifact/inventory_presence_test.go), [content_identity_test.go](../../internal/artifact/content_identity_test.go) |
-| Native host access, links/special files and case-fold collisions | [Unix security](../../internal/artifact/directory_security_unix_test.go), [Windows security](../../internal/artifact/directory_security_windows_test.go), [artifact validation](../../internal/artifact/validate_test.go) |
+| Additional native host access, links/special files and case-fold cases beyond the shared directory vectors | [Unix security](../../internal/artifact/directory_security_unix_test.go), [Windows security](../../internal/artifact/directory_security_windows_test.go), [artifact validation](../../internal/artifact/validate_test.go) |
 | Experimental inference/execution value-level checks included by ordinary validation | [core inference](../../core/inference_test.go), [artifact execution](../../internal/artifact/execution_test.go) |
 
 Detached evidence, semantic diff report shapes and the separate experimental-flow

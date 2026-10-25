@@ -52,6 +52,8 @@ def test_wheel_and_sdist_preserve_exact_offline_bundle(tmp_path):
 import agent_suite
 from agent_suite._schema import Bundle
 from agent_suite._models import Source
+from agent_suite._directory import load_directory
+assert callable(load_directory)
 assert not hasattr(agent_suite, 'Package')
 bundle = Bundle.installed()
 assert len(bundle.schemas) == 15

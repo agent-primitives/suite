@@ -1,0 +1,274 @@
+{
+  "limits": {
+    "entries": 100000,
+    "contentBytes": 4294967296,
+    "retainedBytes": 268435456,
+    "jsonBytes": 4194304,
+    "pathBytes": 1024
+  },
+  "paths": [
+    {
+      "name": "relative",
+      "value": "a/b.json",
+      "valid": true
+    },
+    {
+      "name": "empty",
+      "value": "",
+      "valid": false
+    },
+    {
+      "name": "absolute",
+      "value": "/a",
+      "valid": false
+    },
+    {
+      "name": "parent",
+      "value": "../a",
+      "valid": false
+    },
+    {
+      "name": "dot",
+      "value": ".",
+      "valid": false
+    },
+    {
+      "name": "dot-segment",
+      "value": "a/./b",
+      "valid": false
+    },
+    {
+      "name": "parent-segment",
+      "value": "a/../b",
+      "valid": false
+    },
+    {
+      "name": "double-slash",
+      "value": "a//b",
+      "valid": false
+    },
+    {
+      "name": "trailing-slash",
+      "value": "a/",
+      "valid": false
+    },
+    {
+      "name": "backslash",
+      "value": "a\\b",
+      "valid": false
+    },
+    {
+      "name": "nul",
+      "value": "a\u0000b",
+      "valid": false
+    },
+    {
+      "name": "colon-lexical",
+      "value": "a:b",
+      "valid": true
+    },
+    {
+      "name": "utf8-boundary",
+      "value": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+      "valid": true
+    },
+    {
+      "name": "utf8-overflow",
+      "value": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+      "valid": false
+    },
+    {
+      "name": "invalid-utf8",
+      "hex": "ff",
+      "valid": false
+    }
+  ],
+  "links": [
+    {
+      "name": "sibling",
+      "path": "dir/link",
+      "target": "file",
+      "valid": true
+    },
+    {
+      "name": "parent-inside",
+      "path": "dir/link",
+      "target": "../file",
+      "valid": true
+    },
+    {
+      "name": "normalized-target",
+      "path": "dir/link",
+      "target": "a/../file",
+      "valid": true
+    },
+    {
+      "name": "dangling",
+      "path": "link",
+      "target": "missing",
+      "valid": true
+    },
+    {
+      "name": "root-directory",
+      "path": "dir/link",
+      "target": "..",
+      "valid": false
+    },
+    {
+      "name": "escape",
+      "path": "link",
+      "target": "../outside",
+      "valid": false
+    },
+    {
+      "name": "absolute",
+      "path": "link",
+      "target": "/outside",
+      "valid": false
+    },
+    {
+      "name": "backslash",
+      "path": "link",
+      "target": "a\\b",
+      "valid": false
+    },
+    {
+      "name": "empty",
+      "path": "link",
+      "target": "",
+      "valid": false
+    }
+  ],
+  "collisions": [
+    {
+      "name": "ascii",
+      "first": "A",
+      "second": "a",
+      "collide": true
+    },
+    {
+      "name": "long-s",
+      "first": "ſ",
+      "second": "s",
+      "collide": true
+    },
+    {
+      "name": "sharp-s",
+      "first": "Straße",
+      "second": "STRASSE",
+      "collide": true
+    },
+    {
+      "name": "sigma",
+      "first": "ΟΣ",
+      "second": "ος",
+      "collide": true
+    },
+    {
+      "name": "cherokee-reference",
+      "first": "Ꭰ",
+      "second": "ꭰ",
+      "collide": false
+    },
+    {
+      "name": "vithkuqi",
+      "first": "𐕰",
+      "second": "𐖗",
+      "collide": true
+    },
+    {
+      "name": "garay-reference",
+      "first": "𐵐",
+      "second": "𐵰",
+      "collide": false
+    },
+    {
+      "name": "new-cyrillic-reference",
+      "first": "Ᲊ",
+      "second": "ᲊ",
+      "collide": false
+    },
+    {
+      "name": "no-normalization",
+      "first": "Å",
+      "second": "Å",
+      "collide": false
+    }
+  ],
+  "retention": [
+    {
+      "name": "empty-json",
+      "path": "a.json",
+      "size": 0,
+      "retained": true
+    },
+    {
+      "name": "max-json",
+      "path": "a.json",
+      "size": 4194304,
+      "retained": true
+    },
+    {
+      "name": "large-json",
+      "path": "a.json",
+      "size": 4194305,
+      "retained": false
+    },
+    {
+      "name": "negative-size",
+      "path": "a.json",
+      "size": -1,
+      "retained": false
+    },
+    {
+      "name": "uppercase",
+      "path": "a.JSON",
+      "size": 1,
+      "retained": false
+    },
+    {
+      "name": "markdown",
+      "path": "a.md",
+      "size": 1,
+      "retained": false
+    },
+    {
+      "name": "payload",
+      "path": "bin/tool",
+      "size": 1,
+      "retained": false
+    }
+  ],
+  "budgets": [
+    {
+      "name": "empty",
+      "current": 0,
+      "size": 0,
+      "valid": true
+    },
+    {
+      "name": "boundary",
+      "current": 268435455,
+      "size": 1,
+      "valid": true
+    },
+    {
+      "name": "overflow",
+      "current": 268435455,
+      "size": 2,
+      "valid": false
+    },
+    {
+      "name": "negative-current",
+      "current": -1,
+      "size": 0,
+      "valid": false
+    },
+    {
+      "name": "negative-size",
+      "current": 0,
+      "size": -1,
+      "valid": false
+    }
+  ]
+}

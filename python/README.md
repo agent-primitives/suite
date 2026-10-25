@@ -28,8 +28,18 @@ Private gzip/tar layer loading preserves archived modes, owners, links and
 streamed file hashes, including PAX/GNU names and sparse logical content. It
 matches the Go reader's gzip members, checksums, timestamps and tar framing
 without extracting files or following links. The same content and retained-JSON
-limits apply. OCI envelope/blob loading is not included yet; a successful layer
-read is not schema, graph or package-identity validation.
+limits apply. A successful layer read is not schema, graph or package-identity
+validation.
+
+Private OCI layout loading now verifies closed envelopes, local blob digests and
+sizes, embedded-data agreement, exact empty config bytes and one content layer.
+It accepts OCI layout directories containing gzip/tar layers, not outer archive
+files. OCI file checks refuse final-component links and special files without
+applying loose-content ownership/ACL policy. Caller-selected root aliases are
+allowed. Path-based blob-directory checks and hash-then-parse reads match Go;
+they do not provide an immutable snapshot against concurrent changes.
+The returned artifact digest hashes literal OCI manifest bytes, not the Suite
+root document or a verified package graph. No network or extraction is involved.
 
 Both distribution formats carry exact bytes from the repository's owning
 `schema/` tree, with schema revision, IDs and SHA-256 inventory. No runtime
@@ -47,8 +57,8 @@ python -m mypy --config-file python/pyproject.toml python/src/agent_suite
 Tests require the repository's shared JSON and variant conformance corpus;
 missing, empty, truncated or unknown-target corpora fail. Go-backed numeric
 differential tests retain original number spellings. Shared directory rule/access
-vectors, raw gzip/tar vectors and Go differential probes, and a full-scalar Go
-folding oracle check the native input boundary on
+vectors, raw gzip/tar and OCI envelope vectors, Go differential probes and a
+full-scalar Go folding oracle check the native input boundary on
 Linux, macOS and Windows. Go is a test reference, not a runtime dependency; Windows
-bindings use only `ctypes` and `msvcrt`. Package graph and OCI
-conformance are intentionally not claimed by this foundation.
+bindings use only `ctypes` and `msvcrt`. Package graph validation and verified
+Suite root identity are intentionally not claimed by this foundation.

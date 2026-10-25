@@ -54,9 +54,12 @@ from agent_suite._schema import Bundle
 from agent_suite._models import Source
 from agent_suite._directory import load_directory
 from agent_suite._archive import load_layer
+from agent_suite._oci import load_oci_layout
+from pathlib import Path
 import gzip
 import io
 assert callable(load_directory)
+assert load_oci_layout(Path('layout')).source_type == 'oci-layout'
 assert not load_layer(io.BytesIO(gzip.compress(b'', mtime=0))).entries
 assert not hasattr(agent_suite, 'Package')
 bundle = Bundle.installed()
@@ -66,4 +69,6 @@ for schema in bundle.schemas.values():
 assert bundle.validate('agent.schema.json', {}, Source('agent.json'))
 print('installed offline bundle: 15 exact schemas; no public loader')
 """
+    from test_oci import materialize
+    materialize(tmp_path / 'layout', {'layout': 'minimal-0644'})
     subprocess.run([str(python), "-I", "-c", smoke], cwd=tmp_path, check=True)

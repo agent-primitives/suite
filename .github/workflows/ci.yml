@@ -61,6 +61,7 @@ jobs:
               "TestPolicyBindingDigestPropagationAndStaleAncestors",
               "TestSharedDecodeCases",
               "TestSharedJSONConformance",
+              "TestSharedImageReferenceConformance",
               "TestPackageCorpusRejectsTrailingData",
               "TestRawVariantDigestsPreserveExplicitZeroValues",
               "TestLooseDirectorySharedCorpus",

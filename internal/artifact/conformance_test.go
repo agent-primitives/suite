@@ -156,3 +156,46 @@ func TestLooseDirectorySharedCorpus(t *testing.T) {
 		t.Fatalf("directory corpus has %d cases, want at least 3", count)
 	}
 }
+
+func TestSharedImageReferenceConformance(t *testing.T) {
+	data, err := os.ReadFile("../../testdata/conformance/image-reference-cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []struct {
+		Name        string `json:"name"`
+		ImageRef    string `json:"imageRef"`
+		Valid       bool   `json:"valid"`
+		SchemaValid *bool  `json:"schemaValid,omitempty"`
+	}
+	if err := decodeStrict(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	if len(cases) == 0 {
+		t.Fatal("empty image-reference corpus")
+	}
+	schema := compileReferenceSchema(t, "build-profile.schema.json")
+	for _, c := range cases {
+		t.Run(c.Name, func(t *testing.T) {
+			if err := ValidateImageReference(c.ImageRef); (err == nil) != c.Valid {
+				t.Fatalf("image-reference error = %v, want valid=%t", err, c.Valid)
+			}
+			var profile BuildProfile
+			readStrictJSON(t, "../../testdata/minimal/build-profiles/default.json", &profile)
+			for _, images := range [][]PlatformImage{profile.RuntimeBase, profile.Harness} {
+				for i := range images {
+					images[i].ImageRef = c.ImageRef
+				}
+			}
+			document, err := json.Marshal(profile)
+			if err != nil {
+				t.Fatal(err)
+			}
+			schemaValid := c.Valid
+			if c.SchemaValid != nil {
+				schemaValid = *c.SchemaValid
+			}
+			validateSchemaJSON(t, schema, string(document), schemaValid)
+		})
+	}
+}

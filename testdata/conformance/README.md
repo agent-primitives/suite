@@ -6,8 +6,8 @@ must read the same files, not translate them into a second set of fixtures.
 
 The initial cases were extracted from the Go tests at commit
 `2a21ec3b055dde159b43b58cef70b4f1ea0b17c6`. This is a foundation, **not complete
-Go validator coverage**. No schema bytes, production acceptance rules or digest
-algorithms are changed by moving expectations here.
+Go validator coverage**. Moving those initial expectations changed no schema
+bytes, production acceptance rules or digest algorithms.
 
 ## JSON documents
 
@@ -48,6 +48,29 @@ shared source for policy acceptance, effective canonical bytes and framed effect
 policy digests. Do not confuse those effective digests with authored-policy content
 pins. The selected complete [schema bundle](../../schema/) is also shared;
 validation must never fetch schemas or meta-schemas over the network.
+
+## Image references
+
+[image-reference-cases.json](image-reference-cases.json) contains named `imageRef`
+strings and Go's expected `valid` results. Go's value validator and both Go and
+Python build-profile schema tests consume the same cases for `runtimeBase` and
+`harness`. Optional `schemaValid` records a known, pre-existing DNS/path schema
+mismatch; otherwise schema acceptance must match `valid`. These recorded gaps
+are not exceptions to Go acceptance for a finished package reader.
+
+Bracketed authorities require hexadecimal IPv6 groups: eight full groups or one
+`::` replacing at least one group, with 1–4 digits per group in either case.
+Optional decimal ports must be 1–65535; leading zeroes are accepted. IPv6 repository
+paths are limited to 255 bytes, excluding the authority and digest. Missing/extra/
+empty brackets, malformed addresses, dotted tails, zones, invalid ports, trailing
+newlines and tag-only references are refused. The schema's `not` guard enforces
+that path limit and compensates for differing final-newline anchor behavior in
+Go and Python. Existing DNS-authority and path-separator constraints are unchanged;
+the vectors explicitly retain their earlier acceptance differences.
+
+Published schema bundles, IDs and canonical-identity algorithms are unchanged;
+this draft schema correction belongs to a future minor release, not a patch to a
+frozen bundle.
 
 ## Packages and OCI layouts
 

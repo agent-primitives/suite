@@ -55,7 +55,9 @@ environment names, tools, remote headers, delegated authorization and extensions
 Variant bodies remain explicit raw fragments pending inventory/closure validation;
 other graph manifests remain raw pinned documents. Collection is not whole-graph
 validation, runtime support, verified root identity, or a public partial reader.
-Policy/evaluation references are preserved; their semantic completion is separate.
+Evaluation indexes and policies also require canonical stored JSON; policy keeps
+its own version envelope. Their references are preserved, while semantic
+completion remains separate.
 
 Both distribution formats carry exact bytes from the repository's owning
 `schema/` tree, with schema revision, IDs and SHA-256 inventory. No runtime

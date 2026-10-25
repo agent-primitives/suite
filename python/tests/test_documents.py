@@ -108,6 +108,25 @@ def test_private_document_pipeline_native_directory_and_oci(tmp_path, bundle):
     assert directory.agents[0].record.instructions.source == oci.agents[0].record.instructions.source
 
 
+@pytest.mark.parametrize('target', ['policy', 'evals'])
+@pytest.mark.parametrize('malformed', [False, True])
+def test_optional_manifest_pins_require_canonical_object_bytes(bundle, target, malformed):
+    content = content_fixture('rich-evaluations')
+    agent = json.loads(content.data('agents/writer.json'))
+    ref = agent['policy'] if target == 'policy' else agent['evals'][0]
+    old = content.entries[ref['path']]
+    data = b'{broken' if malformed else b' ' + old.data
+    content.entries[ref['path']] = replace(old, data=data, size=len(data), digest=digest_bytes(data))
+    def change(value):
+        selected = value['policy'] if target == 'policy' else value['evals'][0]
+        selected['descriptor'].update(size=len(data), digest=digest_bytes(data))
+    rebind_agent(content, change)
+    with pytest.raises(DocumentError) as error:
+        read_documents(content, bundle)
+    assert error.value.diagnostics[0].source == Source(ref['path'])
+    assert error.value.diagnostics[0].code == ('document.json' if malformed else 'pin.canonical')
+
+
 def test_rich_fixture_typed_declarations_keep_evaluation_and_policy_refs_raw(bundle):
     result = read_documents(content_fixture('rich-evaluations'), bundle)
     agent = result.agents[0].record

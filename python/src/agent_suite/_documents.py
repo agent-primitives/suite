@@ -144,7 +144,7 @@ def pin_literal(content: Content, ref: Reference, media_type: str) -> Entry:
     return entry
 
 
-def pin_manifest(content: Content, ref: Reference, media_type: str) -> Document:
+def _pin_json(content: Content, ref: Reference, media_type: str) -> Document:
     pin_literal(content, ref, media_type)
     try:
         data = content.data(ref.path)
@@ -153,14 +153,20 @@ def pin_manifest(content: Content, ref: Reference, media_type: str) -> Document:
                  "pinned manifest must be stored as canonical JSON")
         _require(len(data) == ref.descriptor.size and digest_bytes(data) == ref.descriptor.digest,
                  _at(ref.source, "descriptor"), "pin.digest", "manifest bytes do not match descriptor")
-        _require(isinstance(value, dict) and value.get("schemaVersion") == "1.0.0-draft"
-                 and value.get("mediaType") == media_type, Source(ref.path),
-                 "document.header", "unsupported manifest header")
+        _require(isinstance(value, dict), Source(ref.path), "document.type", "expected manifest object")
         return Document(data, Source(ref.path))
     except DocumentError:
         raise
     except ValueError as error:
         fail(Source(ref.path), "document.json", str(error))
+
+
+def pin_manifest(content: Content, ref: Reference, media_type: str) -> Document:
+    document = _pin_json(content, ref, media_type)
+    value = document.value
+    _require(value.get("schemaVersion") == "1.0.0-draft" and value.get("mediaType") == media_type,
+             document.source, "document.header", "unsupported manifest header")
+    return document
 
 
 @dataclass(frozen=True)
@@ -193,10 +199,10 @@ def read_documents(content: Content, bundle: Bundle) -> Documents:
         agent = loaded.record
         pin_literal(content, agent.instructions, "text/markdown; charset=utf-8")
         for evaluation in agent.evals:
-            pin_literal(content, evaluation, _PREFIX + "eval.index.v1+json")
+            pin_manifest(content, evaluation, _PREFIX + "eval.index.v1+json")
         if agent.policy is not None:
-            # Agent schema limits this to policy v1/v2; ownership/semantics wait.
-            pin_literal(content, agent.policy, agent.policy.descriptor.media_type)
+            # Agent schema limits media type to v1/v2; policy has its own envelope.
+            _pin_json(content, agent.policy, agent.policy.descriptor.media_type)
         agents.append(loaded)
     refs = catalog.record.tool_providers
     _unique((r.id + "@" + r.version, r.source) for r in refs)

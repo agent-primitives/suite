@@ -39,6 +39,10 @@ REQUIRED |= {
     "test_literal_pins_never_parse_or_require_retained_body",
     "test_noncanonical_root_but_canonical_pinned_children",
 }
+REQUIRED |= {
+    f"test_optional_manifest_pins_require_canonical_object_bytes[{bad}-{target}]"
+    for bad in (False, True) for target in ("policy", "evals")
+}
 PASSED = set()
 SKIPPED = []
 

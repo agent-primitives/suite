@@ -211,7 +211,7 @@ class TarReader:
             h.size = _decimal(logical)
         if (major, minor) == ("1", "0"):
             tokens: list[bytes] = []
-            pending = b""
+            fragments: list[bytes] = []
             consumed = 0
             needed = 1
             while len(tokens) < needed:
@@ -221,9 +221,12 @@ class TarReader:
                 if len(block) != 512:
                     raise ValueError("truncated sparse map")
                 consumed += 512
-                parts = (pending + block).split(b"\n")
-                tokens.extend(parts[:-1])
-                pending = parts[-1]
+                parts = block.split(b"\n")
+                for part in parts[:-1]:
+                    fragments.append(part)
+                    tokens.append(b"".join(fragments))
+                    fragments.clear()
+                fragments.append(parts[-1])
                 if needed == 1 and tokens:
                     count = _decimal(tokens[0].decode("ascii"))
                     if count < 0 or count > _SPECIAL:

@@ -20,7 +20,7 @@ REQUIRED |= {
 REQUIRED |= {
     "test_shared_archive_cases", "test_go_archive_differential", "test_archive_limits",
     "test_archive_streaming_and_retention", "test_archive_does_not_extract",
-    "test_archive_corpus_guards", "test_pax_linear_work",
+    "test_archive_corpus_guards", "test_pax_linear_work", "test_sparse_map_linear_work",
 }
 if os.name == "nt":
     REQUIRED |= {"test_windows_directory_acl", "test_windows_directory_io", "test_windows_directory_cleanup"}

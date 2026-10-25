@@ -82,6 +82,11 @@ def test_go_archive_differential(tmp_path):
         values = [("GNU.sparse.map", ""), ("GNU.sparse.major", "0"), ("GNU.sparse.minor", "1"),
                   ("GNU.sparse.numblocks", "0"), ("GNU.sparse.size", "0"), (key, "0" * 5001)]
         add("zero-padded-" + key, pax(values) + header() + zero)
+    for token_size in [8192, 1 << 20]:
+        body = b"0" * (token_size - 1) + b"\n"
+        values = [("GNU.sparse.major", "1"), ("GNU.sparse.minor", "0"),
+                  ("GNU.sparse.realsize", "0")]
+        add(f"sparse-long-count-{token_size}", pax(values) + header(size=len(body)) + body + zero)
     unused = bytearray(header())
     unused[157:170] = b"ignored-value"
     add("unused-regular-linkname", checksum(unused) + zero)

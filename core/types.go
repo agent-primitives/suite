@@ -441,6 +441,25 @@ type RuntimeRequirement struct {
 	RequiredPaths []string `json:"requiredBasePaths,omitempty"`
 }
 
+// UnmarshalJSON retains the distinction between an absent abiVersion and an
+// explicitly empty string, which the schema forbids.
+func (r *RuntimeRequirement) UnmarshalJSON(data []byte) error {
+	type wire RuntimeRequirement
+	decoded := wire(*r)
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if _, present := fields["abiVersion"]; present && decoded.ABIVersion == "" {
+		return fmt.Errorf("runtime abiVersion must not be empty when present")
+	}
+	*r = RuntimeRequirement(decoded)
+	return nil
+}
+
 type InventoryEntry struct {
 	Path       string `json:"path"`
 	Type       string `json:"type"`
@@ -475,6 +494,12 @@ func (e *InventoryEntry) UnmarshalJSON(data []byte) error {
 	var decoded wire
 	if err := Unmarshal(data, &decoded); err != nil {
 		return err
+	}
+	if _, present := fields["component"]; present && decoded.Component == "" {
+		return fmt.Errorf("inventory component must not be empty when present")
+	}
+	if _, present := fields["linkTarget"]; present && decoded.LinkTarget == "" {
+		return fmt.Errorf("inventory linkTarget must not be empty when present")
 	}
 	*e = InventoryEntry(decoded)
 	return nil

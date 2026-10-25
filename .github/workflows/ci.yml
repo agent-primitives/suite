@@ -65,6 +65,7 @@ jobs:
               "TestSharedDirectoryRules",
               "TestSharedDirectoryAccess",
               "TestSharedArchiveCases",
+              "TestSharedOCICases",
               "TestPackageCorpusRejectsTrailingData",
               "TestRawVariantDigestsPreserveExplicitZeroValues",
               "TestLooseDirectorySharedCorpus",
@@ -169,7 +170,7 @@ jobs:
           TEST_RESULTS: ${{ runner.temp }}/portable-identity.jsonl
         run: |
           set -euo pipefail
-          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity|TestRawVariantDigests|TestRichEvaluationFixture|TestSharedDirectory|TestSharedArchive)' ./internal/artifact | tee "$TEST_RESULTS"
+          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity|TestRawVariantDigests|TestRichEvaluationFixture|TestSharedDirectory|TestSharedArchive|TestSharedOCI)' ./internal/artifact | tee "$TEST_RESULTS"
           python3 - <<'PY'
           import json
           import os
@@ -182,6 +183,7 @@ jobs:
               "TestSharedDirectoryRules",
               "TestSharedDirectoryAccess",
               "TestSharedArchiveCases",
+              "TestSharedOCICases",
               "TestRichEvaluationFixtureConformance",
               "TestRichEvaluationFixtureOrderedConstraints",
               "TestRichEvaluationFixtureRejectsStaleSources",

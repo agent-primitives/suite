@@ -29,6 +29,7 @@ class Entry:
 class Content:
     entries: dict[str, Entry] = field(default_factory=dict)
     source_type: str = field(default="directory", init=False)
+    artifact_digest: str = field(default="", init=False)
     _folded: dict[str, str] = field(default_factory=dict, init=False, repr=False)
 
     def add(self, entry: Entry) -> None:

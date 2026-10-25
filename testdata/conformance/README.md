@@ -6,8 +6,8 @@ must read the same files, not translate them into a second set of fixtures.
 
 The initial cases were extracted from the Go tests at commit
 `2a21ec3b055dde159b43b58cef70b4f1ea0b17c6`. This is a foundation, **not complete
-Go validator coverage**. No schema bytes, production acceptance rules or digest
-algorithms are changed by moving expectations here.
+Go validator coverage**. Moving those initial expectations changed no schema
+bytes, production acceptance rules or digest algorithms.
 
 ## JSON documents
 
@@ -48,6 +48,19 @@ shared source for policy acceptance, effective canonical bytes and framed effect
 policy digests. Do not confuse those effective digests with authored-policy content
 pins. The selected complete [schema bundle](../../schema/) is also shared;
 validation must never fetch schemas or meta-schemas over the network.
+
+## Image references
+
+[image-reference-cases.json](image-reference-cases.json) contains named `imageRef`
+strings and expected `valid` results. Go's value validator and both Go and Python
+build-profile schema tests consume the same cases for `runtimeBase` and `harness`.
+The draft schema now accepts bracketed IPv6 authorities, with optional ports and
+uppercase hexadecimal digits, matching existing Go acceptance. Unbracketed IPv6,
+zone identifiers and tag-only references remain refused. These cases cover the
+shared shape boundary, not every Go semantic check: Go still validates registry
+addresses and port ranges beyond the schema pattern. Published schema bundles,
+IDs and canonical-identity algorithms are unchanged; this draft schema correction
+belongs to a future minor release, not a patch to a frozen bundle.
 
 ## Packages and OCI layouts
 

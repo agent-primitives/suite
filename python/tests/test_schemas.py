@@ -100,3 +100,18 @@ def test_duplicate_schema_identity_is_refused():
     schema = b'{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.test/same"}'
     with pytest.raises(ValueError, match="duplicate"):
         Bundle.from_bytes({"a.json": schema, "b.json": schema})
+
+
+def test_shared_image_reference_schema():
+    from agent_suite._models import Source
+    from agent_suite._schema import Bundle
+    bundle = Bundle.from_bytes({p.name: p.read_bytes() for p in (ROOT / "schema").glob("*.json")})
+    cases = json.loads((ROOT / "testdata/conformance/image-reference-cases.json").read_bytes())
+    assert cases, "empty image-reference corpus"
+    for case in cases:
+        profile = json.loads((ROOT / "testdata/minimal/build-profiles/default.json").read_bytes())
+        for images in (profile["runtimeBase"], profile["harness"]):
+            for image in images:
+                image["imageRef"] = case["imageRef"]
+        result = bundle.validate("build-profile.schema.json", profile, Source("build-profiles/default.json"))
+        assert (not result) == case["valid"], case["name"]

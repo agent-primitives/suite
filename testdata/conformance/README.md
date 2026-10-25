@@ -49,6 +49,28 @@ policy digests. Do not confuse those effective digests with authored-policy cont
 pins. The selected complete [schema bundle](../../schema/) is also shared;
 validation must never fetch schemas or meta-schemas over the network.
 
+## String length bounds
+
+[string-length-cases.json](string-length-cases.json) supplies literal field values
+and expected acceptance for 21 agent/provider cases. Both languages apply the same
+values to existing fixtures: Go exercises package/provider validation, while
+Python checks the exact bundled schemas. Agent descriptions accept 4,096 Unicode
+code points and refuse 4,097, including multibyte, astral and combining text;
+there is no byte-count or grapheme-count substitution. Remote header names accept
+128 ASCII token characters and refuse 129. Present ABI versions, inventory
+components and link targets cannot be empty; `omit: true` removes an optional key
+rather than supplying an empty string. Omitting those optional keys stays legal.
+
+These tighten Go acceptance to existing draft schema constraints without changing
+schema bytes. Other pre-existing byte-based path/evaluation limits are unchanged;
+this corpus does not claim complete Go/schema acceptance parity.
+
+For existing inputs, shorten descriptions/header names that exceed these bounds
+and omit optional ABI version, component or link-target keys instead of authoring
+empty strings. Canonicalize changed manifests and refresh affected variant,
+provider, catalog and Suite descriptors bottom-up. This acceptance tightening
+requires the next minor release; do not backport it as a v0.7.x patch.
+
 ## Image references
 
 [image-reference-cases.json](image-reference-cases.json) contains named `imageRef`

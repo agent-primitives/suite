@@ -7,6 +7,15 @@ import (
 	"testing"
 )
 
+func TestRuntimeRequirementPreservesStrictDecoder(t *testing.T) {
+	decoder := json.NewDecoder(strings.NewReader(`{"abi":"static","cpuBaseline":"x86-64-v1","abiVerson":"v1"}`))
+	decoder.DisallowUnknownFields()
+	var runtime RuntimeRequirement
+	if err := decoder.Decode(&runtime); err == nil || !strings.Contains(err.Error(), `unknown field "abiVerson"`) {
+		t.Fatalf("strict runtime decode = %v, want unknown-field refusal", err)
+	}
+}
+
 func TestMarshalProducesCanonicalJSON(t *testing.T) {
 	data, err := Marshal(Suite{
 		SchemaVersion: SpecVersion,

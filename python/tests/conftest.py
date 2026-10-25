@@ -7,7 +7,7 @@ REQUIRED = {
     "test_shared_json_conformance", "test_shared_variant_conformance",
     "test_go_numeric_differential", "test_member_and_byte_boundaries",
     "test_offline_registry_resolves_all_bundled_refs",
-    "test_shared_image_reference_schema",
+    "test_shared_image_reference_schema", "test_shared_string_length_cases",
     "test_wheel_and_sdist_preserve_exact_offline_bundle",
     "test_schema_checkout_bytes_are_portable",
 }

@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/agent-primitives/suite/internal/contract"
 )
@@ -18,7 +19,7 @@ var (
 	envPattern        = contract.EnvPattern
 	capabilityPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]{0,127}$`)
 	schemePattern     = regexp.MustCompile(`^[a-z][a-z0-9+.-]*$`)
-	headerNamePattern = regexp.MustCompile("^[!#$%&'*+.^_`|~0-9A-Za-z-]+$")
+	headerNamePattern = regexp.MustCompile("^[!#$%&'*+.^_`|~0-9A-Za-z-]{1,128}$")
 	secretKeyPattern  = regexp.MustCompile(`^[A-Za-z0-9._-]{1,253}$`)
 )
 
@@ -548,6 +549,9 @@ func validateToolProviderInboundReferences(providers map[string]ToolProvider, ag
 
 func validateAgent(agent Agent) error {
 	var errs []error
+	if utf8.RuneCountInString(agent.Description) > 4096 {
+		errs = append(errs, errors.New("agent description must be at most 4096 characters"))
+	}
 	if agent.SchemaVersion != SpecVersion || agent.MediaType != MediaTypeAgent {
 		errs = append(errs, errors.New("unsupported schemaVersion or mediaType"))
 	}

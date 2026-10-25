@@ -1,13 +1,4 @@
 {
-  "package": {
-    "name": "rich-evaluations",
-    "path": "rich-evaluations",
-    "form": "directory",
-    "valid": true,
-    "contentDigest": "sha256:31a86768a30e48cdbabb8a27bc1f50b1913194b35d608500ec2ba367fe51eea6",
-    "manifestDigest": "",
-    "rootDigest": "sha256:acbcc68b1099d0aacd0fc484756355b8f7a8622efd70af234eb5f08e5cf2bf4f"
-  },
   "documents": [
     {
       "path": "agentsuite.json",

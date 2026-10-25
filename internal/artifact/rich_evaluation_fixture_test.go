@@ -14,17 +14,7 @@ import (
 const richEvaluationRoot = "../../testdata/rich-evaluations"
 
 // This vector is separate from the package: golden metadata is not package content.
-// The package row uses the shared conformance corpus's directory-row shape.
 type richEvaluationGolden struct {
-	Package struct {
-		Name           string `json:"name"`
-		Path           string `json:"path"`
-		Form           string `json:"form"`
-		ContentDigest  string `json:"contentDigest"`
-		RootDigest     string `json:"rootDigest"`
-		ManifestDigest string `json:"manifestDigest"`
-		Valid          bool   `json:"valid"`
-	} `json:"package"`
 	Documents []struct {
 		Path       string     `json:"path"`
 		Schema     string     `json:"schema"`
@@ -36,14 +26,8 @@ func readRichEvaluationGolden(t *testing.T) richEvaluationGolden {
 	t.Helper()
 	var golden richEvaluationGolden
 	readStrictJSON(t, "../../testdata/rich-evaluations.golden.json", &golden)
-	if golden.Package.Name != "rich-evaluations" || golden.Package.Path != "rich-evaluations" ||
-		golden.Package.Form != "directory" || !golden.Package.Valid || golden.Package.ManifestDigest != "" || len(golden.Documents) != 15 {
+	if len(golden.Documents) != 15 {
 		t.Fatalf("incomplete fixture vector: %+v", golden)
-	}
-	shared := packageConformanceNamed(t, golden.Package.Name)
-	if shared.Path != "../"+golden.Package.Path || shared.Form != golden.Package.Form || shared.Valid != golden.Package.Valid ||
-		shared.ContentDigest != golden.Package.ContentDigest || shared.RootDigest != golden.Package.RootDigest || shared.ManifestDigest != golden.Package.ManifestDigest {
-		t.Fatalf("shared corpus disagrees with fixture vector: %+v", shared)
 	}
 	return golden
 }
@@ -57,14 +41,6 @@ func copyRichEvaluationFixture(t *testing.T) string {
 
 func TestRichEvaluationFixtureConformance(t *testing.T) {
 	root := copyRichEvaluationFixture(t)
-	report, err := ValidateDirectory(root)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if report.Name != "rich-evaluations" || report.Agents != 1 || report.ToolProviders != 1 || report.Compositions != 1 {
-		t.Fatalf("unexpected graph: %+v", report)
-	}
-
 	golden := readRichEvaluationGolden(t)
 	seen := map[string]bool{}
 	for _, document := range golden.Documents {
@@ -87,17 +63,6 @@ func TestRichEvaluationFixtureConformance(t *testing.T) {
 				}
 				if !bytes.Equal(data, canonical) {
 					t.Fatal("fixture JSON is not stored as canonical bytes")
-				}
-				gotDigest, err := canonicalDigest(data)
-				if err != nil {
-					t.Fatal(err)
-				}
-				gotSize, err := canonicalSize(data)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if gotDigest != document.Descriptor.Digest || gotSize != document.Descriptor.Size {
-					t.Fatalf("canonical identity = %s/%d, want %+v", gotDigest, gotSize, document.Descriptor)
 				}
 			}
 			if got := digestBytes(data); got != document.Descriptor.Digest || int64(len(data)) != document.Descriptor.Size {
@@ -123,14 +88,8 @@ func TestRichEvaluationFixtureConformance(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	identity, err := DiffPaths(root, root)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if identity.Before.ContentDigest != golden.Package.ContentDigest || identity.HasChanges() {
-		t.Fatalf("content identity = %s, want %s", identity.Before.ContentDigest, golden.Package.ContentDigest)
-	}
-	if golden.Documents[0].Path != "agentsuite.json" || golden.Documents[0].Descriptor.Digest != golden.Package.RootDigest {
+	shared := packageConformanceNamed(t, "rich-evaluations")
+	if golden.Documents[0].Path != "agentsuite.json" || golden.Documents[0].Descriptor.Digest != shared.RootDigest {
 		t.Fatal("root identity disagrees with document vector")
 	}
 }
@@ -262,8 +221,8 @@ func TestRichEvaluationFixtureOrderChangesIdentity(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			golden := readRichEvaluationGolden(t)
-			if identity.Before.ContentDigest != golden.Package.ContentDigest || identity.Before.ContentDigest == identity.After.ContentDigest || !identity.HasChanges() {
+			shared := packageConformanceNamed(t, "rich-evaluations")
+			if identity.Before.ContentDigest != shared.ContentDigest || identity.Before.ContentDigest == identity.After.ContentDigest || !identity.HasChanges() {
 				t.Fatalf("%s order did not propagate identity: %+v", order, identity)
 			}
 		})

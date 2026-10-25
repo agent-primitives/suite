@@ -12,6 +12,18 @@ locations, including optional branches. Unresolved references reached during val
 are refused. Diagnostics retain pointers and codes without copying instance values.
 Domain readers and full validation are a later change.
 
+Private directory I/O now builds content records through descriptor-relative
+POSIX opens or stdlib Windows handle/ACL operations. It preserves raw bytes and
+portable modes, checks paths and Go-compatible case collisions, and hashes files
+by bounded streaming. Only `.json` files up to 4 MiB are retained; aggregate limits
+are 100,000 entries, 4 GiB of regular-file bytes and 256 MiB of retained metadata.
+Host access permissions are checked separately from portable content modes.
+Windows input requires supported owner-only ACLs and refuses descendant reparse
+points. Production never repairs input permissions or follows content links.
+Root aliases and opened-directory capabilities follow the Go loader's model;
+this does not promise an atomic snapshot against concurrent same-size writes.
+Loading these private records does not verify a package graph or package identity.
+
 Both distribution formats carry exact bytes from the repository's owning
 `schema/` tree, with schema revision, IDs and SHA-256 inventory. No runtime
 schema downloads or editable Python schema copies are used.
@@ -27,5 +39,8 @@ python -m mypy --config-file python/pyproject.toml python/src/agent_suite
 
 Tests require the repository's shared JSON and variant conformance corpus;
 missing, empty, truncated or unknown-target corpora fail. Go-backed numeric
-differential tests retain original number spellings. Package graph and OCI
+differential tests retain original number spellings. Shared directory rule/access
+vectors and a full-scalar Go folding oracle check the native input boundary on
+Linux, macOS and Windows. Go is a test reference, not a runtime dependency; Windows
+bindings use only `ctypes` and `msvcrt`. Package graph and OCI
 conformance are intentionally not claimed by this foundation.

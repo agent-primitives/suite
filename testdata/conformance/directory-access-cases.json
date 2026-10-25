@@ -1,0 +1,169 @@
+{
+  "files": [
+    {
+      "path": "empty.json",
+      "hex": ""
+    },
+    {
+      "path": "data.json",
+      "hex": "7b7d0a"
+    },
+    {
+      "path": "child/raw.bin",
+      "hex": "610d0a621a6300ff"
+    }
+  ],
+  "cases": [
+    {
+      "name": "ordinary",
+      "platform": "all",
+      "kind": "none",
+      "valid": true
+    },
+    {
+      "name": "root-alias",
+      "platform": "all",
+      "kind": "root-alias",
+      "valid": true
+    },
+    {
+      "name": "safe-link",
+      "platform": "posix",
+      "kind": "symlink",
+      "path": "link",
+      "target": "data.json",
+      "valid": true
+    },
+    {
+      "name": "parent-link",
+      "platform": "posix",
+      "kind": "symlink",
+      "path": "child/link",
+      "target": "../data.json",
+      "valid": true
+    },
+    {
+      "name": "escape-link",
+      "platform": "posix",
+      "kind": "symlink",
+      "path": "link",
+      "target": "../outside",
+      "valid": false
+    },
+    {
+      "name": "fifo",
+      "platform": "posix",
+      "kind": "fifo",
+      "path": "pipe",
+      "valid": false
+    },
+    {
+      "name": "root-group-write",
+      "platform": "posix",
+      "kind": "root-mode",
+      "mode": 504,
+      "valid": false
+    },
+    {
+      "name": "root-readable",
+      "platform": "posix",
+      "kind": "root-mode",
+      "mode": 493,
+      "valid": true
+    },
+    {
+      "name": "executable-file",
+      "platform": "posix",
+      "kind": "file-mode",
+      "path": "data.json",
+      "mode": 493,
+      "valid": true
+    },
+    {
+      "name": "file-world-write",
+      "platform": "posix",
+      "kind": "file-mode",
+      "path": "data.json",
+      "mode": 438,
+      "valid": false
+    },
+    {
+      "name": "directory-group-write",
+      "platform": "posix",
+      "kind": "directory-mode",
+      "path": "child",
+      "mode": 504,
+      "valid": false
+    },
+    {
+      "name": "setuid-file",
+      "platform": "posix",
+      "kind": "file-mode",
+      "path": "data.json",
+      "mode": 2432,
+      "valid": false
+    },
+    {
+      "name": "sticky-directory",
+      "platform": "posix",
+      "kind": "directory-mode",
+      "path": "child",
+      "mode": 960,
+      "valid": false
+    },
+    {
+      "name": "protected-owner",
+      "platform": "windows",
+      "kind": "acl",
+      "dacl": "P(A;OICI;FA;;;{owner})",
+      "protected": true,
+      "valid": true
+    },
+    {
+      "name": "broad-grant",
+      "platform": "windows",
+      "kind": "acl",
+      "dacl": "P(A;;FA;;;{owner})(A;;FR;;;WD)",
+      "protected": true,
+      "valid": false
+    },
+    {
+      "name": "null-dacl",
+      "platform": "windows",
+      "kind": "acl",
+      "dacl": "NO_ACCESS_CONTROL",
+      "protected": true,
+      "valid": false
+    },
+    {
+      "name": "unprotected-root",
+      "platform": "windows",
+      "kind": "acl",
+      "dacl": "(A;;FA;;;{owner})",
+      "protected": false,
+      "valid": false
+    },
+    {
+      "name": "unsupported-ace",
+      "platform": "windows",
+      "kind": "acl",
+      "dacl": "P(A;;FA;;;{owner})(OA;;FR;00112233-4455-6677-8899-aabbccddeeff;;WD)",
+      "protected": true,
+      "valid": false
+    },
+    {
+      "name": "inherited-owner",
+      "platform": "windows",
+      "kind": "inherited-owner",
+      "valid": true
+    },
+    {
+      "name": "child-junction",
+      "platform": "windows",
+      "kind": "junction",
+      "path": "junction",
+      "target": "child",
+      "valid": false
+    }
+  ]
+}

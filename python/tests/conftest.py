@@ -1,4 +1,6 @@
 """Required named passes and zero skipped tests, matching the Go gate."""
+import os
+
 import pytest
 
 REQUIRED = {
@@ -9,6 +11,16 @@ REQUIRED = {
     "test_wheel_and_sdist_preserve_exact_offline_bundle",
     "test_schema_checkout_bytes_are_portable",
 }
+REQUIRED |= {
+    "test_shared_directory_rules", "test_private_content_metadata",
+    "test_go_casefold_differential", "test_directory_loading",
+    "test_directory_limits", "test_directory_changed_file", "test_shared_directory_access",
+}
+if os.name == "nt":
+    REQUIRED |= {"test_windows_directory_acl", "test_windows_directory_io", "test_windows_directory_cleanup"}
+else:
+    REQUIRED |= {"test_posix_directory_races", "test_posix_directory_streams",
+                 "test_posix_directory_fd_bound", "test_posix_directory_fifo_swap"}
 PASSED = set()
 SKIPPED = []
 

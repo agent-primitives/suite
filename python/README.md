@@ -24,6 +24,13 @@ Root aliases and opened-directory capabilities follow the Go loader's model;
 this does not promise an atomic snapshot against concurrent same-size writes.
 Loading these private records does not verify a package graph or package identity.
 
+Private gzip/tar layer loading preserves archived modes, owners, links and
+streamed file hashes, including PAX/GNU names and sparse logical content. It
+matches the Go reader's gzip members, checksums, timestamps and tar framing
+without extracting files or following links. The same content and retained-JSON
+limits apply. OCI envelope/blob loading is not included yet; a successful layer
+read is not schema, graph or package-identity validation.
+
 Both distribution formats carry exact bytes from the repository's owning
 `schema/` tree, with schema revision, IDs and SHA-256 inventory. No runtime
 schema downloads or editable Python schema copies are used.
@@ -40,7 +47,8 @@ python -m mypy --config-file python/pyproject.toml python/src/agent_suite
 Tests require the repository's shared JSON and variant conformance corpus;
 missing, empty, truncated or unknown-target corpora fail. Go-backed numeric
 differential tests retain original number spellings. Shared directory rule/access
-vectors and a full-scalar Go folding oracle check the native input boundary on
+vectors, raw gzip/tar vectors and Go differential probes, and a full-scalar Go
+folding oracle check the native input boundary on
 Linux, macOS and Windows. Go is a test reference, not a runtime dependency; Windows
 bindings use only `ctypes` and `msvcrt`. Package graph and OCI
 conformance are intentionally not claimed by this foundation.

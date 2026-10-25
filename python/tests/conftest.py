@@ -17,6 +17,11 @@ REQUIRED |= {
     "test_directory_limits", "test_directory_changed_file", "test_shared_directory_access",
     "test_windows_root_share_contract", "test_directory_corpus_guards",
 }
+REQUIRED |= {
+    "test_shared_archive_cases", "test_go_archive_differential", "test_archive_limits",
+    "test_archive_streaming_and_retention", "test_archive_does_not_extract",
+    "test_archive_corpus_guards", "test_pax_linear_work",
+}
 if os.name == "nt":
     REQUIRED |= {"test_windows_directory_acl", "test_windows_directory_io", "test_windows_directory_cleanup"}
 else:

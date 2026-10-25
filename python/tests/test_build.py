@@ -53,7 +53,11 @@ import agent_suite
 from agent_suite._schema import Bundle
 from agent_suite._models import Source
 from agent_suite._directory import load_directory
+from agent_suite._archive import load_layer
+import gzip
+import io
 assert callable(load_directory)
+assert not load_layer(io.BytesIO(gzip.compress(b'', mtime=0))).entries
 assert not hasattr(agent_suite, 'Package')
 bundle = Bundle.installed()
 assert len(bundle.schemas) == 15

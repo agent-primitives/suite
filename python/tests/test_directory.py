@@ -205,7 +205,9 @@ def test_shared_directory_access(tmp_path):
         elif kind != "none":
             raise AssertionError("unknown directory fixture: " + kind)
         if not case["valid"]:
-            with pytest.raises((OSError, ValueError)):
+            error = OSError if case["name"] == "unsupported-ace" else (OSError, ValueError)
+            message = "unsupported ACE" if case["name"] == "unsupported-ace" else None
+            with pytest.raises(error, match=message):
                 load_directory(selected)
             continue
         content = load_directory(selected)

@@ -25,16 +25,6 @@ if sys.platform == "win32":
             os.close(child)
         finally:
             os.close(fd)
-        cases = [
-            ("P(A;;FA;;;{owner})(A;;FR;;;WD)", True),
-            ("NO_ACCESS_CONTROL", True),
-            ("(A;;FA;;;{owner})", False),
-            ("P(A;;FA;;;{owner})(OA;;FR;00112233-4455-6677-8899-aabbccddeeff;;WD)", True),
-        ]
-        for dacl, protected in cases:
-            set_acl(root, dacl, protected)
-            with pytest.raises(OSError):
-                native.open_root(root)
         set_acl(root, "P(A;OICI;FA;;;{owner})")
         inherited = root / "inherited"
         inherited.mkdir()

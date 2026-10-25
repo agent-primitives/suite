@@ -25,6 +25,29 @@ if os.name == "posix":
         with pytest.raises(OSError):
             _directory.load_directory(root)
 
+    def test_posix_directory_ancestor_replacement(tmp_path, monkeypatch):
+        from agent_suite import _directory
+        root = tmp_path / "root"
+        root.mkdir()
+        (root / "child").mkdir()
+        (root / "child" / "old.json").write_bytes(b"{}")
+        original_add = _directory.c.Content.add
+        replaced = False
+
+        def replace(self, entry):
+            nonlocal replaced
+            original_add(self, entry)
+            if entry.path == "child" and not replaced:
+                replaced = True
+                (root / "child").rename(tmp_path / "observed-child")
+                (root / "child").mkdir()
+                (root / "child" / "new.json").write_bytes(b"{}")
+
+        monkeypatch.setattr(_directory.c.Content, "add", replace)
+        with pytest.raises(ValueError, match="^directory changed while opening$"):
+            _directory.load_directory(root)
+        assert replaced
+
     def test_posix_directory_streams(tmp_path, monkeypatch):
         from agent_suite import _directory
         (tmp_path / "payload").write_bytes(b"fixture")

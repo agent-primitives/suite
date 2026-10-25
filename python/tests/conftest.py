@@ -20,7 +20,8 @@ REQUIRED |= {
 if os.name == "nt":
     REQUIRED |= {"test_windows_directory_acl", "test_windows_directory_io", "test_windows_directory_cleanup"}
 else:
-    REQUIRED |= {"test_posix_directory_races", "test_posix_directory_streams",
+    REQUIRED |= {"test_posix_directory_races", "test_posix_directory_ancestor_replacement",
+                 "test_posix_directory_streams",
                  "test_posix_directory_fd_bound", "test_posix_directory_fifo_swap"}
 PASSED = set()
 SKIPPED = []

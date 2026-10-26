@@ -232,6 +232,16 @@
     "valid": false
   },
   {
+    "name": "dns-double-hyphen-control",
+    "imageRef": "registry--prod.example/team/image@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "valid": true
+  },
+  {
+    "name": "mixed-repository-separators-control",
+    "imageRef": "registry.example/team/repo-a_b.c@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "valid": true
+  },
+  {
     "name": "ipv6-trailing-newline",
     "imageRef": "[::1]/team/image@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
     "valid": false

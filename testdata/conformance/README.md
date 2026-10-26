@@ -181,11 +181,14 @@ requires the next minor release; do not backport it as a v0.7.x patch.
 ## Image references
 
 [image-reference-cases.json](image-reference-cases.json) contains named `imageRef`
-strings and Go's expected `valid` results. Go's value validator and both Go and
-Python build-profile schema tests consume the same cases for `runtimeBase` and
-`harness`. Optional `schemaValid` records a known, pre-existing DNS/path schema
-mismatch; otherwise schema acceptance must match `valid`. These recorded gaps
-are not exceptions to Go acceptance for a finished package reader.
+strings and the general Go image-reference helper's expected `valid` results.
+Go and Python schema tests consume the same 48 cases for `runtimeBase` and
+`harness`. Optional `schemaValid` distinguishes the narrower authored syntax from
+the helper's value-level contract; otherwise schema acceptance matches `valid`.
+Actual Go build-profile validation must satisfy both contracts. Its shared test
+exercises 96 field-specific cases and 12 fully repinned package paths, with required
+native/no-skip gates. Uppercase IPv6, DNS names containing `--` and mixed single
+repository separators are positive controls.
 
 Bracketed authorities require hexadecimal IPv6 groups: eight full groups or one
 `::` replacing at least one group, with 1–4 digits per group in either case.
@@ -194,12 +197,22 @@ paths are limited to 255 bytes, excluding the authority and digest. Missing/extr
 empty brackets, malformed addresses, dotted tails, zones, invalid ports, trailing
 newlines and tag-only references are refused. The schema's `not` guard enforces
 that path limit and compensates for differing final-newline anchor behavior in
-Go and Python. Existing DNS-authority and path-separator constraints are unchanged;
-the vectors explicitly retain their earlier acceptance differences.
+Go and Python. Existing schema DNS-authority and path-separator constraints are
+unchanged. The authored Go build-profile boundary now also refuses uppercase DNS
+registry spelling, `__` repository separators and repeated repository hyphens.
+The general `core.ValidateImageReference` helper deliberately remains unchanged;
+its broader OCI-name acceptance is not authored build-profile acceptance.
 
 Published schema bundles, IDs and canonical-identity algorithms are unchanged;
-this draft schema correction belongs to a future minor release, not a patch to a
-frozen bundle.
+the earlier draft IPv6 schema correction and this authored Go acceptance tightening
+belong to a future minor release, not a v0.7.x patch or change to a frozen bundle.
+Existing build profiles using the three newly refused spellings must select a
+schema-valid registry/repository reference for the intended image, canonicalize
+the changed build profile and refresh its Suite descriptor size/digest, followed
+by any outer package pins. Lowercasing a DNS name may preserve the registry's
+meaning, but changing a repository name does not create or move an image; consumers
+must use a reference that actually exists. No fixture digest changed in this fix,
+and no tag, release note or publication is performed here.
 
 ## Directory content loading
 

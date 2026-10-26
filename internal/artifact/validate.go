@@ -1165,6 +1165,12 @@ func validatePlatformImages(name string, images []PlatformImage) error {
 		} else if !strings.HasSuffix(image.ImageRef, "@"+image.Image.Digest) {
 			errs = append(errs, fmt.Errorf("%s %s imageRef digest must match image descriptor", name, key))
 		}
+		// Authored profile spelling is narrower than the general OCI name grammar.
+		authority, repository, _ := strings.Cut(image.ImageRef, "/")
+		if !strings.HasPrefix(authority, "[") && authority != strings.ToLower(authority) ||
+			strings.Contains(repository, "__") || strings.Contains(repository, "--") {
+			errs = append(errs, fmt.Errorf("%s %s imageRef does not match authored build-profile syntax", name, key))
+		}
 		if image.Image.MediaType != ociManifestMediaType || !IsValidDigest(image.Image.Digest) || image.Image.Size <= 0 {
 			errs = append(errs, fmt.Errorf("%s %s image descriptor must pin an OCI image manifest", name, key))
 		}

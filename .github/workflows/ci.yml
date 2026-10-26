@@ -181,7 +181,7 @@ jobs:
           TEST_RESULTS: ${{ runner.temp }}/portable-identity.jsonl
         run: |
           set -euo pipefail
-          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity|TestRawVariantDigests|TestRichEvaluationFixture|TestSharedDirectory|TestSharedArchive|TestSharedOCI|TestSharedStringLength|TestSharedDocumentShape|TestSharedCatalogReference|TestSharedDeclaration|TestSharedBundle|TestSharedBuildImageBoundary|TestSharedGraph|TestEmptyInventory)' ./internal/artifact | tee "$TEST_RESULTS"
+          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity|TestRawVariantDigests|TestRichEvaluationFixture|TestSharedDirectory|TestSharedArchive|TestSharedOCI|TestSharedStringLength|TestSharedDocumentShape|TestSharedCatalogReference|TestSharedDeclaration|TestSharedBundle|TestSharedBuildImageBoundary|TestSharedGraph|TestSharedLiteral|TestEmptyInventory)' ./internal/artifact | tee "$TEST_RESULTS"
           python3 - <<'PY'
           import json
           import os

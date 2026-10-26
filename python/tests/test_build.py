@@ -1,6 +1,7 @@
 """Exercise both distribution paths without a runtime checkout dependency."""
 import json
 import os
+import shutil
 import subprocess
 import sys
 import venv
@@ -57,7 +58,8 @@ from agent_suite._archive import load_layer
 from agent_suite._oci import load_oci_layout
 from agent_suite._documents import read_documents
 from agent_suite._graph import read_graph
-from agent_suite._records import Agent, ToolProvider, ToolProviderVariant
+from agent_suite._records import Agent, ToolProvider, ToolProviderVariant, EvaluationIndex, EvaluationCase, PolicyV1, PolicyV2
+from agent_suite._capture import capture_directory, capture_oci_layout
 from agent_suite._bundles import validate_bundles
 from agent_suite._content import Content, Entry
 from agent_suite._record_decode import read_document
@@ -117,7 +119,28 @@ equality.equal = original_equal
 for schema in bundle.schemas.values():
     bundle.registry.resolver(schema['$id'])
 assert bundle.validate('agent.schema.json', {}, Source('agent.json'))
-print('installed offline bundle: 15 exact schemas; no public loader')
+# Both installed distribution paths must preserve snapshots without source files.
+import shutil
+from agent_suite._json import digest_bytes
+for path, loader, capture in [(Path('directory'),load_directory,capture_directory),
+                               (Path('layout'),load_oci_layout,capture_oci_layout)]:
+    content = loader(path)
+    documents = read_documents(content,bundle)
+    ref = documents.agents[0].record.instructions
+    with capture(path,content,documents) as snapshot:
+        shutil.rmtree(path)
+        data = b''.join(snapshot.get(ref).iter_bytes())
+        assert len(data) == ref.descriptor.size and digest_bytes(data) == ref.descriptor.digest
+    assert snapshot.closed
+for filename,kind in [('eval-index.json',EvaluationIndex),('eval-case.json',EvaluationCase),
+                      ('policy.json',PolicyV2)]:
+    document = Document(Path(filename).read_bytes(),Source(filename))
+    assert read_document(document,kind,bundle).document.data == document.data
+filesystem = Document(b'{"version":"agentsuite.policy/v1","denyWritePaths":["/data"],"requiredCapabilities":["filesystem/deny-write/v1"]}',Source('filesystem.json'))
+assert read_document(filesystem,PolicyV1,bundle).record.deny_write_paths == ('/data',)
+network = Document(b'{"version":"agentsuite.policy/v2","network":{"egressAllow":[]},"requiredCapabilities":["network/egress-allow/v1"]}',Source('network.json'))
+assert read_document(network,PolicyV2,bundle).record.network.egress_allow == ()
+print('installed offline bundle: 15 exact schemas; private snapshots/records; no public loader')
 """
     cases = json.loads((ROOT / 'testdata/conformance/bundle-cases.json').read_bytes())['cases']
     baseline = next(c for c in cases if c['name'] == 'baseline-directory')
@@ -126,5 +149,17 @@ print('installed offline bundle: 15 exact schemas; no public loader')
     graph_case = next(c for c in graph_cases if c['name'] == 'runtime-two-profiles')
     (tmp_path / 'graph-case.json').write_text(json.dumps(graph_case), encoding='utf-8')
     from test_oci import materialize
-    materialize(tmp_path / 'layout', {'layout': 'minimal-0644'})
-    subprocess.run([str(python), "-I", "-c", smoke], cwd=tmp_path, check=True)
+    for source_name,target_name in [('evals/writer/index.json','eval-index.json'),
+                                    ('evals/writer/cases/retrieve.json','eval-case.json'),
+                                    ('policies/writer.json','policy.json')]:
+        shutil.copyfile(ROOT/'testdata/rich-evaluations'/source_name,tmp_path/target_name)
+    for wheel in [wheel, next(direct.glob('*.whl'))]:
+        subprocess.run([str(python), '-m', 'pip', 'install', '--no-deps', '--force-reinstall', str(wheel)],
+                       cwd=tmp_path, check=True)
+        materialize(tmp_path / 'layout', {'layout': 'minimal-0644'})
+        directory = tmp_path/'directory'
+        shutil.copytree(ROOT/'testdata/minimal',directory)
+        if os.name == 'nt':
+            from _directory_windows_fixture import secure_fixture
+            secure_fixture(directory)
+        subprocess.run([str(python), "-I", "-c", smoke], cwd=tmp_path, check=True)

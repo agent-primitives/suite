@@ -389,6 +389,29 @@ reads have a separate 4 MiB cap. Compressed layers stream without a new envelope
 byte cap and retain the existing archive limits. Memory/per-record bounds do not
 establish an aggregate CPU or total-input budget.
 
+## Literal bytes and root identity anchors
+
+[literal-cases.json](literal-cases.json) holds six compact byte vectors:
+empty/non-UTF-8 instructions, instructions over 4 MiB, noncanonical schema JSON,
+and input/output schema JSON over 4 MiB. Arbitrary `.data` paths and an oversized
+`.json` path distinguish literals from bounded canonical metadata. Exact bytes
+are base64-decoded `prefix + block * repeat + suffix`; size and SHA-256 are frozen.
+The 5 MiB expansion guard is test transport only, not a package-format limit.
+
+The base is `writeMinimalSuite`, identical in root identity to the `minimal` row
+of [graph-cases.json](graph-cases.json), not the separate minimal fixture folder.
+Instruction cases replace `agents/writer.json`'s reference and repin agent/root.
+Schema cases retain that agent, copy all four `remote-mcp/schemas` files unchanged,
+and install canonical `remote-mcp/tool-provider.json` at
+`tool-providers/search/1.0.0/tool-provider.json`. Replace its first tool's target
+reference, append its manifest reference to the empty catalog, then canonically
+repin provider/catalog/root. Keep the old literal files and composition unchanged.
+
+Go computes each frozen `rootDigest` only after ordinary directory and OCI
+`ValidatePath` both accept. These are shared byte vectors and root anchors, not
+complete package snapshots or evidence of a finished Python package reader.
+No corpus regeneration occurs during tests.
+
 ## Coverage still held in Go
 
 The existing tests remain enabled. Before another validator claims full ordinary

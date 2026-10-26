@@ -3,15 +3,18 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from decimal import Decimal
 from typing import Any, NoReturn, TypeVar, cast
 
 from ._json import Number
 from ._models import Descriptor, Diagnostic, Document, Platform, Source
 from ._records import (
     Agent, AgentInvoke, BrokeredCredential, BuildProfile, Catalog, Composition, CompositionRef,
-    DelegatedAuthorization, EnvironmentName, ExecutionContract, ExecutionInput, Extension, FileRef,
+    DelegatedAuthorization, EnvironmentName, EvaluationAssertion, EvaluationCase, EvaluationIndex,
+    EvaluationLimits, ExecutionContract, ExecutionInput, Extension, FileRef,
     Implementation, InferenceRequirements, InventoryEntry, Loaded, ManifestRef, ModelRequirement,
-    NetworkAccess, PlatformImage, RawFragment, RemoteHeader, RemoteNetworkRequirement, RemoteTimeouts,
+    NetworkAccess, PlatformImage, PolicyEndpoint, PolicyNetwork, PolicyV1, PolicyV2, RawFragment,
+    RemoteHeader, RemoteNetworkRequirement, RemoteTimeouts,
     RemoteToolProvider, ResolvedToolProvider, RuntimeProfile, RuntimeRequirement, SecretKeyRef, Suite,
     Tool, ToolProvider, ToolProviderComposition, ToolProviderCompositionRef, ToolProviderDependency,
     ToolProviderRequirement, ToolProviderVariant,
@@ -419,6 +422,106 @@ def _provider_composition_document(n: _Node) -> ToolProviderComposition:
     )
 
 
+def _evaluation_limits(n: _Node) -> EvaluationLimits:
+    n.closed("maxCases maxCaseBytes")
+    return EvaluationLimits(n.integer("maxCases"), n.integer("maxCaseBytes"), source=n.source)
+
+
+def _evaluation_index(n: _Node) -> EvaluationIndex:
+    n.closed("schemaVersion mediaType agent cases limits")
+    return EvaluationIndex(
+        schema_version=n.text("schemaVersion"),
+        media_type=n.text("mediaType"),
+        agent=n.text("agent"),
+        cases=n.array("cases", _file),
+        limits=_evaluation_limits(n.field("limits")),
+        source=n.source,
+    )
+
+
+def _optional_integer(n: _Node, name: str) -> int | None:
+    return n.integer(name) if name in n.value else None
+
+
+def _evaluation_assertion(n: _Node) -> EvaluationAssertion:
+    n.closed("id type critical value pattern tool rubric minScore judgeModel judgeVersion")
+    # The owning schema selects operands, including explicit noncritical unknown kinds.
+    return EvaluationAssertion(
+        id=n.text("id"),
+        kind=n.text("type"),
+        critical=n.optional("critical", _Node.boolean),
+        value=n.optional("value", _Node.string),
+        pattern=n.optional("pattern", _Node.string),
+        tool=n.optional("tool", _Node.string),
+        rubric=n.optional("rubric", _Node.string),
+        min_score=_optional_integer(n, "minScore"),
+        judge_model=n.optional("judgeModel", _Node.string),
+        judge_version=n.optional("judgeVersion", _Node.string),
+        source=n.source,
+    )
+
+
+def _evaluation_case(n: _Node) -> EvaluationCase:
+    n.closed("schemaVersion mediaType id input runs minPasses assertions")
+    return EvaluationCase(
+        schema_version=n.text("schemaVersion"),
+        media_type=n.text("mediaType"),
+        id=n.text("id"),
+        input=n.text("input"),
+        runs=_optional_integer(n, "runs"),
+        min_passes=_optional_integer(n, "minPasses"),
+        assertions=n.array("assertions", _evaluation_assertion),
+        source=n.source,
+    )
+
+
+def _policy_v1(n: _Node) -> PolicyV1:
+    # No standalone v1 schema: retain its closed, filesystem-only wire contract.
+    n.closed("version denyWritePaths requiredCapabilities")
+    version = n.field("version").string()
+    if version != "agentsuite.policy/v1":
+        fail(n.field("version").source, "document.envelope", "unsupported policy version")
+    for name in ("denyWritePaths", "requiredCapabilities"):
+        if not isinstance(n.field(name).value, list):
+            fail(n.field(name).source, "document.type", "expected array")
+    return PolicyV1(
+        version=version,
+        deny_write_paths=n.array("denyWritePaths", _Node.string),
+        required_capabilities=n.array("requiredCapabilities", _Node.string),
+        source=n.source,
+    )
+
+
+def _policy_endpoint(n: _Node) -> PolicyEndpoint:
+    n.closed("address protocol port")
+    port = n.field("port")
+    value = port.value
+    if not isinstance(value, Number) or not 1 <= value <= 65535:
+        fail(port.source, "document.integer", "expected integral port in 1..65535")
+    candidate = int(value)
+    # Compare the original decimal exactly, not its possibly rounded binary64.
+    # Only the bounded candidate becomes an int: long compensated lexemes need
+    # neither huge integer conversion nor a process-wide digit-limit change.
+    if Decimal(value.lexeme) != Decimal(candidate):
+        fail(port.source, "document.integer", "expected integral port in 1..65535")
+    return PolicyEndpoint(n.text("address"), n.text("protocol"), candidate, source=n.source)
+
+
+def _policy_network(n: _Node) -> PolicyNetwork:
+    n.closed("egressAllow")
+    return PolicyNetwork(n.array("egressAllow", _policy_endpoint), source=n.source)
+
+
+def _policy_v2(n: _Node) -> PolicyV2:
+    n.closed("version network requiredCapabilities")
+    return PolicyV2(
+        version=n.text("version"),
+        network=_policy_network(n.field("network")),
+        required_capabilities=n.array("requiredCapabilities", _Node.string),
+        source=n.source,
+    )
+
+
 def read_document(document: Document, kind: type[T], bundle: Bundle) -> Loaded[T]:
     try:
         value = document.value
@@ -438,7 +541,13 @@ def read_document(document: Document, kind: type[T], bundle: Bundle) -> Loaded[T
         schema = "composition.schema.json"
     elif kind is ToolProviderComposition:
         schema = "tool-provider-composition.schema.json"
-    elif kind is Catalog:
+    elif kind is EvaluationIndex:
+        schema = "eval-index.schema.json"
+    elif kind is EvaluationCase:
+        schema = "eval-case.schema.json"
+    elif kind is PolicyV2:
+        schema = "policy-v2.schema.json"
+    elif kind is Catalog or kind is PolicyV1:
         schema = None
     else:
         raise TypeError("unsupported private document kind")
@@ -461,6 +570,14 @@ def read_document(document: Document, kind: type[T], bundle: Bundle) -> Loaded[T
         record = _composition_document(node)
     elif kind is ToolProviderComposition:
         record = _provider_composition_document(node)
+    elif kind is EvaluationIndex:
+        record = _evaluation_index(node)
+    elif kind is EvaluationCase:
+        record = _evaluation_case(node)
+    elif kind is PolicyV1:
+        record = _policy_v1(node)
+    elif kind is PolicyV2:
+        record = _policy_v2(node)
     else:
         record = _catalog(node)
     return Loaded(document, cast(T, record))

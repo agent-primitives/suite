@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import os
 import stat
+from collections.abc import Mapping
 from pathlib import Path
 from typing import BinaryIO
 
@@ -11,6 +12,8 @@ from . import _oci_json as j
 from ._archive import load_layer
 from ._content import Content
 from ._json import MAX_BYTES, digest_bytes
+from ._literals import LiteralSnapshot
+from ._records import FileRef
 from ._oci_io import open_regular, read_regular
 
 _MAX_INDEX_ENTRIES = 1000
@@ -55,7 +58,8 @@ def _read_blob(root: Path, descriptor: j.Descriptor) -> bytes:
     return data
 
 
-def load_oci_layout(path: str | os.PathLike[str]) -> Content:
+def load_oci_layout(path: str | os.PathLike[str], *, literals: LiteralSnapshot | None = None,
+                    references: Mapping[str, FileRef] | None = None, artifact_digest: str = '') -> Content:
     raw = os.fspath(path)
     if not raw:
         raise ValueError("OCI layout root must not be empty")
@@ -69,6 +73,8 @@ def load_oci_layout(path: str | os.PathLike[str]) -> Content:
             raise ValueError("index.json must contain exactly one manifest descriptor")
         selected = descriptors[0]
         selected.validate()
+        if artifact_digest and selected.digest != artifact_digest:
+            raise ValueError('OCI artifact changed before literal capture')
         if selected.size > _MAX_INDEXED_BYTES:
             raise ValueError("index.json references too many bytes")
         with _open_blob(root, selected):
@@ -83,8 +89,10 @@ def load_oci_layout(path: str | os.PathLike[str]) -> Content:
         # Hash and parse the same handle, as Go does. Not an immutable snapshot:
         # an in-place concurrent rewrite between those passes is not prevented.
         with _open_blob(root, layer) as file:
-            content = load_layer(file)
+            content = load_layer(file, literals=literals, references=references)
     except (ValueError, OSError) as error:
+        if literals is not None and isinstance(error, OSError):
+            raise  # Backing-store I/O failure is not a malformed-package refusal.
         raise ValueError(f"OCI layout {root}: {error}") from error
     content.source_type = "oci-layout"
     content.artifact_digest = selected.digest

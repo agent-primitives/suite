@@ -46,8 +46,21 @@ source-addressable Suite, Agent, catalog, ToolProvider and nested declaration
 records. Pinned manifests must already be canonical and match their media type,
 size and SHA-256; the root manifest may retain noncanonical formatting. Instruction
 and tool-schema references match literal streamed file identities, without parsing
-their bodies or requiring them to be retained. Missing/null/empty distinctions stay
-available from the original document rather than reconstructed typed data.
+their bodies. Missing/null/empty distinctions stay available from the original
+document rather than reconstructed typed data.
+
+Private literal capture now keeps those exact verified bytes in an explicitly
+owned snapshot, usable after its directory or local OCI source is removed. A
+single stdlib `SpooledTemporaryFile` shares a 1 MiB in-memory threshold across
+captured literals, then automatically spills to anonymous/deletion-on-close
+backing storage. This is a spill threshold, not a new file-size limit. Capture
+streams bounded chunks, reuses already retained immutable bytes where available,
+and never extracts an archive tree or reopens a source after capture returns.
+Storage failures, including disk-full, are I/O errors. The snapshot holds memory
+or temporary backing until explicitly closed; its private owner is a context
+manager. Views and iterators become unusable after close. Byte iteration preserves
+non-UTF-8 content; strict incremental text decoding can fail without changing the
+verified bytes. No public package loader or package lifetime API is exposed yet.
 
 Full owning-schema checks plus local Go declaration rules cover identities,
 invocation declarations, deployment
@@ -71,9 +84,14 @@ or runtime execution is introduced. Original pinned bytes remain authoritative.
 
 Successful private graph checks still do **not** establish finished whole-package
 validation, runtime support, verified root identity or a public partial reader.
-Evaluation indexes and policies also require canonical stored JSON; policy keeps
-its own version envelope. Their references are preserved, while semantic
-completion remains separate.
+Evaluation indexes, cases, assertion operands, authored repeat fields and v1/v2
+policy intent now also have frozen located records with explicit schema-first
+converters (v1 uses its closed wire contract because it has no standalone schema).
+Original JSON remains authoritative; policies keep their own version envelope.
+Network ports check mathematical integrality against the original numeric lexeme,
+not a rounded float. Evaluation namespace/regex checks and complete policy
+semantics remain separate; decoding these private records is not whole-package
+validation, policy enforcement or execution.
 
 Both distribution formats carry exact bytes from the repository's owning
 `schema/` tree, with schema revision, IDs and SHA-256 inventory. No runtime

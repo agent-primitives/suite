@@ -82,6 +82,29 @@ REQUIRED |= {
 REQUIRED |= {f'test_wide_valid_execution_uniqueness_work[{size}]' for size in (256,512,1024,2048)}
 REQUIRED |= {f'test_unique_items_reference_diagnostics_and_work[{ref}]' for ref in ('$ref', '$dynamicRef')}
 REQUIRED |= {f'test_shared_composition_provider_presence[{case}]' for case in ('empty', 'omitted', 'null')}
+REQUIRED |= {
+    'test_small_spool_and_aggregate_rollover',
+    'test_reused_metadata_and_empty_literal_need_no_spool',
+    'test_large_literal_is_not_a_json_document_limit',
+    'test_literal_text_is_incremental_and_bytes_are_authoritative',
+    'test_literals_interleave_and_read_concurrently',
+    'test_literal_close_and_seal_are_explicit',
+    'test_short_spool_writes_are_completed_and_disk_full_propagates',
+    'test_shared_literal_capture_cases',
+    'test_captured_literals_outlive_oci_layout',
+    'test_retained_tool_schema_is_original_not_reread',
+    'test_directory_capture_checks_opened_kind_not_only_inode',
+    'test_oci_snapshot_disk_full_is_io_failure_and_cleans_up',
+    'test_shared_policy_accepted_and_v2_refused_wire_vectors',
+    'test_private_policy_records_are_frozen_located_and_keep_raw_bytes',
+    'test_evaluation_assertions_preserve_every_operand_and_optional_presence',
+    'test_existing_rich_evaluation_fixtures_through_private_decoder',
+}
+REQUIRED |= {f'test_capture_failure_closes_native_source_handles[{cancel}]' for cancel in ('False','True')}
+REQUIRED |= {f'test_captured_go_fixture_literals_outlive_directory[{name}]'
+             for name in ('minimal','remote','bundled','runtime-two-profiles')}
+REQUIRED |= {f'test_close_releases_reused_payload_even_with_suspended_iterator[{active}]'
+             for active in ('False','True')}
 PASSED = set()
 SKIPPED = []
 

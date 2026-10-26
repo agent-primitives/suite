@@ -77,6 +77,31 @@ Existing tracked fixtures contain no affected empty-file inventory entries;
 the deliberately malformed regression bytes retain their valid old pins so a
 pin error cannot hide the intended shape refusal.
 
+## Catalog-reference identity
+
+[catalog-reference-cases.json](catalog-reference-cases.json) freezes five literal
+Suite root inputs: baseline and arbitrary valid identifier controls, plus missing,
+empty and invalid `toolProviderCatalog.id` refusals. The bytes come from the
+`suite-baseline` Go fixture in [document-shape-cases.json](document-shape-cases.json),
+changing only that root ID. Child bytes and their descriptor pins are unchanged;
+tests do not regenerate the corpus.
+
+Go strict decoding alone accepts all five inputs, including the missing ID.
+The existing `loadToolProviders` semantic loader owns the identifier refusal;
+the Go runner checks strict decoding plus that loader and full `ValidatePath`
+on a native secured directory fixture. Python checks the identical bytes against
+the unchanged Suite schema in the closed offline Bundle. It asserts source
+`agentsuite.json`, code `schema.required` at `/toolProviderCatalog` for a missing
+ID, and `schema.pattern` at `/toolProviderCatalog/id` for empty or invalid IDs.
+Named required passes and no-skip gates include normal and native Go CI.
+
+This tightens Go acceptance to the existing draft schema and requires the next
+minor release; do not backport it as a patch. Set the root reference ID to any
+identifier matching the schema, not a fixed catalog name. The catalog body has
+no ID, so no body-ID equality is required. Migration changes the Suite root
+identity and any enclosing package pins; unchanged child pins need no refresh.
+No schema bytes, Python acceptance rules or Go APIs change.
+
 ## String length bounds
 
 [string-length-cases.json](string-length-cases.json) supplies literal field values

@@ -262,6 +262,9 @@ func (v *validator) loadAgents() error {
 }
 
 func (v *validator) loadToolProviders() error {
+	if !identifierPattern.MatchString(v.suite.ToolProviderCatalog.ID) {
+		return fmt.Errorf("tool provider catalog reference %q has invalid id", v.suite.ToolProviderCatalog.ID)
+	}
 	data, err := v.content.data(v.suite.ToolProviderCatalog.Path)
 	if err != nil {
 		return fmt.Errorf("tool provider catalog: %w", err)

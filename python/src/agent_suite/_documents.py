@@ -120,9 +120,10 @@ def validate_declarations(record: Suite | Agent | Catalog | ToolProvider) -> Non
             _require(_IDENTIFIER.fullmatch(network.destination_ref), _at(network.source, "destinationRef"),
                      "declaration.identity", "network destination reference is invalid")
         for header in remote.headers:
-            _require(_IDENTIFIER.fullmatch(header.secret_ref.name) and _SECRET_KEY.fullmatch(header.secret_ref.key),
-                     _at(header.secret_ref.source, "name"),
+            _require(_IDENTIFIER.fullmatch(header.secret_ref.name), _at(header.secret_ref.source, "name"),
                      "declaration.identity", "header secret reference is invalid")
+            _require(_SECRET_KEY.fullmatch(header.secret_ref.key), _at(header.secret_ref.source, "key"),
+                     "declaration.identity", "header secret key is invalid")
             _require(_HEADER.fullmatch(header.name) and header.name.lower() not in _RESERVED_HEADERS, _at(header.source, "name"),
                      "declaration.header", "header is transport-managed")
 
@@ -221,9 +222,16 @@ def read_documents(content: Content, bundle: Bundle) -> Documents:
                 pin_literal(content, tool.output_schema, "application/schema+json")
         providers.append(provider)
     raw_manifests = []
+    checked: dict[tuple[str, str, bytes | None], Document] = {}
     for group, media in ((s.compositions, "composition"), (s.build_profiles, "build.profile"),
                         (s.tool_provider_compositions, "tool.provider.composition"),
                         (s.runtime_profiles, "runtime.profile")):
         for other in group:
-            raw_manifests.append(pin_manifest(content, other, _PREFIX + media + ".v1+json"))
+            media_type = _PREFIX + media + ".v1+json"
+            # Each reference is checked; only successful byte/envelope work is reused.
+            entry = pin_literal(content, other, media_type)
+            key = (other.path, media_type, entry.data)
+            if key not in checked:
+                checked[key] = pin_manifest(content, other, media_type)
+            raw_manifests.append(checked[key])
     return Documents(suite, catalog, tuple(agents), tuple(providers), tuple(raw_manifests))

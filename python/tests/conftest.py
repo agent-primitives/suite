@@ -38,6 +38,8 @@ REQUIRED |= {
     "test_private_document_pipeline_native_directory_and_oci",
     "test_literal_pins_never_parse_or_require_retained_body",
     "test_noncanonical_root_but_canonical_pinned_children",
+    "test_repeated_raw_manifest_checks_are_collection_local",
+    "test_remote_secret_key_diagnostic_points_to_key",
 }
 REQUIRED |= {
     f"test_optional_manifest_pins_require_canonical_object_bytes[{bad}-{target}]"

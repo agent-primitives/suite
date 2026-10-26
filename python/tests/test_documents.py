@@ -139,6 +139,88 @@ def test_rich_fixture_typed_declarations_keep_evaluation_and_policy_refs_raw(bun
     assert provider.source.file.endswith('tool-provider.json')
 
 
+def repeated_build_refs(content, count):
+    root = json.loads(content.data('agentsuite.json'))
+    ref = root['buildProfiles'][0]
+    entry = content.entries[ref['path']]
+    child = json.loads(entry.data)
+    child['runtimeBase'][0]['image']['annotations'] = {'large': 'x' * (1 << 20)}
+    data = canonical_bytes(child)
+    content.entries[ref['path']] = replace(entry, data=data, size=len(data), digest=digest_bytes(data))
+    ref['descriptor'].update(size=len(data), digest=digest_bytes(data))
+    root['buildProfiles'] = [json.loads(json.dumps(ref)) for _ in range(count)]
+    return root, data
+
+
+def store_root(content, root):
+    data = canonical_bytes(root)
+    content.entries['agentsuite.json'] = replace(content.entries['agentsuite.json'], data=data,
+                                               size=len(data), digest=digest_bytes(data))
+
+
+def test_repeated_raw_manifest_checks_are_collection_local(bundle, monkeypatch):
+    import agent_suite._documents as documents
+    import agent_suite._models as models
+    content = content_fixture()
+    root, child = repeated_build_refs(content, 16)
+    assert not bundle.validate('build-profile.schema.json', decode(child), Source('build-profiles/default.json'))
+    store_root(content, root)
+    calls = {'decode': 0, 'canonical': 0}
+    original_decode, original_canonical = documents.decode, documents.canonical_bytes
+    def counted_decode(data):
+        if data == child:
+            calls['decode'] += 1
+        return original_decode(data)
+    def counted_canonical(value):
+        if isinstance(value, dict) and value.get('mediaType') == 'application/vnd.agentsuite.build.profile.v1+json':
+            calls['canonical'] += 1
+        return original_canonical(value)
+    monkeypatch.setattr(documents, 'decode', counted_decode)
+    monkeypatch.setattr(models, 'decode', counted_decode)
+    monkeypatch.setattr(documents, 'canonical_bytes', counted_canonical)
+    result = read_documents(content, bundle)
+    assert len(result.raw_manifests) == 17
+    assert calls == {'decode': 2, 'canonical': 1}
+    # Reuse never escapes this collection call, even for the same Content.
+    read_documents(content, bundle)
+    assert calls == {'decode': 4, 'canonical': 2}
+
+
+@pytest.mark.parametrize('change,code', [
+    ({'digest': 'sha256:' + '0' * 64}, 'pin.digest'),
+    ({'size': 0}, 'pin.size'),
+    ({'mediaType': 'wrong'}, 'pin.media_type'),
+    ({'path': '../escape.json'}, 'pin.path'),
+])
+def test_repeated_raw_manifest_still_checks_each_reference(bundle, change, code):
+    content = content_fixture()
+    root, _ = repeated_build_refs(content, 2)
+    ref = root['buildProfiles'][1]
+    if 'path' in change:
+        ref.update(change)
+    else:
+        ref['descriptor'].update(change)
+    store_root(content, root)
+    with pytest.raises(DocumentError) as error:
+        read_documents(content, bundle)
+    assert error.value.diagnostics[0].code == code
+    assert error.value.diagnostics[0].source.pointer.startswith('/buildProfiles/1/')
+
+
+def test_remote_secret_key_diagnostic_points_to_key(bundle):
+    cases = json.loads((ROOT / 'testdata/conformance/declaration-cases.json').read_bytes())['cases']
+    case = next(c for c in cases if c['name'] == 'valid-remote-provider')
+    value = json.loads(base64.b64decode(case['bytes'], validate=True))
+    value['remote']['headers'][0]['secretRef']['key'] = 'token\n'
+    document = Document(canonical_bytes(value), Source('provider.json'))
+    assert not bundle.validate('tool-provider.schema.json', document.value, document.source)
+    record = read_document(document, ToolProvider, bundle).record
+    with pytest.raises(DocumentError) as error:
+        validate_declarations(record)
+    assert error.value.diagnostics[0].source == Source('provider.json', '/remote/headers/0/secretRef/key')
+    assert error.value.diagnostics[0].code == 'declaration.identity'
+
+
 def test_private_document_collection_and_source_pins(bundle):
     content = content_fixture()
     result = read_documents(content, bundle)

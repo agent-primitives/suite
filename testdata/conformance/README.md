@@ -118,7 +118,9 @@ once, not repeated under an alias. Python object-array uniqueness uses structura
 JSON keys instead of all-pairs object comparisons. Deterministic regressions count
 comparison/key work through wide execution inputs and resolved providers, while
 stock-validator parity checks retain boolean/numeric distinctions, numeric equality,
-object-key independence, array order and exact diagnostic locations. Schema bytes
+object-key independence, array order and exact diagnostic locations. Arrays with no
+top-level object keep stock sorting, including its nested-sequence corner cases.
+Schema bytes
 are unchanged. Bundle-local validation views preserve the extension across owned
 2020-12 references; mixed/nested dialects or metadata-sensitive references keep
 stock validation. This is not an aggregate CPU or worst-case hash-work guarantee.

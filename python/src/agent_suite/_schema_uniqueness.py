@@ -1,4 +1,4 @@
-"""Equality-preserving JSON uniqueness; non-JSON Python values keep stock behavior."""
+"""Fast JSON object uniqueness; other arrays/Python values keep stock behavior."""
 from __future__ import annotations
 
 import math
@@ -35,14 +35,16 @@ def _key(value: Any) -> Hashable:
 def _unique_items(validator: Any, unique: bool, instance: Any, schema: Any) -> Iterator[ValidationError]:
     if not unique or not validator.is_type(instance, 'array'):
         return
-    if type(instance) is not list:
+    # Non-object arrays already use stock sorting. Keep even its nested-sequence
+    # ordering quirks: changing unrelated accepted inputs is not this fix's scope.
+    if type(instance) is not list or not any(type(value) is dict for value in instance):
         yield from _stock_unique(validator, unique, instance, schema)
         return
     try:
         # Inspect every value before deciding: a later non-JSON value must send
         # the WHOLE array through the original equality/sorting behavior.
         keys = [_key(value) for value in instance]
-    except TypeError:
+    except (TypeError, RecursionError):
         yield from _stock_unique(validator, unique, instance, schema)
         return
     if len(set(keys)) != len(keys):

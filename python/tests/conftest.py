@@ -69,6 +69,7 @@ REQUIRED |= {
 REQUIRED |= {
     'test_json_uniqueness_matches_stock_equality_and_diagnostics',
     'test_non_json_values_keep_stock_fallback',
+    'test_nested_array_sorting_keeps_stock_acceptance',
     'test_disabled_and_non_array_uniqueness_keep_stock',
     'test_comparison_counter_observes_stock_all_pairs',
     'test_wide_resolved_provider_objects_keep_schema_uniqueness',

@@ -48,12 +48,24 @@ def test_json_uniqueness_matches_stock_equality_and_diagnostics():
     assert not bundle.validate('0.json', [[1,2],[2,1]], source)
 
 
+def test_nested_array_sorting_keeps_stock_acceptance():
+    bundle = make_bundle(document('nested-arrays', uniqueItems=True))
+    # Stock sorting and its boolean-aware equality disagree about ordering these
+    # sequences. This performance fix must not change that existing acceptance.
+    values = [[True], [1], [False], [0], [[True]], [[1]], {'x':[True]}, {'x':[1]}]
+    for items in itertools.product(values, repeat=3):
+        value = list(items)
+        assert bundle.validate('0.json', value, Source('f')) == stock(bundle, '0.json', value, Source('f'))
+
+
 def test_non_json_values_keep_stock_fallback():
     class Object(dict):
         pass
     bundle = make_bundle(document('fallback', uniqueItems=True))
     nan = float('nan')
-    for instance in [[Decimal('1'), 1], [Fraction(1,2), 0.5], [(1,), [1]],
+    cycle = {}
+    cycle['self'] = cycle
+    for instance in [[cycle], [cycle,cycle], [Decimal('1'), 1], [Fraction(1,2), 0.5], [(1,), [1]],
                      [Object(x=1), {'x':1.0}], [nan,nan], [float('nan'),float('nan')],
                      [1,nan,1], [float('inf'),float('inf')], [b'a',b'a']]:
         assert bundle.validate('0.json', instance, Source('f')) == stock(bundle, '0.json', instance, Source('f'))

@@ -11,7 +11,7 @@ import pytest
 from agent_suite._bundles import add_variant_destinations, bundle_closure, validate_bundles
 from agent_suite._content import Content, Entry
 from agent_suite._documents import read_documents
-from agent_suite._json import digest_bytes, variant_bytes
+from agent_suite._json import canonical_bytes, digest_bytes, variant_bytes
 from agent_suite._models import Document, Source
 from agent_suite._record_decode import DocumentError, read_document
 from agent_suite._records import ToolProvider, ToolProviderDependency
@@ -29,6 +29,31 @@ def bundled(bundle):
     content = content_fixture('rich-evaluations')
     provider = read_documents(content, bundle).providers[0].record
     return content, provider, provider.variants[0]
+
+
+@pytest.mark.parametrize('duplicate,code,pointer', [
+    ('environment', 'variant.environment', '/variants/0/environment/1/name'),
+    ('platform', 'variant.duplicate', '/variants/1/platform'),
+])
+def test_schema_valid_semantic_duplicates(bundle, duplicate, code, pointer):
+    content, _, variant = bundled(bundle)
+    original = variant.raw.document
+    value = original.value
+    variants = value['variants']
+    if duplicate == 'environment':
+        variants[0]['environment'] = [{'name':'CONFIG'}, {'name':'CONFIG', 'required':True}]
+    else:
+        variants.append({**variants[0], 'arguments':['--stdio']})
+    for raw in variants:
+        raw['variantDigest'] = digest_bytes(variant_bytes(raw))
+    document = Document(canonical_bytes(value), original.source)
+    assert not bundle.validate('tool-provider.schema.json', document.value, document.source)
+    provider = read_document(document, ToolProvider, bundle).record
+    with pytest.raises(DocumentError) as error:
+        validate_bundles(content, {provider.id+'@'+provider.version: provider})
+    diagnostic = error.value.diagnostics[0]
+    assert diagnostic.code == code
+    assert diagnostic.source == Source(original.source.file, pointer)
 
 
 def dependency(key, digest):

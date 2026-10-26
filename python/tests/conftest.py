@@ -1,5 +1,7 @@
 """Required named passes and zero skipped tests, matching the Go gate."""
+import json
 import os
+from pathlib import Path
 
 import pytest
 
@@ -105,6 +107,36 @@ REQUIRED |= {f'test_captured_go_fixture_literals_outlive_directory[{name}]'
              for name in ('minimal','remote','bundled','runtime-two-profiles')}
 REQUIRED |= {f'test_close_releases_reused_payload_even_with_suspended_iterator[{active}]'
              for active in ('False','True')}
+REQUIRED |= {
+    'test_reader_corpus_guards', 'test_shared_regex_cases', 'test_go_regex_differential',
+    'test_native_regex_budget_and_cache_isolation', 'test_native_regex_parse_certificate',
+    'test_native_regex_compiles_bounded_syntax', 'test_native_regex_peak_memory',
+    'test_native_regex_bounded_range_cpu',
+    'test_shared_policy_all_wire_vectors', 'test_package_rich_ordered_authored_views_and_identity',
+    'test_package_validate_rehashes_retained_literal_backing',
+    'test_package_repr_and_equality_do_not_traverse_captured_content',
+    'test_package_construction_failure_releases_captured_snapshot',
+    'test_package_context_failure_closes_snapshot_and_discards_private_content',
+    'test_package_empty_pathlike_refused_from_valid_package_directory',
+    'test_package_marker_io_error_does_not_fall_back_to_directory',
+    'test_package_root_can_be_noncanonical_but_pins_stay_verified',
+    'test_package_tool_schemas_and_policy_identity_survive_removal',
+    'test_unknown_noncritical_value_has_same_schema_flavor',
+    'test_foreign_and_mixed_bundles_keep_stock_pattern_semantics',
+}
+CORPUS = Path(__file__).resolve().parents[2] / 'testdata/conformance'
+for filename in ('reader-cases.json', 'reader-semantic-cases.json'):
+    for case in json.loads((CORPUS / filename).read_bytes())['cases']:
+        REQUIRED.add(f"test_shared_reader_cases[{case['name']}]")
+        if case['valid']:
+            REQUIRED.add(f"test_shared_reader_oci_positives[{case['name']}]")
+for case in json.loads((CORPUS / 'reader-boundary-cases.json').read_bytes())['cases']:
+    REQUIRED.add(f"test_shared_reader_boundary_cases[{case['name']}]")
+    if os.name != 'nt' and case['name'].startswith('policy-symlink-'):
+        REQUIRED.add(f"test_shared_reader_boundary_native_symlinks[{case['name']}]")
+for case in json.loads((CORPUS / 'literal-cases.json').read_bytes())['cases']:
+    for oci in ('False', 'True'):
+        REQUIRED.add(f"test_package_shared_literal_bytes_outlive_source[{case['name']}-{oci}]")
 PASSED = set()
 SKIPPED = []
 

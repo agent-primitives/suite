@@ -1,0 +1,3484 @@
+{
+  "cases": [
+    {
+      "name": "empty",
+      "pattern": "",
+      "valid": true
+    },
+    {
+      "name": "anchors",
+      "pattern": "^$",
+      "valid": true
+    },
+    {
+      "name": "newline",
+      "pattern": "a\nb",
+      "valid": true
+    },
+    {
+      "name": "nul",
+      "pattern": "a\u0000b",
+      "valid": true
+    },
+    {
+      "name": "vt",
+      "pattern": "\u000b",
+      "valid": true
+    },
+    {
+      "name": "nel",
+      "pattern": "",
+      "valid": true
+    },
+    {
+      "name": "nbsp",
+      "pattern": " ",
+      "valid": true
+    },
+    {
+      "name": "bom",
+      "pattern": "﻿",
+      "valid": true
+    },
+    {
+      "name": "named-python",
+      "pattern": "(?P<name>a)",
+      "valid": true
+    },
+    {
+      "name": "named-perl",
+      "pattern": "(?<name>a)",
+      "valid": true
+    },
+    {
+      "name": "named-digit",
+      "pattern": "(?<123>a)",
+      "valid": true
+    },
+    {
+      "name": "named-underscore",
+      "pattern": "(?P<_>a)",
+      "valid": true
+    },
+    {
+      "name": "named-duplicate",
+      "pattern": "(?P<x>a)(?<x>b)",
+      "valid": true
+    },
+    {
+      "name": "named-empty",
+      "pattern": "(?P<>a)",
+      "valid": false
+    },
+    {
+      "name": "named-hyphen",
+      "pattern": "(?<a-b>a)",
+      "valid": false
+    },
+    {
+      "name": "named-unicode",
+      "pattern": "(?<é>a)",
+      "valid": false
+    },
+    {
+      "name": "named-chinese",
+      "pattern": "(?P<中文>a)",
+      "valid": false
+    },
+    {
+      "name": "named-quote",
+      "pattern": "(?'x'a)",
+      "valid": false
+    },
+    {
+      "name": "named-unclosed",
+      "pattern": "(?<foo",
+      "valid": false
+    },
+    {
+      "name": "lookahead",
+      "pattern": "(?=a)",
+      "valid": false
+    },
+    {
+      "name": "negative-lookahead",
+      "pattern": "(?!a)",
+      "valid": false
+    },
+    {
+      "name": "lookbehind",
+      "pattern": "(?<=a)",
+      "valid": false
+    },
+    {
+      "name": "backreference",
+      "pattern": "(a)\\1",
+      "valid": false
+    },
+    {
+      "name": "named-backreference",
+      "pattern": "(?P<x>a)(?P=x)",
+      "valid": false
+    },
+    {
+      "name": "byte-escape",
+      "pattern": "\\C",
+      "valid": false
+    },
+    {
+      "name": "byte-in-class",
+      "pattern": "[\\C]",
+      "valid": false
+    },
+    {
+      "name": "byte-escaped",
+      "pattern": "\\\\C",
+      "valid": true
+    },
+    {
+      "name": "byte-triple",
+      "pattern": "\\\\\\C",
+      "valid": false
+    },
+    {
+      "name": "byte-quoted",
+      "pattern": "\\Q\\C\\E",
+      "valid": true
+    },
+    {
+      "name": "byte-unclosed-quote",
+      "pattern": "\\Q\\C",
+      "valid": true
+    },
+    {
+      "name": "byte-after-quote",
+      "pattern": "\\Qx\\E\\C",
+      "valid": false
+    },
+    {
+      "name": "byte-after-class",
+      "pattern": "[x]\\C",
+      "valid": false
+    },
+    {
+      "name": "byte-after-first-bracket",
+      "pattern": "[]]\\C",
+      "valid": false
+    },
+    {
+      "name": "byte-after-posix",
+      "pattern": "[[:alpha:]]\\C",
+      "valid": false
+    },
+    {
+      "name": "byte-literal-class",
+      "pattern": "[\\\\C]",
+      "valid": true
+    },
+    {
+      "name": "quote-in-class",
+      "pattern": "[\\Q\\C\\E]",
+      "valid": false
+    },
+    {
+      "name": "escaped-quote",
+      "pattern": "\\\\Q\\C",
+      "valid": false
+    },
+    {
+      "name": "literal-group-quoted",
+      "pattern": "\\Q(?<é>\\E",
+      "valid": true
+    },
+    {
+      "name": "literal-group-class",
+      "pattern": "[(?<é>]",
+      "valid": true
+    },
+    {
+      "name": "octal-one",
+      "pattern": "\\1",
+      "valid": false
+    },
+    {
+      "name": "octal-two",
+      "pattern": "\\12",
+      "valid": true
+    },
+    {
+      "name": "octal-zero",
+      "pattern": "\\0",
+      "valid": true
+    },
+    {
+      "name": "octal-three",
+      "pattern": "\\123",
+      "valid": true
+    },
+    {
+      "name": "octal-max",
+      "pattern": "\\777",
+      "valid": true
+    },
+    {
+      "name": "octal-four",
+      "pattern": "\\1234",
+      "valid": true
+    },
+    {
+      "name": "octal-eight",
+      "pattern": "\\8",
+      "valid": false
+    },
+    {
+      "name": "octal-leading",
+      "pattern": "\\08",
+      "valid": true
+    },
+    {
+      "name": "hex",
+      "pattern": "\\x7f",
+      "valid": true
+    },
+    {
+      "name": "hex-short",
+      "pattern": "\\x7",
+      "valid": false
+    },
+    {
+      "name": "hex-unicode",
+      "pattern": "\\x{10FFFF}",
+      "valid": true
+    },
+    {
+      "name": "hex-overflow",
+      "pattern": "\\x{110000}",
+      "valid": false
+    },
+    {
+      "name": "hex-surrogate",
+      "pattern": "\\x{D800}",
+      "valid": true
+    },
+    {
+      "name": "hex-empty",
+      "pattern": "\\x{}",
+      "valid": false
+    },
+    {
+      "name": "python-unicode",
+      "pattern": "\\u1234",
+      "valid": false
+    },
+    {
+      "name": "escape-E",
+      "pattern": "\\E",
+      "valid": false
+    },
+    {
+      "name": "escape-Z",
+      "pattern": "\\Z",
+      "valid": false
+    },
+    {
+      "name": "escape-z",
+      "pattern": "\\z",
+      "valid": true
+    },
+    {
+      "name": "escape-A",
+      "pattern": "\\A",
+      "valid": true
+    },
+    {
+      "name": "escape-e",
+      "pattern": "\\e",
+      "valid": false
+    },
+    {
+      "name": "escape-control",
+      "pattern": "\\cA",
+      "valid": false
+    },
+    {
+      "name": "escape-punctuation",
+      "pattern": "\\_",
+      "valid": true
+    },
+    {
+      "name": "escape-space",
+      "pattern": "\\ ",
+      "valid": true
+    },
+    {
+      "name": "escape-unicode",
+      "pattern": "\\é",
+      "valid": false
+    },
+    {
+      "name": "escape-trailing",
+      "pattern": "a\\",
+      "valid": false
+    },
+    {
+      "name": "repeat-limit",
+      "pattern": "a{1000}",
+      "valid": true
+    },
+    {
+      "name": "repeat-over",
+      "pattern": "a{1001}",
+      "valid": false
+    },
+    {
+      "name": "repeat-unbounded-over",
+      "pattern": "a{1001,}",
+      "valid": false
+    },
+    {
+      "name": "repeat-nested-limit",
+      "pattern": "(a{100}){10}",
+      "valid": true
+    },
+    {
+      "name": "repeat-nested-over",
+      "pattern": "(a{100}){11}",
+      "valid": false
+    },
+    {
+      "name": "repeat-zero",
+      "pattern": "(a{1001}){0}",
+      "valid": false
+    },
+    {
+      "name": "repeat-leading-zero",
+      "pattern": "a{01}",
+      "valid": true
+    },
+    {
+      "name": "repeat-bad-range",
+      "pattern": "a{2,1}",
+      "valid": false
+    },
+    {
+      "name": "repeat-unbounded",
+      "pattern": "a{1000,}",
+      "valid": true
+    },
+    {
+      "name": "repeat-stack",
+      "pattern": "a**",
+      "valid": false
+    },
+    {
+      "name": "repeat-lazy",
+      "pattern": "a+?",
+      "valid": true
+    },
+    {
+      "name": "repeat-possessive",
+      "pattern": "a++",
+      "valid": false
+    },
+    {
+      "name": "repeat-literal",
+      "pattern": "{2}",
+      "valid": false
+    },
+    {
+      "name": "repeat-empty",
+      "pattern": "a{}",
+      "valid": true
+    },
+    {
+      "name": "flags",
+      "pattern": "(?imsU:a)",
+      "valid": true
+    },
+    {
+      "name": "flags-clear",
+      "pattern": "(?i-msU:a)",
+      "valid": true
+    },
+    {
+      "name": "flags-empty",
+      "pattern": "(?-:a)",
+      "valid": false
+    },
+    {
+      "name": "flags-empty-clear",
+      "pattern": "(?i-:a)",
+      "valid": false
+    },
+    {
+      "name": "flags-unknown",
+      "pattern": "(?x:a)",
+      "valid": false
+    },
+    {
+      "name": "flags-scope",
+      "pattern": "(?i)a(?-i:b)",
+      "valid": true
+    },
+    {
+      "name": "flags-nested",
+      "pattern": "(?i:(?-i:a))",
+      "valid": true
+    },
+    {
+      "name": "group-unclosed",
+      "pattern": "(",
+      "valid": false
+    },
+    {
+      "name": "group-extra",
+      "pattern": ")",
+      "valid": false
+    },
+    {
+      "name": "class-empty",
+      "pattern": "[]",
+      "valid": false
+    },
+    {
+      "name": "class-first-bracket",
+      "pattern": "[]a]",
+      "valid": true
+    },
+    {
+      "name": "class-negate-bracket",
+      "pattern": "[^]a]",
+      "valid": true
+    },
+    {
+      "name": "class-range",
+      "pattern": "[z-a]",
+      "valid": false
+    },
+    {
+      "name": "class-posix",
+      "pattern": "[[:alpha:]]",
+      "valid": true
+    },
+    {
+      "name": "class-posix-unknown",
+      "pattern": "[[:notaclass:]]",
+      "valid": false
+    },
+    {
+      "name": "class-property-start-range",
+      "pattern": "[\\pL-a]",
+      "valid": true
+    },
+    {
+      "name": "class-property-end-range",
+      "pattern": "[a-\\pL]",
+      "valid": false
+    },
+    {
+      "name": "property-nested",
+      "pattern": "[\\p{Assigned}]",
+      "valid": true
+    },
+    {
+      "name": "property-negated",
+      "pattern": "\\P{^Uppercase_Letter}",
+      "valid": true
+    },
+    {
+      "name": "property-spaces",
+      "pattern": "\\p{ upper-CASE_letter }",
+      "valid": true
+    },
+    {
+      "name": "property-unknown",
+      "pattern": "\\p{Not_A_Property}",
+      "valid": false
+    },
+    {
+      "name": "property-binary",
+      "pattern": "\\p{White_Space}",
+      "valid": false
+    },
+    {
+      "name": "property-script-prefix",
+      "pattern": "\\p{sc=Latin}",
+      "valid": false
+    },
+    {
+      "name": "property-empty",
+      "pattern": "\\p{}",
+      "valid": false
+    },
+    {
+      "name": "property-unclosed",
+      "pattern": "\\p{Greek",
+      "valid": false
+    },
+    {
+      "name": "property-quoted",
+      "pattern": "\\Q\\p{Unknown}\\E",
+      "valid": true
+    },
+    {
+      "name": "property-escaped",
+      "pattern": "\\\\p{Unknown}",
+      "valid": true
+    },
+    {
+      "name": "property-signed-twice",
+      "pattern": "\\p{^^L}",
+      "valid": false
+    },
+    {
+      "name": "property-tab",
+      "pattern": "\\p{Uppercase\tLetter}",
+      "valid": false
+    },
+    {
+      "name": "nesting-capture",
+      "pattern": "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((a))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+      "valid": true
+    },
+    {
+      "name": "nesting-noncapture",
+      "pattern": "(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:a)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+      "valid": true
+    },
+    {
+      "name": "budget-literal",
+      "pattern": "(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa){1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-alternation",
+      "pattern": "(a|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|da|b|c|d){1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-letter",
+      "pattern": "(\\pL){1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-properties",
+      "pattern": "([\\pL\\pN]){1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-classes",
+      "pattern": "([a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z]){1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-unicode",
+      "pattern": "(ĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀĀ){1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-fold",
+      "pattern": "(?i:[a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z][a-z]){1000}",
+      "valid": true
+    },
+    {
+      "name": "property-C-exact",
+      "pattern": "\\p{C}",
+      "valid": true
+    },
+    {
+      "name": "property-C-lower",
+      "pattern": "\\p{c}",
+      "valid": true
+    },
+    {
+      "name": "property-Cc-exact",
+      "pattern": "\\p{Cc}",
+      "valid": true
+    },
+    {
+      "name": "property-Cc-lower",
+      "pattern": "\\p{cc}",
+      "valid": true
+    },
+    {
+      "name": "property-Cf-exact",
+      "pattern": "\\p{Cf}",
+      "valid": true
+    },
+    {
+      "name": "property-Cf-lower",
+      "pattern": "\\p{cf}",
+      "valid": true
+    },
+    {
+      "name": "property-Cn-exact",
+      "pattern": "\\p{Cn}",
+      "valid": true
+    },
+    {
+      "name": "property-Cn-lower",
+      "pattern": "\\p{cn}",
+      "valid": true
+    },
+    {
+      "name": "property-Co-exact",
+      "pattern": "\\p{Co}",
+      "valid": true
+    },
+    {
+      "name": "property-Co-lower",
+      "pattern": "\\p{co}",
+      "valid": true
+    },
+    {
+      "name": "property-Cs-exact",
+      "pattern": "\\p{Cs}",
+      "valid": true
+    },
+    {
+      "name": "property-Cs-lower",
+      "pattern": "\\p{cs}",
+      "valid": true
+    },
+    {
+      "name": "property-L-exact",
+      "pattern": "\\p{L}",
+      "valid": true
+    },
+    {
+      "name": "property-L-lower",
+      "pattern": "\\p{l}",
+      "valid": true
+    },
+    {
+      "name": "property-LC-exact",
+      "pattern": "\\p{LC}",
+      "valid": true
+    },
+    {
+      "name": "property-LC-lower",
+      "pattern": "\\p{lc}",
+      "valid": true
+    },
+    {
+      "name": "property-Ll-exact",
+      "pattern": "\\p{Ll}",
+      "valid": true
+    },
+    {
+      "name": "property-Ll-lower",
+      "pattern": "\\p{ll}",
+      "valid": true
+    },
+    {
+      "name": "property-Lm-exact",
+      "pattern": "\\p{Lm}",
+      "valid": true
+    },
+    {
+      "name": "property-Lm-lower",
+      "pattern": "\\p{lm}",
+      "valid": true
+    },
+    {
+      "name": "property-Lo-exact",
+      "pattern": "\\p{Lo}",
+      "valid": true
+    },
+    {
+      "name": "property-Lo-lower",
+      "pattern": "\\p{lo}",
+      "valid": true
+    },
+    {
+      "name": "property-Lt-exact",
+      "pattern": "\\p{Lt}",
+      "valid": true
+    },
+    {
+      "name": "property-Lt-lower",
+      "pattern": "\\p{lt}",
+      "valid": true
+    },
+    {
+      "name": "property-Lu-exact",
+      "pattern": "\\p{Lu}",
+      "valid": true
+    },
+    {
+      "name": "property-Lu-lower",
+      "pattern": "\\p{lu}",
+      "valid": true
+    },
+    {
+      "name": "property-M-exact",
+      "pattern": "\\p{M}",
+      "valid": true
+    },
+    {
+      "name": "property-M-lower",
+      "pattern": "\\p{m}",
+      "valid": true
+    },
+    {
+      "name": "property-Mc-exact",
+      "pattern": "\\p{Mc}",
+      "valid": true
+    },
+    {
+      "name": "property-Mc-lower",
+      "pattern": "\\p{mc}",
+      "valid": true
+    },
+    {
+      "name": "property-Me-exact",
+      "pattern": "\\p{Me}",
+      "valid": true
+    },
+    {
+      "name": "property-Me-lower",
+      "pattern": "\\p{me}",
+      "valid": true
+    },
+    {
+      "name": "property-Mn-exact",
+      "pattern": "\\p{Mn}",
+      "valid": true
+    },
+    {
+      "name": "property-Mn-lower",
+      "pattern": "\\p{mn}",
+      "valid": true
+    },
+    {
+      "name": "property-N-exact",
+      "pattern": "\\p{N}",
+      "valid": true
+    },
+    {
+      "name": "property-N-lower",
+      "pattern": "\\p{n}",
+      "valid": true
+    },
+    {
+      "name": "property-Nd-exact",
+      "pattern": "\\p{Nd}",
+      "valid": true
+    },
+    {
+      "name": "property-Nd-lower",
+      "pattern": "\\p{nd}",
+      "valid": true
+    },
+    {
+      "name": "property-Nl-exact",
+      "pattern": "\\p{Nl}",
+      "valid": true
+    },
+    {
+      "name": "property-Nl-lower",
+      "pattern": "\\p{nl}",
+      "valid": true
+    },
+    {
+      "name": "property-No-exact",
+      "pattern": "\\p{No}",
+      "valid": true
+    },
+    {
+      "name": "property-No-lower",
+      "pattern": "\\p{no}",
+      "valid": true
+    },
+    {
+      "name": "property-P-exact",
+      "pattern": "\\p{P}",
+      "valid": true
+    },
+    {
+      "name": "property-P-lower",
+      "pattern": "\\p{p}",
+      "valid": true
+    },
+    {
+      "name": "property-Pc-exact",
+      "pattern": "\\p{Pc}",
+      "valid": true
+    },
+    {
+      "name": "property-Pc-lower",
+      "pattern": "\\p{pc}",
+      "valid": true
+    },
+    {
+      "name": "property-Pd-exact",
+      "pattern": "\\p{Pd}",
+      "valid": true
+    },
+    {
+      "name": "property-Pd-lower",
+      "pattern": "\\p{pd}",
+      "valid": true
+    },
+    {
+      "name": "property-Pe-exact",
+      "pattern": "\\p{Pe}",
+      "valid": true
+    },
+    {
+      "name": "property-Pe-lower",
+      "pattern": "\\p{pe}",
+      "valid": true
+    },
+    {
+      "name": "property-Pf-exact",
+      "pattern": "\\p{Pf}",
+      "valid": true
+    },
+    {
+      "name": "property-Pf-lower",
+      "pattern": "\\p{pf}",
+      "valid": true
+    },
+    {
+      "name": "property-Pi-exact",
+      "pattern": "\\p{Pi}",
+      "valid": true
+    },
+    {
+      "name": "property-Pi-lower",
+      "pattern": "\\p{pi}",
+      "valid": true
+    },
+    {
+      "name": "property-Po-exact",
+      "pattern": "\\p{Po}",
+      "valid": true
+    },
+    {
+      "name": "property-Po-lower",
+      "pattern": "\\p{po}",
+      "valid": true
+    },
+    {
+      "name": "property-Ps-exact",
+      "pattern": "\\p{Ps}",
+      "valid": true
+    },
+    {
+      "name": "property-Ps-lower",
+      "pattern": "\\p{ps}",
+      "valid": true
+    },
+    {
+      "name": "property-S-exact",
+      "pattern": "\\p{S}",
+      "valid": true
+    },
+    {
+      "name": "property-S-lower",
+      "pattern": "\\p{s}",
+      "valid": true
+    },
+    {
+      "name": "property-Sc-exact",
+      "pattern": "\\p{Sc}",
+      "valid": true
+    },
+    {
+      "name": "property-Sc-lower",
+      "pattern": "\\p{sc}",
+      "valid": true
+    },
+    {
+      "name": "property-Sk-exact",
+      "pattern": "\\p{Sk}",
+      "valid": true
+    },
+    {
+      "name": "property-Sk-lower",
+      "pattern": "\\p{sk}",
+      "valid": true
+    },
+    {
+      "name": "property-Sm-exact",
+      "pattern": "\\p{Sm}",
+      "valid": true
+    },
+    {
+      "name": "property-Sm-lower",
+      "pattern": "\\p{sm}",
+      "valid": true
+    },
+    {
+      "name": "property-So-exact",
+      "pattern": "\\p{So}",
+      "valid": true
+    },
+    {
+      "name": "property-So-lower",
+      "pattern": "\\p{so}",
+      "valid": true
+    },
+    {
+      "name": "property-Z-exact",
+      "pattern": "\\p{Z}",
+      "valid": true
+    },
+    {
+      "name": "property-Z-lower",
+      "pattern": "\\p{z}",
+      "valid": true
+    },
+    {
+      "name": "property-Zl-exact",
+      "pattern": "\\p{Zl}",
+      "valid": true
+    },
+    {
+      "name": "property-Zl-lower",
+      "pattern": "\\p{zl}",
+      "valid": true
+    },
+    {
+      "name": "property-Zp-exact",
+      "pattern": "\\p{Zp}",
+      "valid": true
+    },
+    {
+      "name": "property-Zp-lower",
+      "pattern": "\\p{zp}",
+      "valid": true
+    },
+    {
+      "name": "property-Zs-exact",
+      "pattern": "\\p{Zs}",
+      "valid": true
+    },
+    {
+      "name": "property-Zs-lower",
+      "pattern": "\\p{zs}",
+      "valid": true
+    },
+    {
+      "name": "property-Cased_Letter-exact",
+      "pattern": "\\p{Cased_Letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Cased_Letter-lower",
+      "pattern": "\\p{cased_letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Close_Punctuation-exact",
+      "pattern": "\\p{Close_Punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Close_Punctuation-lower",
+      "pattern": "\\p{close_punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Combining_Mark-exact",
+      "pattern": "\\p{Combining_Mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Combining_Mark-lower",
+      "pattern": "\\p{combining_mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Connector_Punctuation-exact",
+      "pattern": "\\p{Connector_Punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Connector_Punctuation-lower",
+      "pattern": "\\p{connector_punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Control-exact",
+      "pattern": "\\p{Control}",
+      "valid": true
+    },
+    {
+      "name": "property-Control-lower",
+      "pattern": "\\p{control}",
+      "valid": true
+    },
+    {
+      "name": "property-Currency_Symbol-exact",
+      "pattern": "\\p{Currency_Symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Currency_Symbol-lower",
+      "pattern": "\\p{currency_symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Dash_Punctuation-exact",
+      "pattern": "\\p{Dash_Punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Dash_Punctuation-lower",
+      "pattern": "\\p{dash_punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Decimal_Number-exact",
+      "pattern": "\\p{Decimal_Number}",
+      "valid": true
+    },
+    {
+      "name": "property-Decimal_Number-lower",
+      "pattern": "\\p{decimal_number}",
+      "valid": true
+    },
+    {
+      "name": "property-Enclosing_Mark-exact",
+      "pattern": "\\p{Enclosing_Mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Enclosing_Mark-lower",
+      "pattern": "\\p{enclosing_mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Final_Punctuation-exact",
+      "pattern": "\\p{Final_Punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Final_Punctuation-lower",
+      "pattern": "\\p{final_punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Format-exact",
+      "pattern": "\\p{Format}",
+      "valid": true
+    },
+    {
+      "name": "property-Format-lower",
+      "pattern": "\\p{format}",
+      "valid": true
+    },
+    {
+      "name": "property-Initial_Punctuation-exact",
+      "pattern": "\\p{Initial_Punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Initial_Punctuation-lower",
+      "pattern": "\\p{initial_punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Letter-exact",
+      "pattern": "\\p{Letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Letter-lower",
+      "pattern": "\\p{letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Letter_Number-exact",
+      "pattern": "\\p{Letter_Number}",
+      "valid": true
+    },
+    {
+      "name": "property-Letter_Number-lower",
+      "pattern": "\\p{letter_number}",
+      "valid": true
+    },
+    {
+      "name": "property-Line_Separator-exact",
+      "pattern": "\\p{Line_Separator}",
+      "valid": true
+    },
+    {
+      "name": "property-Line_Separator-lower",
+      "pattern": "\\p{line_separator}",
+      "valid": true
+    },
+    {
+      "name": "property-Lowercase_Letter-exact",
+      "pattern": "\\p{Lowercase_Letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Lowercase_Letter-lower",
+      "pattern": "\\p{lowercase_letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Mark-exact",
+      "pattern": "\\p{Mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Mark-lower",
+      "pattern": "\\p{mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Math_Symbol-exact",
+      "pattern": "\\p{Math_Symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Math_Symbol-lower",
+      "pattern": "\\p{math_symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Modifier_Letter-exact",
+      "pattern": "\\p{Modifier_Letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Modifier_Letter-lower",
+      "pattern": "\\p{modifier_letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Modifier_Symbol-exact",
+      "pattern": "\\p{Modifier_Symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Modifier_Symbol-lower",
+      "pattern": "\\p{modifier_symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Nonspacing_Mark-exact",
+      "pattern": "\\p{Nonspacing_Mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Nonspacing_Mark-lower",
+      "pattern": "\\p{nonspacing_mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Number-exact",
+      "pattern": "\\p{Number}",
+      "valid": true
+    },
+    {
+      "name": "property-Number-lower",
+      "pattern": "\\p{number}",
+      "valid": true
+    },
+    {
+      "name": "property-Open_Punctuation-exact",
+      "pattern": "\\p{Open_Punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Open_Punctuation-lower",
+      "pattern": "\\p{open_punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Other-exact",
+      "pattern": "\\p{Other}",
+      "valid": true
+    },
+    {
+      "name": "property-Other-lower",
+      "pattern": "\\p{other}",
+      "valid": true
+    },
+    {
+      "name": "property-Other_Letter-exact",
+      "pattern": "\\p{Other_Letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Other_Letter-lower",
+      "pattern": "\\p{other_letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Other_Number-exact",
+      "pattern": "\\p{Other_Number}",
+      "valid": true
+    },
+    {
+      "name": "property-Other_Number-lower",
+      "pattern": "\\p{other_number}",
+      "valid": true
+    },
+    {
+      "name": "property-Other_Punctuation-exact",
+      "pattern": "\\p{Other_Punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Other_Punctuation-lower",
+      "pattern": "\\p{other_punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Other_Symbol-exact",
+      "pattern": "\\p{Other_Symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Other_Symbol-lower",
+      "pattern": "\\p{other_symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Paragraph_Separator-exact",
+      "pattern": "\\p{Paragraph_Separator}",
+      "valid": true
+    },
+    {
+      "name": "property-Paragraph_Separator-lower",
+      "pattern": "\\p{paragraph_separator}",
+      "valid": true
+    },
+    {
+      "name": "property-Private_Use-exact",
+      "pattern": "\\p{Private_Use}",
+      "valid": true
+    },
+    {
+      "name": "property-Private_Use-lower",
+      "pattern": "\\p{private_use}",
+      "valid": true
+    },
+    {
+      "name": "property-Punctuation-exact",
+      "pattern": "\\p{Punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Punctuation-lower",
+      "pattern": "\\p{punctuation}",
+      "valid": true
+    },
+    {
+      "name": "property-Separator-exact",
+      "pattern": "\\p{Separator}",
+      "valid": true
+    },
+    {
+      "name": "property-Separator-lower",
+      "pattern": "\\p{separator}",
+      "valid": true
+    },
+    {
+      "name": "property-Space_Separator-exact",
+      "pattern": "\\p{Space_Separator}",
+      "valid": true
+    },
+    {
+      "name": "property-Space_Separator-lower",
+      "pattern": "\\p{space_separator}",
+      "valid": true
+    },
+    {
+      "name": "property-Spacing_Mark-exact",
+      "pattern": "\\p{Spacing_Mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Spacing_Mark-lower",
+      "pattern": "\\p{spacing_mark}",
+      "valid": true
+    },
+    {
+      "name": "property-Surrogate-exact",
+      "pattern": "\\p{Surrogate}",
+      "valid": true
+    },
+    {
+      "name": "property-Surrogate-lower",
+      "pattern": "\\p{surrogate}",
+      "valid": true
+    },
+    {
+      "name": "property-Symbol-exact",
+      "pattern": "\\p{Symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Symbol-lower",
+      "pattern": "\\p{symbol}",
+      "valid": true
+    },
+    {
+      "name": "property-Titlecase_Letter-exact",
+      "pattern": "\\p{Titlecase_Letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Titlecase_Letter-lower",
+      "pattern": "\\p{titlecase_letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Unassigned-exact",
+      "pattern": "\\p{Unassigned}",
+      "valid": true
+    },
+    {
+      "name": "property-Unassigned-lower",
+      "pattern": "\\p{unassigned}",
+      "valid": true
+    },
+    {
+      "name": "property-Uppercase_Letter-exact",
+      "pattern": "\\p{Uppercase_Letter}",
+      "valid": true
+    },
+    {
+      "name": "property-Uppercase_Letter-lower",
+      "pattern": "\\p{uppercase_letter}",
+      "valid": true
+    },
+    {
+      "name": "property-cntrl-exact",
+      "pattern": "\\p{cntrl}",
+      "valid": true
+    },
+    {
+      "name": "property-cntrl-lower",
+      "pattern": "\\p{cntrl}",
+      "valid": true
+    },
+    {
+      "name": "property-digit-exact",
+      "pattern": "\\p{digit}",
+      "valid": true
+    },
+    {
+      "name": "property-digit-lower",
+      "pattern": "\\p{digit}",
+      "valid": true
+    },
+    {
+      "name": "property-punct-exact",
+      "pattern": "\\p{punct}",
+      "valid": true
+    },
+    {
+      "name": "property-punct-lower",
+      "pattern": "\\p{punct}",
+      "valid": true
+    },
+    {
+      "name": "property-Adlam-exact",
+      "pattern": "\\p{Adlam}",
+      "valid": true
+    },
+    {
+      "name": "property-Adlam-lower",
+      "pattern": "\\p{adlam}",
+      "valid": true
+    },
+    {
+      "name": "property-Ahom-exact",
+      "pattern": "\\p{Ahom}",
+      "valid": true
+    },
+    {
+      "name": "property-Ahom-lower",
+      "pattern": "\\p{ahom}",
+      "valid": true
+    },
+    {
+      "name": "property-Anatolian_Hieroglyphs-exact",
+      "pattern": "\\p{Anatolian_Hieroglyphs}",
+      "valid": false
+    },
+    {
+      "name": "property-Anatolian_Hieroglyphs-lower",
+      "pattern": "\\p{anatolian_hieroglyphs}",
+      "valid": false
+    },
+    {
+      "name": "property-Arabic-exact",
+      "pattern": "\\p{Arabic}",
+      "valid": true
+    },
+    {
+      "name": "property-Arabic-lower",
+      "pattern": "\\p{arabic}",
+      "valid": true
+    },
+    {
+      "name": "property-Armenian-exact",
+      "pattern": "\\p{Armenian}",
+      "valid": true
+    },
+    {
+      "name": "property-Armenian-lower",
+      "pattern": "\\p{armenian}",
+      "valid": true
+    },
+    {
+      "name": "property-Avestan-exact",
+      "pattern": "\\p{Avestan}",
+      "valid": true
+    },
+    {
+      "name": "property-Avestan-lower",
+      "pattern": "\\p{avestan}",
+      "valid": true
+    },
+    {
+      "name": "property-Balinese-exact",
+      "pattern": "\\p{Balinese}",
+      "valid": true
+    },
+    {
+      "name": "property-Balinese-lower",
+      "pattern": "\\p{balinese}",
+      "valid": true
+    },
+    {
+      "name": "property-Bamum-exact",
+      "pattern": "\\p{Bamum}",
+      "valid": true
+    },
+    {
+      "name": "property-Bamum-lower",
+      "pattern": "\\p{bamum}",
+      "valid": true
+    },
+    {
+      "name": "property-Bassa_Vah-exact",
+      "pattern": "\\p{Bassa_Vah}",
+      "valid": false
+    },
+    {
+      "name": "property-Bassa_Vah-lower",
+      "pattern": "\\p{bassa_vah}",
+      "valid": false
+    },
+    {
+      "name": "property-Batak-exact",
+      "pattern": "\\p{Batak}",
+      "valid": true
+    },
+    {
+      "name": "property-Batak-lower",
+      "pattern": "\\p{batak}",
+      "valid": true
+    },
+    {
+      "name": "property-Bengali-exact",
+      "pattern": "\\p{Bengali}",
+      "valid": true
+    },
+    {
+      "name": "property-Bengali-lower",
+      "pattern": "\\p{bengali}",
+      "valid": true
+    },
+    {
+      "name": "property-Bhaiksuki-exact",
+      "pattern": "\\p{Bhaiksuki}",
+      "valid": true
+    },
+    {
+      "name": "property-Bhaiksuki-lower",
+      "pattern": "\\p{bhaiksuki}",
+      "valid": true
+    },
+    {
+      "name": "property-Bopomofo-exact",
+      "pattern": "\\p{Bopomofo}",
+      "valid": true
+    },
+    {
+      "name": "property-Bopomofo-lower",
+      "pattern": "\\p{bopomofo}",
+      "valid": true
+    },
+    {
+      "name": "property-Brahmi-exact",
+      "pattern": "\\p{Brahmi}",
+      "valid": true
+    },
+    {
+      "name": "property-Brahmi-lower",
+      "pattern": "\\p{brahmi}",
+      "valid": true
+    },
+    {
+      "name": "property-Braille-exact",
+      "pattern": "\\p{Braille}",
+      "valid": true
+    },
+    {
+      "name": "property-Braille-lower",
+      "pattern": "\\p{braille}",
+      "valid": true
+    },
+    {
+      "name": "property-Buginese-exact",
+      "pattern": "\\p{Buginese}",
+      "valid": true
+    },
+    {
+      "name": "property-Buginese-lower",
+      "pattern": "\\p{buginese}",
+      "valid": true
+    },
+    {
+      "name": "property-Buhid-exact",
+      "pattern": "\\p{Buhid}",
+      "valid": true
+    },
+    {
+      "name": "property-Buhid-lower",
+      "pattern": "\\p{buhid}",
+      "valid": true
+    },
+    {
+      "name": "property-Canadian_Aboriginal-exact",
+      "pattern": "\\p{Canadian_Aboriginal}",
+      "valid": false
+    },
+    {
+      "name": "property-Canadian_Aboriginal-lower",
+      "pattern": "\\p{canadian_aboriginal}",
+      "valid": false
+    },
+    {
+      "name": "property-Carian-exact",
+      "pattern": "\\p{Carian}",
+      "valid": true
+    },
+    {
+      "name": "property-Carian-lower",
+      "pattern": "\\p{carian}",
+      "valid": true
+    },
+    {
+      "name": "property-Caucasian_Albanian-exact",
+      "pattern": "\\p{Caucasian_Albanian}",
+      "valid": false
+    },
+    {
+      "name": "property-Caucasian_Albanian-lower",
+      "pattern": "\\p{caucasian_albanian}",
+      "valid": false
+    },
+    {
+      "name": "property-Chakma-exact",
+      "pattern": "\\p{Chakma}",
+      "valid": true
+    },
+    {
+      "name": "property-Chakma-lower",
+      "pattern": "\\p{chakma}",
+      "valid": true
+    },
+    {
+      "name": "property-Cham-exact",
+      "pattern": "\\p{Cham}",
+      "valid": true
+    },
+    {
+      "name": "property-Cham-lower",
+      "pattern": "\\p{cham}",
+      "valid": true
+    },
+    {
+      "name": "property-Cherokee-exact",
+      "pattern": "\\p{Cherokee}",
+      "valid": true
+    },
+    {
+      "name": "property-Cherokee-lower",
+      "pattern": "\\p{cherokee}",
+      "valid": true
+    },
+    {
+      "name": "property-Chorasmian-exact",
+      "pattern": "\\p{Chorasmian}",
+      "valid": true
+    },
+    {
+      "name": "property-Chorasmian-lower",
+      "pattern": "\\p{chorasmian}",
+      "valid": true
+    },
+    {
+      "name": "property-Common-exact",
+      "pattern": "\\p{Common}",
+      "valid": true
+    },
+    {
+      "name": "property-Common-lower",
+      "pattern": "\\p{common}",
+      "valid": true
+    },
+    {
+      "name": "property-Coptic-exact",
+      "pattern": "\\p{Coptic}",
+      "valid": true
+    },
+    {
+      "name": "property-Coptic-lower",
+      "pattern": "\\p{coptic}",
+      "valid": true
+    },
+    {
+      "name": "property-Cuneiform-exact",
+      "pattern": "\\p{Cuneiform}",
+      "valid": true
+    },
+    {
+      "name": "property-Cuneiform-lower",
+      "pattern": "\\p{cuneiform}",
+      "valid": true
+    },
+    {
+      "name": "property-Cypriot-exact",
+      "pattern": "\\p{Cypriot}",
+      "valid": true
+    },
+    {
+      "name": "property-Cypriot-lower",
+      "pattern": "\\p{cypriot}",
+      "valid": true
+    },
+    {
+      "name": "property-Cypro_Minoan-exact",
+      "pattern": "\\p{Cypro_Minoan}",
+      "valid": false
+    },
+    {
+      "name": "property-Cypro_Minoan-lower",
+      "pattern": "\\p{cypro_minoan}",
+      "valid": false
+    },
+    {
+      "name": "property-Cyrillic-exact",
+      "pattern": "\\p{Cyrillic}",
+      "valid": true
+    },
+    {
+      "name": "property-Cyrillic-lower",
+      "pattern": "\\p{cyrillic}",
+      "valid": true
+    },
+    {
+      "name": "property-Deseret-exact",
+      "pattern": "\\p{Deseret}",
+      "valid": true
+    },
+    {
+      "name": "property-Deseret-lower",
+      "pattern": "\\p{deseret}",
+      "valid": true
+    },
+    {
+      "name": "property-Devanagari-exact",
+      "pattern": "\\p{Devanagari}",
+      "valid": true
+    },
+    {
+      "name": "property-Devanagari-lower",
+      "pattern": "\\p{devanagari}",
+      "valid": true
+    },
+    {
+      "name": "property-Dives_Akuru-exact",
+      "pattern": "\\p{Dives_Akuru}",
+      "valid": false
+    },
+    {
+      "name": "property-Dives_Akuru-lower",
+      "pattern": "\\p{dives_akuru}",
+      "valid": false
+    },
+    {
+      "name": "property-Dogra-exact",
+      "pattern": "\\p{Dogra}",
+      "valid": true
+    },
+    {
+      "name": "property-Dogra-lower",
+      "pattern": "\\p{dogra}",
+      "valid": true
+    },
+    {
+      "name": "property-Duployan-exact",
+      "pattern": "\\p{Duployan}",
+      "valid": true
+    },
+    {
+      "name": "property-Duployan-lower",
+      "pattern": "\\p{duployan}",
+      "valid": true
+    },
+    {
+      "name": "property-Egyptian_Hieroglyphs-exact",
+      "pattern": "\\p{Egyptian_Hieroglyphs}",
+      "valid": false
+    },
+    {
+      "name": "property-Egyptian_Hieroglyphs-lower",
+      "pattern": "\\p{egyptian_hieroglyphs}",
+      "valid": false
+    },
+    {
+      "name": "property-Elbasan-exact",
+      "pattern": "\\p{Elbasan}",
+      "valid": true
+    },
+    {
+      "name": "property-Elbasan-lower",
+      "pattern": "\\p{elbasan}",
+      "valid": true
+    },
+    {
+      "name": "property-Elymaic-exact",
+      "pattern": "\\p{Elymaic}",
+      "valid": true
+    },
+    {
+      "name": "property-Elymaic-lower",
+      "pattern": "\\p{elymaic}",
+      "valid": true
+    },
+    {
+      "name": "property-Ethiopic-exact",
+      "pattern": "\\p{Ethiopic}",
+      "valid": true
+    },
+    {
+      "name": "property-Ethiopic-lower",
+      "pattern": "\\p{ethiopic}",
+      "valid": true
+    },
+    {
+      "name": "property-Georgian-exact",
+      "pattern": "\\p{Georgian}",
+      "valid": true
+    },
+    {
+      "name": "property-Georgian-lower",
+      "pattern": "\\p{georgian}",
+      "valid": true
+    },
+    {
+      "name": "property-Glagolitic-exact",
+      "pattern": "\\p{Glagolitic}",
+      "valid": true
+    },
+    {
+      "name": "property-Glagolitic-lower",
+      "pattern": "\\p{glagolitic}",
+      "valid": true
+    },
+    {
+      "name": "property-Gothic-exact",
+      "pattern": "\\p{Gothic}",
+      "valid": true
+    },
+    {
+      "name": "property-Gothic-lower",
+      "pattern": "\\p{gothic}",
+      "valid": true
+    },
+    {
+      "name": "property-Grantha-exact",
+      "pattern": "\\p{Grantha}",
+      "valid": true
+    },
+    {
+      "name": "property-Grantha-lower",
+      "pattern": "\\p{grantha}",
+      "valid": true
+    },
+    {
+      "name": "property-Greek-exact",
+      "pattern": "\\p{Greek}",
+      "valid": true
+    },
+    {
+      "name": "property-Greek-lower",
+      "pattern": "\\p{greek}",
+      "valid": true
+    },
+    {
+      "name": "property-Gujarati-exact",
+      "pattern": "\\p{Gujarati}",
+      "valid": true
+    },
+    {
+      "name": "property-Gujarati-lower",
+      "pattern": "\\p{gujarati}",
+      "valid": true
+    },
+    {
+      "name": "property-Gunjala_Gondi-exact",
+      "pattern": "\\p{Gunjala_Gondi}",
+      "valid": false
+    },
+    {
+      "name": "property-Gunjala_Gondi-lower",
+      "pattern": "\\p{gunjala_gondi}",
+      "valid": false
+    },
+    {
+      "name": "property-Gurmukhi-exact",
+      "pattern": "\\p{Gurmukhi}",
+      "valid": true
+    },
+    {
+      "name": "property-Gurmukhi-lower",
+      "pattern": "\\p{gurmukhi}",
+      "valid": true
+    },
+    {
+      "name": "property-Han-exact",
+      "pattern": "\\p{Han}",
+      "valid": true
+    },
+    {
+      "name": "property-Han-lower",
+      "pattern": "\\p{han}",
+      "valid": true
+    },
+    {
+      "name": "property-Hangul-exact",
+      "pattern": "\\p{Hangul}",
+      "valid": true
+    },
+    {
+      "name": "property-Hangul-lower",
+      "pattern": "\\p{hangul}",
+      "valid": true
+    },
+    {
+      "name": "property-Hanifi_Rohingya-exact",
+      "pattern": "\\p{Hanifi_Rohingya}",
+      "valid": false
+    },
+    {
+      "name": "property-Hanifi_Rohingya-lower",
+      "pattern": "\\p{hanifi_rohingya}",
+      "valid": false
+    },
+    {
+      "name": "property-Hanunoo-exact",
+      "pattern": "\\p{Hanunoo}",
+      "valid": true
+    },
+    {
+      "name": "property-Hanunoo-lower",
+      "pattern": "\\p{hanunoo}",
+      "valid": true
+    },
+    {
+      "name": "property-Hatran-exact",
+      "pattern": "\\p{Hatran}",
+      "valid": true
+    },
+    {
+      "name": "property-Hatran-lower",
+      "pattern": "\\p{hatran}",
+      "valid": true
+    },
+    {
+      "name": "property-Hebrew-exact",
+      "pattern": "\\p{Hebrew}",
+      "valid": true
+    },
+    {
+      "name": "property-Hebrew-lower",
+      "pattern": "\\p{hebrew}",
+      "valid": true
+    },
+    {
+      "name": "property-Hiragana-exact",
+      "pattern": "\\p{Hiragana}",
+      "valid": true
+    },
+    {
+      "name": "property-Hiragana-lower",
+      "pattern": "\\p{hiragana}",
+      "valid": true
+    },
+    {
+      "name": "property-Imperial_Aramaic-exact",
+      "pattern": "\\p{Imperial_Aramaic}",
+      "valid": false
+    },
+    {
+      "name": "property-Imperial_Aramaic-lower",
+      "pattern": "\\p{imperial_aramaic}",
+      "valid": false
+    },
+    {
+      "name": "property-Inherited-exact",
+      "pattern": "\\p{Inherited}",
+      "valid": true
+    },
+    {
+      "name": "property-Inherited-lower",
+      "pattern": "\\p{inherited}",
+      "valid": true
+    },
+    {
+      "name": "property-Inscriptional_Pahlavi-exact",
+      "pattern": "\\p{Inscriptional_Pahlavi}",
+      "valid": false
+    },
+    {
+      "name": "property-Inscriptional_Pahlavi-lower",
+      "pattern": "\\p{inscriptional_pahlavi}",
+      "valid": false
+    },
+    {
+      "name": "property-Inscriptional_Parthian-exact",
+      "pattern": "\\p{Inscriptional_Parthian}",
+      "valid": false
+    },
+    {
+      "name": "property-Inscriptional_Parthian-lower",
+      "pattern": "\\p{inscriptional_parthian}",
+      "valid": false
+    },
+    {
+      "name": "property-Javanese-exact",
+      "pattern": "\\p{Javanese}",
+      "valid": true
+    },
+    {
+      "name": "property-Javanese-lower",
+      "pattern": "\\p{javanese}",
+      "valid": true
+    },
+    {
+      "name": "property-Kaithi-exact",
+      "pattern": "\\p{Kaithi}",
+      "valid": true
+    },
+    {
+      "name": "property-Kaithi-lower",
+      "pattern": "\\p{kaithi}",
+      "valid": true
+    },
+    {
+      "name": "property-Kannada-exact",
+      "pattern": "\\p{Kannada}",
+      "valid": true
+    },
+    {
+      "name": "property-Kannada-lower",
+      "pattern": "\\p{kannada}",
+      "valid": true
+    },
+    {
+      "name": "property-Katakana-exact",
+      "pattern": "\\p{Katakana}",
+      "valid": true
+    },
+    {
+      "name": "property-Katakana-lower",
+      "pattern": "\\p{katakana}",
+      "valid": true
+    },
+    {
+      "name": "property-Kawi-exact",
+      "pattern": "\\p{Kawi}",
+      "valid": true
+    },
+    {
+      "name": "property-Kawi-lower",
+      "pattern": "\\p{kawi}",
+      "valid": true
+    },
+    {
+      "name": "property-Kayah_Li-exact",
+      "pattern": "\\p{Kayah_Li}",
+      "valid": false
+    },
+    {
+      "name": "property-Kayah_Li-lower",
+      "pattern": "\\p{kayah_li}",
+      "valid": false
+    },
+    {
+      "name": "property-Kharoshthi-exact",
+      "pattern": "\\p{Kharoshthi}",
+      "valid": true
+    },
+    {
+      "name": "property-Kharoshthi-lower",
+      "pattern": "\\p{kharoshthi}",
+      "valid": true
+    },
+    {
+      "name": "property-Khitan_Small_Script-exact",
+      "pattern": "\\p{Khitan_Small_Script}",
+      "valid": false
+    },
+    {
+      "name": "property-Khitan_Small_Script-lower",
+      "pattern": "\\p{khitan_small_script}",
+      "valid": false
+    },
+    {
+      "name": "property-Khmer-exact",
+      "pattern": "\\p{Khmer}",
+      "valid": true
+    },
+    {
+      "name": "property-Khmer-lower",
+      "pattern": "\\p{khmer}",
+      "valid": true
+    },
+    {
+      "name": "property-Khojki-exact",
+      "pattern": "\\p{Khojki}",
+      "valid": true
+    },
+    {
+      "name": "property-Khojki-lower",
+      "pattern": "\\p{khojki}",
+      "valid": true
+    },
+    {
+      "name": "property-Khudawadi-exact",
+      "pattern": "\\p{Khudawadi}",
+      "valid": true
+    },
+    {
+      "name": "property-Khudawadi-lower",
+      "pattern": "\\p{khudawadi}",
+      "valid": true
+    },
+    {
+      "name": "property-Lao-exact",
+      "pattern": "\\p{Lao}",
+      "valid": true
+    },
+    {
+      "name": "property-Lao-lower",
+      "pattern": "\\p{lao}",
+      "valid": true
+    },
+    {
+      "name": "property-Latin-exact",
+      "pattern": "\\p{Latin}",
+      "valid": true
+    },
+    {
+      "name": "property-Latin-lower",
+      "pattern": "\\p{latin}",
+      "valid": true
+    },
+    {
+      "name": "property-Lepcha-exact",
+      "pattern": "\\p{Lepcha}",
+      "valid": true
+    },
+    {
+      "name": "property-Lepcha-lower",
+      "pattern": "\\p{lepcha}",
+      "valid": true
+    },
+    {
+      "name": "property-Limbu-exact",
+      "pattern": "\\p{Limbu}",
+      "valid": true
+    },
+    {
+      "name": "property-Limbu-lower",
+      "pattern": "\\p{limbu}",
+      "valid": true
+    },
+    {
+      "name": "property-Linear_A-exact",
+      "pattern": "\\p{Linear_A}",
+      "valid": false
+    },
+    {
+      "name": "property-Linear_A-lower",
+      "pattern": "\\p{linear_a}",
+      "valid": false
+    },
+    {
+      "name": "property-Linear_B-exact",
+      "pattern": "\\p{Linear_B}",
+      "valid": false
+    },
+    {
+      "name": "property-Linear_B-lower",
+      "pattern": "\\p{linear_b}",
+      "valid": false
+    },
+    {
+      "name": "property-Lisu-exact",
+      "pattern": "\\p{Lisu}",
+      "valid": true
+    },
+    {
+      "name": "property-Lisu-lower",
+      "pattern": "\\p{lisu}",
+      "valid": true
+    },
+    {
+      "name": "property-Lycian-exact",
+      "pattern": "\\p{Lycian}",
+      "valid": true
+    },
+    {
+      "name": "property-Lycian-lower",
+      "pattern": "\\p{lycian}",
+      "valid": true
+    },
+    {
+      "name": "property-Lydian-exact",
+      "pattern": "\\p{Lydian}",
+      "valid": true
+    },
+    {
+      "name": "property-Lydian-lower",
+      "pattern": "\\p{lydian}",
+      "valid": true
+    },
+    {
+      "name": "property-Mahajani-exact",
+      "pattern": "\\p{Mahajani}",
+      "valid": true
+    },
+    {
+      "name": "property-Mahajani-lower",
+      "pattern": "\\p{mahajani}",
+      "valid": true
+    },
+    {
+      "name": "property-Makasar-exact",
+      "pattern": "\\p{Makasar}",
+      "valid": true
+    },
+    {
+      "name": "property-Makasar-lower",
+      "pattern": "\\p{makasar}",
+      "valid": true
+    },
+    {
+      "name": "property-Malayalam-exact",
+      "pattern": "\\p{Malayalam}",
+      "valid": true
+    },
+    {
+      "name": "property-Malayalam-lower",
+      "pattern": "\\p{malayalam}",
+      "valid": true
+    },
+    {
+      "name": "property-Mandaic-exact",
+      "pattern": "\\p{Mandaic}",
+      "valid": true
+    },
+    {
+      "name": "property-Mandaic-lower",
+      "pattern": "\\p{mandaic}",
+      "valid": true
+    },
+    {
+      "name": "property-Manichaean-exact",
+      "pattern": "\\p{Manichaean}",
+      "valid": true
+    },
+    {
+      "name": "property-Manichaean-lower",
+      "pattern": "\\p{manichaean}",
+      "valid": true
+    },
+    {
+      "name": "property-Marchen-exact",
+      "pattern": "\\p{Marchen}",
+      "valid": true
+    },
+    {
+      "name": "property-Marchen-lower",
+      "pattern": "\\p{marchen}",
+      "valid": true
+    },
+    {
+      "name": "property-Masaram_Gondi-exact",
+      "pattern": "\\p{Masaram_Gondi}",
+      "valid": false
+    },
+    {
+      "name": "property-Masaram_Gondi-lower",
+      "pattern": "\\p{masaram_gondi}",
+      "valid": false
+    },
+    {
+      "name": "property-Medefaidrin-exact",
+      "pattern": "\\p{Medefaidrin}",
+      "valid": true
+    },
+    {
+      "name": "property-Medefaidrin-lower",
+      "pattern": "\\p{medefaidrin}",
+      "valid": true
+    },
+    {
+      "name": "property-Meetei_Mayek-exact",
+      "pattern": "\\p{Meetei_Mayek}",
+      "valid": false
+    },
+    {
+      "name": "property-Meetei_Mayek-lower",
+      "pattern": "\\p{meetei_mayek}",
+      "valid": false
+    },
+    {
+      "name": "property-Mende_Kikakui-exact",
+      "pattern": "\\p{Mende_Kikakui}",
+      "valid": false
+    },
+    {
+      "name": "property-Mende_Kikakui-lower",
+      "pattern": "\\p{mende_kikakui}",
+      "valid": false
+    },
+    {
+      "name": "property-Meroitic_Cursive-exact",
+      "pattern": "\\p{Meroitic_Cursive}",
+      "valid": false
+    },
+    {
+      "name": "property-Meroitic_Cursive-lower",
+      "pattern": "\\p{meroitic_cursive}",
+      "valid": false
+    },
+    {
+      "name": "property-Meroitic_Hieroglyphs-exact",
+      "pattern": "\\p{Meroitic_Hieroglyphs}",
+      "valid": false
+    },
+    {
+      "name": "property-Meroitic_Hieroglyphs-lower",
+      "pattern": "\\p{meroitic_hieroglyphs}",
+      "valid": false
+    },
+    {
+      "name": "property-Miao-exact",
+      "pattern": "\\p{Miao}",
+      "valid": true
+    },
+    {
+      "name": "property-Miao-lower",
+      "pattern": "\\p{miao}",
+      "valid": true
+    },
+    {
+      "name": "property-Modi-exact",
+      "pattern": "\\p{Modi}",
+      "valid": true
+    },
+    {
+      "name": "property-Modi-lower",
+      "pattern": "\\p{modi}",
+      "valid": true
+    },
+    {
+      "name": "property-Mongolian-exact",
+      "pattern": "\\p{Mongolian}",
+      "valid": true
+    },
+    {
+      "name": "property-Mongolian-lower",
+      "pattern": "\\p{mongolian}",
+      "valid": true
+    },
+    {
+      "name": "property-Mro-exact",
+      "pattern": "\\p{Mro}",
+      "valid": true
+    },
+    {
+      "name": "property-Mro-lower",
+      "pattern": "\\p{mro}",
+      "valid": true
+    },
+    {
+      "name": "property-Multani-exact",
+      "pattern": "\\p{Multani}",
+      "valid": true
+    },
+    {
+      "name": "property-Multani-lower",
+      "pattern": "\\p{multani}",
+      "valid": true
+    },
+    {
+      "name": "property-Myanmar-exact",
+      "pattern": "\\p{Myanmar}",
+      "valid": true
+    },
+    {
+      "name": "property-Myanmar-lower",
+      "pattern": "\\p{myanmar}",
+      "valid": true
+    },
+    {
+      "name": "property-Nabataean-exact",
+      "pattern": "\\p{Nabataean}",
+      "valid": true
+    },
+    {
+      "name": "property-Nabataean-lower",
+      "pattern": "\\p{nabataean}",
+      "valid": true
+    },
+    {
+      "name": "property-Nag_Mundari-exact",
+      "pattern": "\\p{Nag_Mundari}",
+      "valid": false
+    },
+    {
+      "name": "property-Nag_Mundari-lower",
+      "pattern": "\\p{nag_mundari}",
+      "valid": false
+    },
+    {
+      "name": "property-Nandinagari-exact",
+      "pattern": "\\p{Nandinagari}",
+      "valid": true
+    },
+    {
+      "name": "property-Nandinagari-lower",
+      "pattern": "\\p{nandinagari}",
+      "valid": true
+    },
+    {
+      "name": "property-New_Tai_Lue-exact",
+      "pattern": "\\p{New_Tai_Lue}",
+      "valid": false
+    },
+    {
+      "name": "property-New_Tai_Lue-lower",
+      "pattern": "\\p{new_tai_lue}",
+      "valid": false
+    },
+    {
+      "name": "property-Newa-exact",
+      "pattern": "\\p{Newa}",
+      "valid": true
+    },
+    {
+      "name": "property-Newa-lower",
+      "pattern": "\\p{newa}",
+      "valid": true
+    },
+    {
+      "name": "property-Nko-exact",
+      "pattern": "\\p{Nko}",
+      "valid": true
+    },
+    {
+      "name": "property-Nko-lower",
+      "pattern": "\\p{nko}",
+      "valid": true
+    },
+    {
+      "name": "property-Nushu-exact",
+      "pattern": "\\p{Nushu}",
+      "valid": true
+    },
+    {
+      "name": "property-Nushu-lower",
+      "pattern": "\\p{nushu}",
+      "valid": true
+    },
+    {
+      "name": "property-Nyiakeng_Puachue_Hmong-exact",
+      "pattern": "\\p{Nyiakeng_Puachue_Hmong}",
+      "valid": false
+    },
+    {
+      "name": "property-Nyiakeng_Puachue_Hmong-lower",
+      "pattern": "\\p{nyiakeng_puachue_hmong}",
+      "valid": false
+    },
+    {
+      "name": "property-Ogham-exact",
+      "pattern": "\\p{Ogham}",
+      "valid": true
+    },
+    {
+      "name": "property-Ogham-lower",
+      "pattern": "\\p{ogham}",
+      "valid": true
+    },
+    {
+      "name": "property-Ol_Chiki-exact",
+      "pattern": "\\p{Ol_Chiki}",
+      "valid": false
+    },
+    {
+      "name": "property-Ol_Chiki-lower",
+      "pattern": "\\p{ol_chiki}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Hungarian-exact",
+      "pattern": "\\p{Old_Hungarian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Hungarian-lower",
+      "pattern": "\\p{old_hungarian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Italic-exact",
+      "pattern": "\\p{Old_Italic}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Italic-lower",
+      "pattern": "\\p{old_italic}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_North_Arabian-exact",
+      "pattern": "\\p{Old_North_Arabian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_North_Arabian-lower",
+      "pattern": "\\p{old_north_arabian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Permic-exact",
+      "pattern": "\\p{Old_Permic}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Permic-lower",
+      "pattern": "\\p{old_permic}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Persian-exact",
+      "pattern": "\\p{Old_Persian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Persian-lower",
+      "pattern": "\\p{old_persian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Sogdian-exact",
+      "pattern": "\\p{Old_Sogdian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Sogdian-lower",
+      "pattern": "\\p{old_sogdian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_South_Arabian-exact",
+      "pattern": "\\p{Old_South_Arabian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_South_Arabian-lower",
+      "pattern": "\\p{old_south_arabian}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Turkic-exact",
+      "pattern": "\\p{Old_Turkic}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Turkic-lower",
+      "pattern": "\\p{old_turkic}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Uyghur-exact",
+      "pattern": "\\p{Old_Uyghur}",
+      "valid": false
+    },
+    {
+      "name": "property-Old_Uyghur-lower",
+      "pattern": "\\p{old_uyghur}",
+      "valid": false
+    },
+    {
+      "name": "property-Oriya-exact",
+      "pattern": "\\p{Oriya}",
+      "valid": true
+    },
+    {
+      "name": "property-Oriya-lower",
+      "pattern": "\\p{oriya}",
+      "valid": true
+    },
+    {
+      "name": "property-Osage-exact",
+      "pattern": "\\p{Osage}",
+      "valid": true
+    },
+    {
+      "name": "property-Osage-lower",
+      "pattern": "\\p{osage}",
+      "valid": true
+    },
+    {
+      "name": "property-Osmanya-exact",
+      "pattern": "\\p{Osmanya}",
+      "valid": true
+    },
+    {
+      "name": "property-Osmanya-lower",
+      "pattern": "\\p{osmanya}",
+      "valid": true
+    },
+    {
+      "name": "property-Pahawh_Hmong-exact",
+      "pattern": "\\p{Pahawh_Hmong}",
+      "valid": false
+    },
+    {
+      "name": "property-Pahawh_Hmong-lower",
+      "pattern": "\\p{pahawh_hmong}",
+      "valid": false
+    },
+    {
+      "name": "property-Palmyrene-exact",
+      "pattern": "\\p{Palmyrene}",
+      "valid": true
+    },
+    {
+      "name": "property-Palmyrene-lower",
+      "pattern": "\\p{palmyrene}",
+      "valid": true
+    },
+    {
+      "name": "property-Pau_Cin_Hau-exact",
+      "pattern": "\\p{Pau_Cin_Hau}",
+      "valid": false
+    },
+    {
+      "name": "property-Pau_Cin_Hau-lower",
+      "pattern": "\\p{pau_cin_hau}",
+      "valid": false
+    },
+    {
+      "name": "property-Phags_Pa-exact",
+      "pattern": "\\p{Phags_Pa}",
+      "valid": false
+    },
+    {
+      "name": "property-Phags_Pa-lower",
+      "pattern": "\\p{phags_pa}",
+      "valid": false
+    },
+    {
+      "name": "property-Phoenician-exact",
+      "pattern": "\\p{Phoenician}",
+      "valid": true
+    },
+    {
+      "name": "property-Phoenician-lower",
+      "pattern": "\\p{phoenician}",
+      "valid": true
+    },
+    {
+      "name": "property-Psalter_Pahlavi-exact",
+      "pattern": "\\p{Psalter_Pahlavi}",
+      "valid": false
+    },
+    {
+      "name": "property-Psalter_Pahlavi-lower",
+      "pattern": "\\p{psalter_pahlavi}",
+      "valid": false
+    },
+    {
+      "name": "property-Rejang-exact",
+      "pattern": "\\p{Rejang}",
+      "valid": true
+    },
+    {
+      "name": "property-Rejang-lower",
+      "pattern": "\\p{rejang}",
+      "valid": true
+    },
+    {
+      "name": "property-Runic-exact",
+      "pattern": "\\p{Runic}",
+      "valid": true
+    },
+    {
+      "name": "property-Runic-lower",
+      "pattern": "\\p{runic}",
+      "valid": true
+    },
+    {
+      "name": "property-Samaritan-exact",
+      "pattern": "\\p{Samaritan}",
+      "valid": true
+    },
+    {
+      "name": "property-Samaritan-lower",
+      "pattern": "\\p{samaritan}",
+      "valid": true
+    },
+    {
+      "name": "property-Saurashtra-exact",
+      "pattern": "\\p{Saurashtra}",
+      "valid": true
+    },
+    {
+      "name": "property-Saurashtra-lower",
+      "pattern": "\\p{saurashtra}",
+      "valid": true
+    },
+    {
+      "name": "property-Sharada-exact",
+      "pattern": "\\p{Sharada}",
+      "valid": true
+    },
+    {
+      "name": "property-Sharada-lower",
+      "pattern": "\\p{sharada}",
+      "valid": true
+    },
+    {
+      "name": "property-Shavian-exact",
+      "pattern": "\\p{Shavian}",
+      "valid": true
+    },
+    {
+      "name": "property-Shavian-lower",
+      "pattern": "\\p{shavian}",
+      "valid": true
+    },
+    {
+      "name": "property-Siddham-exact",
+      "pattern": "\\p{Siddham}",
+      "valid": true
+    },
+    {
+      "name": "property-Siddham-lower",
+      "pattern": "\\p{siddham}",
+      "valid": true
+    },
+    {
+      "name": "property-SignWriting-exact",
+      "pattern": "\\p{SignWriting}",
+      "valid": false
+    },
+    {
+      "name": "property-SignWriting-lower",
+      "pattern": "\\p{signwriting}",
+      "valid": false
+    },
+    {
+      "name": "property-Sinhala-exact",
+      "pattern": "\\p{Sinhala}",
+      "valid": true
+    },
+    {
+      "name": "property-Sinhala-lower",
+      "pattern": "\\p{sinhala}",
+      "valid": true
+    },
+    {
+      "name": "property-Sogdian-exact",
+      "pattern": "\\p{Sogdian}",
+      "valid": true
+    },
+    {
+      "name": "property-Sogdian-lower",
+      "pattern": "\\p{sogdian}",
+      "valid": true
+    },
+    {
+      "name": "property-Sora_Sompeng-exact",
+      "pattern": "\\p{Sora_Sompeng}",
+      "valid": false
+    },
+    {
+      "name": "property-Sora_Sompeng-lower",
+      "pattern": "\\p{sora_sompeng}",
+      "valid": false
+    },
+    {
+      "name": "property-Soyombo-exact",
+      "pattern": "\\p{Soyombo}",
+      "valid": true
+    },
+    {
+      "name": "property-Soyombo-lower",
+      "pattern": "\\p{soyombo}",
+      "valid": true
+    },
+    {
+      "name": "property-Sundanese-exact",
+      "pattern": "\\p{Sundanese}",
+      "valid": true
+    },
+    {
+      "name": "property-Sundanese-lower",
+      "pattern": "\\p{sundanese}",
+      "valid": true
+    },
+    {
+      "name": "property-Syloti_Nagri-exact",
+      "pattern": "\\p{Syloti_Nagri}",
+      "valid": false
+    },
+    {
+      "name": "property-Syloti_Nagri-lower",
+      "pattern": "\\p{syloti_nagri}",
+      "valid": false
+    },
+    {
+      "name": "property-Syriac-exact",
+      "pattern": "\\p{Syriac}",
+      "valid": true
+    },
+    {
+      "name": "property-Syriac-lower",
+      "pattern": "\\p{syriac}",
+      "valid": true
+    },
+    {
+      "name": "property-Tagalog-exact",
+      "pattern": "\\p{Tagalog}",
+      "valid": true
+    },
+    {
+      "name": "property-Tagalog-lower",
+      "pattern": "\\p{tagalog}",
+      "valid": true
+    },
+    {
+      "name": "property-Tagbanwa-exact",
+      "pattern": "\\p{Tagbanwa}",
+      "valid": true
+    },
+    {
+      "name": "property-Tagbanwa-lower",
+      "pattern": "\\p{tagbanwa}",
+      "valid": true
+    },
+    {
+      "name": "property-Tai_Le-exact",
+      "pattern": "\\p{Tai_Le}",
+      "valid": false
+    },
+    {
+      "name": "property-Tai_Le-lower",
+      "pattern": "\\p{tai_le}",
+      "valid": false
+    },
+    {
+      "name": "property-Tai_Tham-exact",
+      "pattern": "\\p{Tai_Tham}",
+      "valid": false
+    },
+    {
+      "name": "property-Tai_Tham-lower",
+      "pattern": "\\p{tai_tham}",
+      "valid": false
+    },
+    {
+      "name": "property-Tai_Viet-exact",
+      "pattern": "\\p{Tai_Viet}",
+      "valid": false
+    },
+    {
+      "name": "property-Tai_Viet-lower",
+      "pattern": "\\p{tai_viet}",
+      "valid": false
+    },
+    {
+      "name": "property-Takri-exact",
+      "pattern": "\\p{Takri}",
+      "valid": true
+    },
+    {
+      "name": "property-Takri-lower",
+      "pattern": "\\p{takri}",
+      "valid": true
+    },
+    {
+      "name": "property-Tamil-exact",
+      "pattern": "\\p{Tamil}",
+      "valid": true
+    },
+    {
+      "name": "property-Tamil-lower",
+      "pattern": "\\p{tamil}",
+      "valid": true
+    },
+    {
+      "name": "property-Tangsa-exact",
+      "pattern": "\\p{Tangsa}",
+      "valid": true
+    },
+    {
+      "name": "property-Tangsa-lower",
+      "pattern": "\\p{tangsa}",
+      "valid": true
+    },
+    {
+      "name": "property-Tangut-exact",
+      "pattern": "\\p{Tangut}",
+      "valid": true
+    },
+    {
+      "name": "property-Tangut-lower",
+      "pattern": "\\p{tangut}",
+      "valid": true
+    },
+    {
+      "name": "property-Telugu-exact",
+      "pattern": "\\p{Telugu}",
+      "valid": true
+    },
+    {
+      "name": "property-Telugu-lower",
+      "pattern": "\\p{telugu}",
+      "valid": true
+    },
+    {
+      "name": "property-Thaana-exact",
+      "pattern": "\\p{Thaana}",
+      "valid": true
+    },
+    {
+      "name": "property-Thaana-lower",
+      "pattern": "\\p{thaana}",
+      "valid": true
+    },
+    {
+      "name": "property-Thai-exact",
+      "pattern": "\\p{Thai}",
+      "valid": true
+    },
+    {
+      "name": "property-Thai-lower",
+      "pattern": "\\p{thai}",
+      "valid": true
+    },
+    {
+      "name": "property-Tibetan-exact",
+      "pattern": "\\p{Tibetan}",
+      "valid": true
+    },
+    {
+      "name": "property-Tibetan-lower",
+      "pattern": "\\p{tibetan}",
+      "valid": true
+    },
+    {
+      "name": "property-Tifinagh-exact",
+      "pattern": "\\p{Tifinagh}",
+      "valid": true
+    },
+    {
+      "name": "property-Tifinagh-lower",
+      "pattern": "\\p{tifinagh}",
+      "valid": true
+    },
+    {
+      "name": "property-Tirhuta-exact",
+      "pattern": "\\p{Tirhuta}",
+      "valid": true
+    },
+    {
+      "name": "property-Tirhuta-lower",
+      "pattern": "\\p{tirhuta}",
+      "valid": true
+    },
+    {
+      "name": "property-Toto-exact",
+      "pattern": "\\p{Toto}",
+      "valid": true
+    },
+    {
+      "name": "property-Toto-lower",
+      "pattern": "\\p{toto}",
+      "valid": true
+    },
+    {
+      "name": "property-Ugaritic-exact",
+      "pattern": "\\p{Ugaritic}",
+      "valid": true
+    },
+    {
+      "name": "property-Ugaritic-lower",
+      "pattern": "\\p{ugaritic}",
+      "valid": true
+    },
+    {
+      "name": "property-Vai-exact",
+      "pattern": "\\p{Vai}",
+      "valid": true
+    },
+    {
+      "name": "property-Vai-lower",
+      "pattern": "\\p{vai}",
+      "valid": true
+    },
+    {
+      "name": "property-Vithkuqi-exact",
+      "pattern": "\\p{Vithkuqi}",
+      "valid": true
+    },
+    {
+      "name": "property-Vithkuqi-lower",
+      "pattern": "\\p{vithkuqi}",
+      "valid": true
+    },
+    {
+      "name": "property-Wancho-exact",
+      "pattern": "\\p{Wancho}",
+      "valid": true
+    },
+    {
+      "name": "property-Wancho-lower",
+      "pattern": "\\p{wancho}",
+      "valid": true
+    },
+    {
+      "name": "property-Warang_Citi-exact",
+      "pattern": "\\p{Warang_Citi}",
+      "valid": false
+    },
+    {
+      "name": "property-Warang_Citi-lower",
+      "pattern": "\\p{warang_citi}",
+      "valid": false
+    },
+    {
+      "name": "property-Yezidi-exact",
+      "pattern": "\\p{Yezidi}",
+      "valid": true
+    },
+    {
+      "name": "property-Yezidi-lower",
+      "pattern": "\\p{yezidi}",
+      "valid": true
+    },
+    {
+      "name": "property-Yi-exact",
+      "pattern": "\\p{Yi}",
+      "valid": true
+    },
+    {
+      "name": "property-Yi-lower",
+      "pattern": "\\p{yi}",
+      "valid": true
+    },
+    {
+      "name": "property-Zanabazar_Square-exact",
+      "pattern": "\\p{Zanabazar_Square}",
+      "valid": false
+    },
+    {
+      "name": "property-Zanabazar_Square-lower",
+      "pattern": "\\p{zanabazar_square}",
+      "valid": false
+    },
+    {
+      "name": "property-Any-exact",
+      "pattern": "\\p{Any}",
+      "valid": true
+    },
+    {
+      "name": "property-Any-lower",
+      "pattern": "\\p{any}",
+      "valid": true
+    },
+    {
+      "name": "property-Assigned-exact",
+      "pattern": "\\p{Assigned}",
+      "valid": true
+    },
+    {
+      "name": "property-Assigned-lower",
+      "pattern": "\\p{assigned}",
+      "valid": true
+    },
+    {
+      "name": "property-ASCII-exact",
+      "pattern": "\\p{ASCII}",
+      "valid": true
+    },
+    {
+      "name": "property-ASCII-lower",
+      "pattern": "\\p{ascii}",
+      "valid": true
+    },
+    {
+      "name": "repeat-zero-barrier",
+      "pattern": "((a{1000}){0}){100}",
+      "valid": true
+    },
+    {
+      "name": "repeat-zero-range-barrier",
+      "pattern": "((a{1000}){0,0}){100}",
+      "valid": true
+    },
+    {
+      "name": "repeat-zero-invalid-inner",
+      "pattern": "((a{1001}){0}){100}",
+      "valid": false
+    },
+    {
+      "name": "repeat-zero-invalid-outer",
+      "pattern": "((a{1000}){0}){1001}",
+      "valid": false
+    },
+    {
+      "name": "repeat-nonzero-barrier",
+      "pattern": "((a{1000}){0,1}){100}",
+      "valid": false
+    },
+    {
+      "name": "repeat-zero-invalid-stack",
+      "pattern": "(a{1000}{0}){100}",
+      "valid": false
+    },
+    {
+      "name": "repeat-zero-flags",
+      "pattern": "a(?i){0}",
+      "valid": true
+    },
+    {
+      "name": "repeat-zero-nested",
+      "pattern": "((((a{1000}){0}){100}){0}){100}",
+      "valid": true
+    },
+    {
+      "name": "budget-folded-nonword",
+      "pattern": "(?i:(?:\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W){1000})",
+      "valid": true
+    },
+    {
+      "name": "budget-nonword",
+      "pattern": "(?:\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W\\W){1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-dot",
+      "pattern": "(?:........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................){1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-dotall",
+      "pattern": "(?s:(?:........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................){1000})",
+      "valid": true
+    },
+    {
+      "name": "budget-complement",
+      "pattern": "(?i:(?:[^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a][^a]){1000})",
+      "valid": true
+    },
+    {
+      "name": "budget-folded-wide",
+      "pattern": "(?i:(?:[\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}][\\x{100}-\\x{ffff}]){1000})",
+      "valid": true
+    },
+    {
+      "name": "budget-quoted-utf8",
+      "pattern": "(?i:(?:\\Q𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀\\E){1000})",
+      "valid": true
+    },
+    {
+      "name": "budget-utf8",
+      "pattern": "(?i:(?:𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀𐐀){1000})",
+      "valid": true
+    },
+    {
+      "name": "budget-hex-utf8",
+      "pattern": "(?i:(?:\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}\\x{10400}){1000})",
+      "valid": true
+    },
+    {
+      "name": "budget-word",
+      "pattern": "(?i:(?:\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w\\w){1000})",
+      "valid": true
+    },
+    {
+      "name": "class-first-bracket-range",
+      "pattern": "[]-a]",
+      "valid": true
+    },
+    {
+      "name": "class-last-dash-then-close",
+      "pattern": "[a-]]",
+      "valid": true
+    },
+    {
+      "name": "class-posix-range-start",
+      "pattern": "[[:alpha:]-z]",
+      "valid": true
+    },
+    {
+      "name": "class-posix-range-end",
+      "pattern": "[a-[:alpha:]]",
+      "valid": false
+    },
+    {
+      "name": "class-hex-range-reversed",
+      "pattern": "[\\x{10000}-\\x{ffff}]",
+      "valid": false
+    },
+    {
+      "name": "class-hex-range",
+      "pattern": "[\\x{ffff}-\\x{10000}]",
+      "valid": true
+    },
+    {
+      "name": "class-incomplete-posix",
+      "pattern": "[[:alpha]",
+      "valid": true
+    },
+    {
+      "name": "class-escaped-close",
+      "pattern": "[\\]]",
+      "valid": true
+    },
+    {
+      "name": "class-unclosed-escaped-close",
+      "pattern": "[\\]",
+      "valid": false
+    },
+    {
+      "name": "class-invalid-escape",
+      "pattern": "[\\u1234]",
+      "valid": false
+    },
+    {
+      "name": "class-invalid-hex",
+      "pattern": "[\\x{110000}]",
+      "valid": false
+    },
+    {
+      "name": "class-octal-range",
+      "pattern": "[\\123-\\122]",
+      "valid": false
+    },
+    {
+      "name": "class-first-close-unclosed",
+      "pattern": "[^]",
+      "valid": false
+    },
+    {
+      "name": "class-posix-unclosed",
+      "pattern": "[[:alpha:]",
+      "valid": false
+    },
+    {
+      "name": "repeat-class-nested-over",
+      "pattern": "([^a]{100}){11}",
+      "valid": false
+    },
+    {
+      "name": "repeat-dot-nested-over",
+      "pattern": "(.{100}){11}",
+      "valid": false
+    },
+    {
+      "name": "repeat-quoted-empty",
+      "pattern": "\\Qa\\E\\Q\\E{2}",
+      "valid": true
+    },
+    {
+      "name": "quote-syntax-literal",
+      "pattern": "\\Q[\\C(?<é>\\p{Unknown}\\E{1000}",
+      "valid": true
+    },
+    {
+      "name": "hex-invalid-repeat",
+      "pattern": "(\\x{110000}){0}",
+      "valid": false
+    },
+    {
+      "name": "class-invalid-zero",
+      "pattern": "([z-a]){0}",
+      "valid": false
+    },
+    {
+      "name": "class-range-end-posix-looking",
+      "pattern": "[[-[:bad:]",
+      "valid": true
+    },
+    {
+      "name": "class-range-end-posix-looking-negated",
+      "pattern": "[^--[:alpha:]",
+      "valid": true
+    },
+    {
+      "name": "class-range-end-posix-looking-first-close",
+      "pattern": "[^][-[:bad:]",
+      "valid": true
+    },
+    {
+      "name": "class-range-end-posix-looking-zero",
+      "pattern": "([[-[:bad:]){0}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-zero",
+      "pattern": "a{0,1}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-one",
+      "pattern": "a{1,1}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-max",
+      "pattern": "a{0,1000}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-min-max",
+      "pattern": "a{999,1000}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-zero-exact",
+      "pattern": "a{0,0}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-reversed",
+      "pattern": "a{2,1}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-max-over",
+      "pattern": "a{0,1001}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-min-over",
+      "pattern": "a{1001,1001}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-huge",
+      "pattern": "a{0,999999999999999999999}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-min-leading-zero",
+      "pattern": "a{01,1001}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-max-leading-zero",
+      "pattern": "a{0,01001}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-both-leading-zero",
+      "pattern": "a{01,02}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-unicode-digits",
+      "pattern": "a{١,٢}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-malformed",
+      "pattern": "a{0,2x}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-missing-min",
+      "pattern": "a{,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-unbounded",
+      "pattern": "a{2,}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-zero-unbounded",
+      "pattern": "a{0,}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-unbounded-over",
+      "pattern": "a{1001,}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-missing-operand",
+      "pattern": "{0,2}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-lazy",
+      "pattern": "a{0,2}?",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-lazy-stacked",
+      "pattern": "a{0,2}??",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-stacked",
+      "pattern": "a{0,2}{1,2}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-star-stacked",
+      "pattern": "a{0,2}*",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-anchor",
+      "pattern": "^{0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-empty",
+      "pattern": "(){0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-bare-flags",
+      "pattern": "(?i){0,2}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-flags-previous-atom",
+      "pattern": "a(?i){0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-flag-group",
+      "pattern": "(?i:a){0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-escaped",
+      "pattern": "a\\{0,2\\}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-quoted",
+      "pattern": "\\Qa{0,2}\\E{0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-quoted-unclosed",
+      "pattern": "\\Qa{0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-class",
+      "pattern": "[{0,2}]{0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-unicode-class",
+      "pattern": "[\\pL]{0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-unicode-property",
+      "pattern": "\\p{Assigned}{0,2}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-nested-limit",
+      "pattern": "(a{0,100}){0,10}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-nested-over",
+      "pattern": "(a{0,100}){0,11}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-nested-zero-barrier",
+      "pattern": "((a{0,1000}){0,0}){0,1000}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-nested-zero-invalid",
+      "pattern": "((a{0,1001}){0,0}){0,1000}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-outer-zero",
+      "pattern": "(a{0,1000}){0}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-inner-zero",
+      "pattern": "(a{0,0}){0,1000}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-unbounded-inner",
+      "pattern": "(a{2,}){0,500}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-unbounded-inner-over",
+      "pattern": "(a{2,}){0,501}",
+      "valid": false
+    },
+    {
+      "name": "repeat-range-unbounded-outer",
+      "pattern": "(a{0,500}){2,}",
+      "valid": true
+    },
+    {
+      "name": "repeat-range-unbounded-outer-over",
+      "pattern": "(a{0,501}){2,}",
+      "valid": false
+    },
+    {
+      "name": "budget-nullable-range",
+      "pattern": "a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}a{0,1000}",
+      "valid": true
+    },
+    {
+      "name": "budget-anchor-star",
+      "pattern": "(^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*){1000}",
+      "valid": true
+    }
+  ]
+}

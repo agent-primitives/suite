@@ -1,0 +1,612 @@
+{
+  "agent-id-newline": {
+    "code": "document.identity",
+    "file": "agentsuite.json",
+    "pointer": "/agents/0"
+  },
+  "eval-agent-mismatch": {
+    "code": "evaluation.owner",
+    "file": "evals/writer/index.json",
+    "pointer": "/agent"
+  },
+  "eval-assertion-bad-judge-score": {
+    "code": "schema.maximum",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0/minScore"
+  },
+  "eval-assertion-blank-value": {
+    "code": "schema.oneOf",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-control-value": {
+    "code": "schema.oneOf",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-irrelevant-empty-field": {
+    "code": "schema.pattern",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0/pattern"
+  },
+  "eval-assertion-line-separator-tool": {
+    "code": "schema.not",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0/tool"
+  },
+  "eval-assertion-line-separator-value": {
+    "code": "schema.oneOf",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-missing-id": {
+    "code": "schema.required",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-missing-judge-version": {
+    "code": "schema.oneOf",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-missing-value": {
+    "code": "schema.oneOf",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-non-ASCII-judge-identity": {
+    "code": "schema.pattern",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0/judgeModel"
+  },
+  "eval-assertion-null-critical": {
+    "code": "schema.type",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0/critical"
+  },
+  "eval-assertion-paragraph-separator-tool": {
+    "code": "schema.not",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0/tool"
+  },
+  "eval-assertion-paragraph-separator-value": {
+    "code": "schema.oneOf",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-unknown-critical": {
+    "code": "schema.oneOf",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-unknown-implicit-critical": {
+    "code": "schema.oneOf",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-assertion-unknown-property": {
+    "code": "schema.additionalProperties",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/assertions/0"
+  },
+  "eval-binding-bad-index-digest": {
+    "code": "pin.digest",
+    "file": "agents/writer.json",
+    "pointer": "/evals/0/descriptor"
+  },
+  "eval-binding-multiple-indexes": {
+    "code": "schema.maxItems",
+    "file": "agents/writer.json",
+    "pointer": "/evals"
+  },
+  "eval-binding-null": {
+    "code": "schema.type",
+    "file": "agents/writer.json",
+    "pointer": "/evals"
+  },
+  "eval-binding-unbound-tree": {
+    "code": "evaluation.namespace",
+    "file": "evals/writer",
+    "pointer": ""
+  },
+  "eval-binding-wrong-path": {
+    "code": "pin.file",
+    "file": "agents/writer.json",
+    "pointer": "/evals/0/path"
+  },
+  "eval-case-filename": {
+    "code": "evaluation.filename",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/id"
+  },
+  "eval-duplicate-assertion-ids": {
+    "code": "evaluation.id",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions/1/id"
+  },
+  "eval-graph-case-digest": {
+    "code": "pin.digest",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases/0/descriptor"
+  },
+  "eval-graph-case-too-large": {
+    "code": "evaluation.limit",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": ""
+  },
+  "eval-graph-cross-agent-path": {
+    "code": "evaluation.path",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases/0/path"
+  },
+  "eval-graph-duplicate-ids": {
+    "code": "evaluation.id",
+    "file": "evals/writer/cases/arithmetic.json",
+    "pointer": "/id"
+  },
+  "eval-graph-duplicate-reference": {
+    "code": "schema.uniqueItems",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases"
+  },
+  "eval-graph-embedded-result": {
+    "code": "evaluation.namespace",
+    "file": "evals/writer/results",
+    "pointer": ""
+  },
+  "eval-graph-empty-cases": {
+    "code": "schema.type",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases"
+  },
+  "eval-graph-invalid-count-limit": {
+    "code": "schema.maximum",
+    "file": "evals/writer/index.json",
+    "pointer": "/limits/maxCases"
+  },
+  "eval-graph-invalid-size-limit": {
+    "code": "schema.maximum",
+    "file": "evals/writer/index.json",
+    "pointer": "/limits/maxCaseBytes"
+  },
+  "eval-graph-missing-case": {
+    "code": "pin.file",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases/0/path"
+  },
+  "eval-graph-orphan-agent": {
+    "code": "evaluation.namespace",
+    "file": "evals/missing",
+    "pointer": ""
+  },
+  "eval-graph-too-many-cases": {
+    "code": "evaluation.limit",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases"
+  },
+  "eval-id-newline": {
+    "code": "evaluation.id",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/id"
+  },
+  "eval-input-nbsp": {
+    "code": "evaluation.input",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/input"
+  },
+  "eval-input-next-line": {
+    "code": "evaluation.input",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/input"
+  },
+  "eval-input-vt": {
+    "code": "evaluation.input",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/input"
+  },
+  "eval-judge-newline": {
+    "code": "evaluation.judge",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions/0/judgeModel"
+  },
+  "eval-minpasses-exceeds-runs": {
+    "code": "evaluation.min_passes",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/minPasses"
+  },
+  "eval-minpasses-without-runs": {
+    "code": "schema.dependentRequired",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": ""
+  },
+  "eval-orphan-file": {
+    "code": "evaluation.namespace",
+    "file": "evals/writer/cases/extra.json",
+    "pointer": ""
+  },
+  "eval-pattern-byte-limit": {
+    "code": "evaluation.pattern",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions/0/pattern"
+  },
+  "eval-raw-minscore-fraction": {
+    "code": "pin.canonical",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": ""
+  },
+  "eval-raw-runs-exponent": {
+    "code": "pin.canonical",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": ""
+  },
+  "eval-regex-lookahead": {
+    "code": "evaluation.regex",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions/0/pattern"
+  },
+  "eval-rubric-byte-limit": {
+    "code": "evaluation.rubric",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions/0/rubric"
+  },
+  "eval-runs-null-min-passes": {
+    "code": "schema.type",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/minPasses"
+  },
+  "eval-runs-null-runs": {
+    "code": "schema.type",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/runs"
+  },
+  "eval-runs-zero-min-passes": {
+    "code": "schema.minimum",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/minPasses"
+  },
+  "eval-runs-zero-runs": {
+    "code": "schema.minimum",
+    "file": "evals/writer/cases/case.json",
+    "pointer": "/runs"
+  },
+  "eval-source-case-empty-assertions": {
+    "code": "schema.minItems",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions"
+  },
+  "eval-source-case-invalid-digest": {
+    "code": "schema.pattern",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases/0/descriptor/digest"
+  },
+  "eval-source-case-media": {
+    "code": "schema.const",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/mediaType"
+  },
+  "eval-source-case-null-value": {
+    "code": "schema.type",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions/0/value"
+  },
+  "eval-source-case-ref-media": {
+    "code": "pin.media_type",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases/0/descriptor"
+  },
+  "eval-source-case-ref-size": {
+    "code": "pin.size",
+    "file": "evals/writer/index.json",
+    "pointer": "/cases/0/descriptor"
+  },
+  "eval-source-case-version": {
+    "code": "schema.const",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/schemaVersion"
+  },
+  "eval-source-index-media": {
+    "code": "document.header",
+    "file": "evals/writer/index.json",
+    "pointer": ""
+  },
+  "eval-source-index-ref-media": {
+    "code": "pin.media_type",
+    "file": "agents/writer.json",
+    "pointer": "/evals/0/descriptor"
+  },
+  "eval-source-index-ref-size": {
+    "code": "pin.size",
+    "file": "agents/writer.json",
+    "pointer": "/evals/0/descriptor"
+  },
+  "eval-source-index-version": {
+    "code": "document.header",
+    "file": "evals/writer/index.json",
+    "pointer": ""
+  },
+  "eval-source-rubric-control": {
+    "code": "schema.not",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions/0/rubric"
+  },
+  "eval-stale-order": {
+    "code": "pin.digest",
+    "file": "agents/writer.json",
+    "pointer": "/evals/0/descriptor"
+  },
+  "eval-strict-duplicate-JSON-keys": {
+    "code": "document.json",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": ""
+  },
+  "eval-strict-empty-input": {
+    "code": "schema.pattern",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/input"
+  },
+  "eval-strict-invalid-regex": {
+    "code": "evaluation.regex",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": "/assertions/0/pattern"
+  },
+  "eval-strict-unknown-field": {
+    "code": "pin.canonical",
+    "file": "evals/writer/cases/capital.json",
+    "pointer": ""
+  },
+  "policy-before-decode-invalid-digest": {
+    "code": "schema.pattern",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/digest"
+  },
+  "policy-before-decode-negative-size": {
+    "code": "schema.minimum",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/size"
+  },
+  "policy-before-decode-wrong-hash": {
+    "code": "pin.digest",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-before-decode-wrong-media": {
+    "code": "schema.enum",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/mediaType"
+  },
+  "policy-before-decode-wrong-size": {
+    "code": "pin.size",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-count-v1-4097": {
+    "code": "policy.paths",
+    "file": "policies/writer.json",
+    "pointer": "/denyWritePaths"
+  },
+  "policy-count-v2-4097": {
+    "code": "schema.maxItems",
+    "file": "policies/writer.json",
+    "pointer": "/network/egressAllow"
+  },
+  "policy-document-noncanonical-raw-descriptor": {
+    "code": "pin.canonical",
+    "file": "policies/writer.json",
+    "pointer": ""
+  },
+  "policy-document-not-JSON": {
+    "code": "document.json",
+    "file": "policies/writer.json",
+    "pointer": ""
+  },
+  "policy-document-v2-wrong-version-media": {
+    "code": "document.unknown",
+    "file": "policies/writer.json",
+    "pointer": "/network"
+  },
+  "policy-effective-digest": {
+    "code": "pin.digest",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-hardlink-writer": {
+    "code": "pin.file",
+    "file": "agents/writer.json",
+    "pointer": "/policy/path"
+  },
+  "policy-orphan-subdirectory": {
+    "code": "policy.namespace",
+    "file": "policies/extra",
+    "pointer": ""
+  },
+  "policy-oversized": {
+    "code": "schema.maximum",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/size"
+  },
+  "policy-ref-array": {
+    "code": "schema.type",
+    "file": "agents/writer.json",
+    "pointer": "/policy"
+  },
+  "policy-ref-invalid-digest": {
+    "code": "schema.pattern",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/digest"
+  },
+  "policy-ref-missing-descriptor": {
+    "code": "schema.required",
+    "file": "agents/writer.json",
+    "pointer": "/policy"
+  },
+  "policy-ref-missing-digest": {
+    "code": "schema.required",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-ref-missing-media": {
+    "code": "schema.required",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-ref-missing-path": {
+    "code": "schema.required",
+    "file": "agents/writer.json",
+    "pointer": "/policy"
+  },
+  "policy-ref-missing-size": {
+    "code": "schema.required",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-ref-negative-size": {
+    "code": "schema.minimum",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/size"
+  },
+  "policy-ref-null": {
+    "code": "schema.type",
+    "file": "agents/writer.json",
+    "pointer": "/policy"
+  },
+  "policy-ref-null-descriptor": {
+    "code": "schema.type",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-ref-null-digest": {
+    "code": "schema.type",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/digest"
+  },
+  "policy-ref-null-media": {
+    "code": "schema.type",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/mediaType"
+  },
+  "policy-ref-null-path": {
+    "code": "schema.type",
+    "file": "agents/writer.json",
+    "pointer": "/policy/path"
+  },
+  "policy-ref-null-size": {
+    "code": "schema.type",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/size"
+  },
+  "policy-ref-unknown-descriptor-field": {
+    "code": "schema.additionalProperties",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-ref-unknown-ref-field": {
+    "code": "schema.additionalProperties",
+    "file": "agents/writer.json",
+    "pointer": "/policy"
+  },
+  "policy-ref-version-mismatch": {
+    "code": "schema.additionalProperties",
+    "file": "policies/writer.json",
+    "pointer": ""
+  },
+  "policy-ref-wrong-digest": {
+    "code": "pin.digest",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-ref-wrong-media": {
+    "code": "schema.enum",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor/mediaType"
+  },
+  "policy-ref-wrong-size": {
+    "code": "pin.size",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-stale-ancestor": {
+    "code": "pin.digest",
+    "file": "agentsuite.json",
+    "pointer": "/agents/0/descriptor"
+  },
+  "policy-symlink-extra": {
+    "code": "policy.namespace",
+    "file": "policies/extra.json",
+    "pointer": ""
+  },
+  "policy-symlink-root": {
+    "code": "pin.file",
+    "file": "agents/writer.json",
+    "pointer": "/policy/path"
+  },
+  "policy-symlink-writer": {
+    "code": "pin.file",
+    "file": "agents/writer.json",
+    "pointer": "/policy/path"
+  },
+  "policy-unbound-file": {
+    "code": "policy.namespace",
+    "file": "policies/writer.json",
+    "pointer": ""
+  },
+  "policy-unowned-cross-agent": {
+    "code": "pin.file",
+    "file": "agents/writer.json",
+    "pointer": "/policy/path"
+  },
+  "policy-unowned-missing": {
+    "code": "pin.file",
+    "file": "agents/writer.json",
+    "pointer": "/policy/path"
+  },
+  "policy-unowned-nested-file": {
+    "code": "policy.namespace",
+    "file": "policies/nested",
+    "pointer": ""
+  },
+  "policy-unowned-noncanonical-canonical-descriptor": {
+    "code": "pin.size",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-unowned-orphan-file": {
+    "code": "policy.namespace",
+    "file": "policies/extra.json",
+    "pointer": ""
+  },
+  "policy-unowned-outside-namespace": {
+    "code": "schema.pattern",
+    "file": "agents/writer.json",
+    "pointer": "/policy/path"
+  },
+  "policy-unowned-stale-policy-bytes": {
+    "code": "pin.digest",
+    "file": "agents/writer.json",
+    "pointer": "/policy/descriptor"
+  },
+  "policy-v1-capabilities": {
+    "code": "policy.capabilities",
+    "file": "policies/writer.json",
+    "pointer": "/requiredCapabilities"
+  },
+  "policy-v1-empty-paths": {
+    "code": "policy.paths",
+    "file": "policies/writer.json",
+    "pointer": "/denyWritePaths"
+  },
+  "policy-v1-root-path": {
+    "code": "policy.path",
+    "file": "policies/writer.json",
+    "pointer": "/denyWritePaths/0"
+  },
+  "policy-v1-unclean-path": {
+    "code": "policy.path",
+    "file": "policies/writer.json",
+    "pointer": "/denyWritePaths/0"
+  },
+  "policy-v2-invalid-ipv4": {
+    "code": "schema.pattern",
+    "file": "policies/writer.json",
+    "pointer": "/network/egressAllow/0/address"
+  }
+}

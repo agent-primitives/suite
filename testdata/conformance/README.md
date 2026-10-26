@@ -412,6 +412,184 @@ Go computes each frozen `rootDigest` only after ordinary directory and OCI
 complete package snapshots or evidence of a finished Python package reader.
 No corpus regeneration occurs during tests.
 
+## Ordinary reader snapshots
+
+[reader-cases.json](reader-cases.json) freezes 30 complete directory snapshots
+from actual Go helpers at `d753475d3313507bb3297d06b28ec373287e3791`:
+seven accepted and 23 refused. It reuses the graph transport with every regular
+file's literal base64 bytes, portable 0644/0755 modes and zero ownership.
+Go checks literal hashes, runs ordinary policy/evaluation validation on the
+same entries, replays all 30 through full `ValidatePath`, and replays the seven
+accepted inputs through OCI with authored portable modes. Refused rows freeze
+the exact first diagnostic; additional unvisited-file diagnostics may be
+map-ordered. Every child and ancestor pin is frozen, including raw `50.0` and
+`1e0` integer-field refusals that must not be canonicalized away.
+
+Cases cover stored policies/evaluations, namespace ownership, run bounds,
+assertion identity, RE2 lookahead refusal, multibyte byte limits and Unicode.
+Ten selected frozen documents also run against Go's actual reference schemas:
+C0 separators and VT/NEL/NBSP/BOM satisfy Go's `\S`; semantic blank-input
+checks separately refuse VT/NEL/NBSP. Final-newline agent/case/judge identities
+fail both schema and ordinary validation. The rich positive includes a U+2028
+rubric, ordinary RE2, a judge and repeats. Original graph/literal corpora remain
+unchanged. This selected corpus does not replace the remaining Go tests or
+prove model execution, complete regex equivalence or native-host parity.
+
+## Policy/evaluation ordinary-case inventory (base d753475d)
+
+[reader-semantic-cases.json](reader-semantic-cases.json) adds **112 complete
+snapshots: 18 accepted, 94 refused**. These are frozen once from the actual Go
+helpers and original table mutations, not independently translated Python
+fixtures. Every row carries a base-qualified `origin`: the original Go test
+function and table-row name, or the current ordinary-validator boundary under
+test. Both runners consume these literal bytes. No fixture generation runs in
+CI. All original Go tests remain enabled.
+
+The Go gates are `TestSharedReaderSemanticCases` (every row through
+`validateContent` and full `ValidatePath`) and
+`TestSharedReaderSemanticOCIPositives` (all 18 accepted snapshots through OCI,
+with authored 0644/0755 modes). The graph transport includes every regular
+file's bytes, even where production intentionally does not retain Data.
+Names, counts, explicit fields/nulls, sorted entries, byte size/digest, complete
+directory roots and base provenance are checked. Refusals freeze the first
+complete owning-agent diagnostic, not its map-ordered namespace tail.
+For namespace-only failures there is no stable first Go diagnostic: both the
+promoter and test select the lexical-first complete diagnostic instead.
+This exception changes no acceptance rule or product diagnostic.
+
+### Evaluation inventory
+
+Sources: [evaluation_test.go](../../internal/artifact/evaluation_test.go) and
+the current [ordinary validator](../../internal/artifact/evaluation.go).
+The following mapping covers every original function/table row. A prefix means
+**all** original rows in that family, with the exact row name in each snapshot's
+`origin`, except the explicitly reused rows listed here.
+
+| Original Go test/family | Shared mapping |
+| --- | --- |
+| `TestEmbeddedEvaluationsAcceptDirectoryAndOCI` | `eval-default-suite`, including portable OCI replay |
+| `TestEvaluationReferenceSchemas`: accepted index/agent; maxCases 129, maxCaseBytes 0, extra results, null evals | Existing packages `coordinator-workers`; `eval-graph-invalid-count-limit`; shared typed evaluation/schema tests for the two isolated schema constraints; `eval-strict-unknown-field` is the ordinary closed-record family; `eval-binding-null`. These isolated schema tests are not additional package acceptance promises. |
+| `TestEmbeddedEvaluationsRejectInvalidGraph` (14 rows) | All `eval-graph-*` origins (12); original “wrong agent” → reader `eval-agent-mismatch`; “unreferenced case” → reader `eval-orphan-file` |
+| `TestEmbeddedEvaluationAgentBinding` (5 rows) | All `eval-binding-*` origins, including null, wrong path, stale digest, multiple indexes and unbound tree |
+| `TestEvaluationAssertionsMatchSchemasAndSemantics` (24 rows) | All `eval-assertion-*` origins: all eight positives and all sixteen refusals, with original assertion bytes |
+| `TestEvaluationCaseRunPolicy` (10 rows) | All `eval-runs-*` origins (8); “min passes without runs” / “min passes exceeds runs” → reader `eval-minpasses-without-runs` / `eval-minpasses-exceeds-runs` |
+| `TestEvaluationCaseStrictness` (6 rows) | All `eval-strict-*` origins (4); “duplicate assertions” → reader `eval-duplicate-assertion-ids`; “wrong case id” → reader `eval-case-filename` |
+| `TestEvaluationIdentityCommitsToCasesAndOrder` | `eval-stale-order`, `eval-repinned-order`; reader rich/shared packages bind edited case bytes. Diff affected-agent/reason/identity-report assertions are diff APIs, not public-reader results. |
+| `TestEvaluationJCSIdentityIgnoresJSONFormatting` | `eval-default-suite` and shared JSON canonical-formatting goldens; the original Go unit comparison remains enabled. The producer canonicalized both snapshots to identical bytes/metadata, so no duplicate snapshot is counted. |
+| Current evaluation.go boundary probes, beyond original tables | `eval-source-*`: index/case version and media; reference media/size; invalid case digest; empty assertions; known null operand; rubric control. Pins are refreshed to reach the intended layer. |
+| Additional Unicode, byte-length, identity and numeric-lexeme probes | Existing reader30 origins; [regex-cases.json](regex-cases.json) has 696 Go syntax probes including wide-class resource and class-range/POSIX regressions |
+
+### Authored-policy binding inventory
+
+Source: [policy_binding_test.go](../../internal/artifact/policy_binding_test.go).
+
+| Original Go test/family | Shared mapping |
+| --- | --- |
+| `TestPolicyBindingAcceptsAuthoredPolicies`: v1, v2, deny all | Reader `reader-rich` contains original bindingV1 bytes; `policy-v2-ipv4` / `policy-v2-empty-allowlist` contain original bindingV2 / bindingDenyAll bytes. Existing typed codec tests retain round-trip checks. |
+| `TestPolicyBindingRejectsReferenceShapes` (20 rows) | All `policy-ref-*` origins, including missing/null/unknown descriptor fields, path, size, digest, media and version binding. Its final unrelated unknown-agent-field check is the shared closed-record JSON family (`platform-unknown-field`) and existing typed agent tests. |
+| `TestPolicyBindingRejectsInvalidDocuments`: empty/relative v1 paths, missing capability, unknown v1 field, v1 network | Shared wire rows `empty denyWritePaths`, `relative path`, `missing requiredCapabilities`, `unknown field`, `v1 with null network`; reader `policy-v1-empty-paths` also exercises ordinary package rejection |
+| Same: missing v2 network, null list, wrong protocol, unknown endpoint, v2 filesystem | Shared wire rows `missing network`, `null egressAllow`, endpoint UDP/extra-field rows, `v2 with empty denyWritePaths` |
+| Same: fractional port, enormous exponent | Shared wire invalid-port precise-fraction and out-of-range exponent families (including 443.0000000000000000000001 and 1e400); raw numeric lexemes are preserved |
+| Same: wrong version media, noncanonical raw descriptor, not JSON | `policy-document-v2-wrong-version-media`, `policy-document-noncanonical-raw-descriptor`, `policy-document-not-JSON` |
+| Same: unsupported version, duplicate field | Shared wire `unknown version`, `duplicate key`; shared JSON strict parsing also applies before policy decoding |
+| `TestPolicyBindingChecksDescriptorsBeforeDecoding` (5 rows) | All `policy-before-decode-*` origins; malformed `{` remains the target bytes, so the frozen refusal proves descriptor checks precede decode. `policy-document-not-JSON` is the correctly pinned decode-refusal control. |
+| `TestPolicyBindingRejectsUnownedContent`: missing, cross agent, outside namespace, orphan file, nested file, stale policy bytes, noncanonical canonical descriptor | All seven `policy-unowned-*` origins |
+| Same: extra directory | Reader `policy-orphan-subdirectory` |
+| Same: oversized policy | Boundary `policy-oversized`: 4,194,305 spaces, exact raw descriptor and Go-generated ancestor pins; compact body directive, not opaque base64 |
+| Same: symlink policies root, writer file, extra file | Boundaries `policy-symlink-root`, `policy-symlink-writer`, `policy-symlink-extra`: frozen original native mutations, replayed as portable OCI links everywhere and native POSIX symlinks |
+| `TestPolicyBindingAbsentAndEmptyNamespace` | Reader `reader-minimal` for absent; `policy-empty-namespace` for empty; `policy-unbound-file` for orphan; shared package `coordinator-workers` for old fixture |
+| `TestPolicyBindingDigestPropagationAndStaleAncestors` | `policy-unowned-stale-policy-bytes`, `policy-stale-ancestor`, `policy-repinned-ancestor`; full affected-agent/diff report and OCI artifact-identity comparisons belong to the diff API |
+| `TestPolicyBindingUsesOrdinaryNotEffectiveDigest` | Original authored arrays retained above; `policy-effective-digest` refuses framed effective identity as an ordinary document pin. Effective-policy normalization itself is not part of this reader. |
+
+### Policy codec/schema inventory
+
+Sources: [policy tests](../../policy/), [policy binding schema tests](../../internal/artifact/policy_binding_schema_test.go)
+and [policy schema tests](../../internal/artifact/policy_schema_test.go).
+The existing shared [decode-cases.jsonl](../../policy/testdata/decode-cases.jsonl)
+contains 190 wire vectors (27 accepted, 163 refused); all V1/V2 rows, including
+refusals, are consumed. Accepted rows alone cannot qualify ordinary policy parity. Consumers must apply the same actual wire bytes, not
+only their normalized effective-policy canonical outputs.
+
+| Original Go function/family | Classification and shared coverage |
+| --- | --- |
+| `policy.TestSharedDecodeCases` | Every row of the existing shared wire corpus; ordinary decode acceptance applies, effective normalization/digest/payload assertions do not |
+| `TestSuitePolicyDecodeIsClosed` (all nine bad inputs and trailing-whitespace positive) | Wire relative path, unknown field, duplicate key, unknown version, missing/empty/unknown capability, second value, trailing garbage and JSON-whitespace families |
+| `TestPolicyDecodeRejectsUnpairedSurrogate` | Shared unpaired high/low surrogate and UTF-8 refusal families |
+| `TestTypedPolicyPathsRequireUTF8` (all five paths) | Wire invalid/truncated UTF-8, encoded surrogate and Unicode/replacement-character families. Resolve/admin/effective/payload calls are separate APIs. |
+| `TestNetworkDecodeResolvePayload` | Wire `v2 vector from unsorted duplicates` and reader IPv4 snapshot cover decode; Resolve/canonical/payload outputs are separate APIs |
+| `TestNetworkDecodeClosedAndRequired` | Every missing/null/unknown network, endpoint, capability, filesystem/version-mixing family in the wire corpus |
+| `TestNetworkIntegralPortLexemes`, `TestNetworkPortsRejectRoundedFractions` | Every existing integral-port and invalid-port lexeme row, with original raw tokens, not floating-point reconstructions |
+| `TestNetworkTypedValidation` | Endpoint address/protocol/port, nil network/list, required capability and mixed-profile wire families; malformed UTF-8 belongs to shared JSON. Public Go constant checks and typed Resolve/canonical/payload inputs are not reader APIs. |
+| `TestNetworkListLimits` | `policy-count-v2-4096` / `policy-count-v2-4097` freeze raw duplicate endpoint count before normalization; `policy-count-v1-4096` / `policy-count-v1-4097` cover ordinary V1 count. Shared content-retention boundaries cover oversized metadata; original Go oversized suite-decode check retained. Admin/effective/payload limits are separate APIs. |
+| `TestNetworkV1WireRemainsClosed` | Wire `v1 with null network`, `v1 with empty network`, `v1 with deny-all network`; legacy administrative decoding is not the reader |
+| `TestNetworkSchemaCodecAgreement` | All suite endpoint families (integer forms, string/fractional ports, UDP, CIDR, hostname, unknown/missing field, null) map to the same shared wire rows; admin and effective golden output branches are separate APIs |
+| `TestNetworkAddressDiagnosticsDoNotEchoInput` | Shared invalid-address/control refusal families cover acceptance. Exact diagnostic sanitization of the policy Go API remains its own test, not a new public-reader diagnostic contract. |
+| `artifact.TestNetworkPolicyV2ReferenceSchema` | All ordinary positive duplicate/empty/port-boundary and negative version/address/protocol/port/required/null/unknown/capability/filesystem families map to shared wire rows; 4097 endpoints → `policy-count-v2-4097` |
+| `TestPolicyBindingFixtureConformance` | Shared package `policy-binding`, including its stored OCI/ordinary validation coverage |
+| `TestAgentPolicyReferenceSchema` (all nine rows) | v1/v2 positives above; null/empty/null descriptor/missing size/other media/extra field → `policy-ref-*`; traversal is the shared path/owner refusal family, including `policy-unowned-outside-namespace` |
+| `TestPolicyBindingRejectsOCIHardlink` | Boundary `policy-hardlink-writer`: original Go archive entries, including earlier regular target `metadata/original.json`; separately accepted regular-file control |
+| `TestAdministrativePolicyDecodeIsClosed`, `TestNetworkAdministration`, `TestNetworkAdministrativeV2ReferenceSchema` | Not applicable: administrative policy is supplied to policy resolution, never read from the package |
+| `TestCanonicalVectorFilesAgree`, `TestEffectivePolicyUsesUTF16PathOrdering`, `TestCanonicalBytesUseJCSStringEncoding`, `TestCanonicalBytesRejectsOversizedComposition`, `TestCanonicalBytesSizeBoundary`, `TestCompositionCannotWeaken`, `TestNetworkNormalizationDoesNotAlias`, `TestNetworkGoldenVectors` | Not applicable: effective-policy resolution, canonicalization, normalization, aliasing and framed identity are not public package reading |
+| `TestPolicyPathLimitsApplyAtEveryBoundary` | Its original admin/Resolve/effective boundaries are not the reader; ordinary suite path count is nevertheless shared by the V1 count snapshots above |
+| `TestPayloadPreservesExactBytesAndCapabilities`, `TestNetworkPayloadVersionMismatch`, `TestNetworkPayloadTampering` | Not applicable: provider effective-policy payload verification is not stored authored-policy validation |
+
+### Inventory limits and remaining qualification
+
+All policy/evaluation functions and original row families above are classified;
+this is not a claim that all Go APIs have Python counterparts. Shared portable
+ordinary semantic snapshots close the additional evaluation and policy-binding
+table coverage. Existing shared JSON/type/length/graph/declaration/bundle/OCI/
+literal and regex corpora are reused, not replaced.
+
+[reader-boundary-cases.json](reader-boundary-cases.json) closes the five original
+integration gaps: oversized policy, three policy symlinks and the policy OCI
+hardlink. It stores two accepted complete controls and five refused snapshots,
+all produced by the original Go helpers/mutations at the same base. Frozen root
+and agent bytes already contain the current pins; neither consumer recomputes
+package ancestors. Only the oversized file has null literal bytes, replaced by
+one fixed base64-space block repeated 4,194,305 times. Its frozen size and SHA-256
+are checked. Links carry explicit type/target, zero ownership and portable modes.
+This is a small test-only extension of the entry snapshot, not a mutation DSL.
+
+Python's oversized-policy case first refuses the descriptor's schema maximum
+(`schema.maximum` at `/policy/descriptor/size`); Go reaches metadata retention.
+The outcomes agree, while the earlier shared metadata-limit tests separately
+exercise Python's retained-JSON boundary. Python's first `(code, file, pointer)`
+for all 122 refused package/boundary snapshots is frozen in
+[reader-diagnostics.json](../../python/tests/reader-diagnostics.json), so an
+unrelated earlier refusal cannot silently satisfy a negative test.
+
+`TestSharedReaderBoundaryCases` and Python `test_shared_reader_boundary_cases`
+validate the regular controls first, then replay all five refusals through OCI
+without extraction. Oversized directory replay runs on every platform; the
+three native symlink replays are defined on POSIX only, with no skipped tests.
+Windows still exercises all five archived boundaries without requiring native
+symlink privileges. The original Go tests remain enabled. All original
+policy/evaluation ordinary families now have shared-case or explicit non-reader
+classification; this does not claim exhaustive native-race or arbitrary-input
+parity. Detached evidence, effective/admin policy, diff reports, execution and
+experimental flow are excluded APIs, not silently waived reader cases.
+
+## Go regex syntax cases
+
+[regex-cases.json](regex-cases.json) freezes 696 actual Go 1.26 `regexp.Compile`
+accept/refuse results. Go and Python consume the same strings, including Unicode
+property aliases, Go-inaccessible script names, capture names, literal/quoted
+escapes, zero-count repeat barriers and class-range/POSIX boundaries. They also
+include valid patterns at the existing 1,024-byte evaluation bound whose repeated
+wide classes exhaust the native binding's matching-program budget without
+syntax-only reduction. No expression is matched or executed.
+
+Python checks each class atom before reducing it for structural compilation;
+the original authored pattern remains unchanged. The exactly pinned native
+library parses the entire expression before attempting its matching program.
+Only its exact compile-budget failure status certifies completed parsing; syntax
+errors and malformed suffixes still refuse, and unknown budget failures raise.
+A small matching-program budget avoids unnecessary wide-class and nullable-range
+construction; it is not an input or acceptance limit. Program-size, fresh-process
+memory and CPU tests guard those regressions. These cases and bounded generated
+Go differentials are evidence, not an exhaustive proof over every possible regex.
+
 ## Coverage still held in Go
 
 The existing tests remain enabled. Before another validator claims full ordinary
@@ -420,8 +598,8 @@ Go acceptance/refusal parity, share its applicable remaining vectors too:
 | Existing coverage | Current source |
 | --- | --- |
 | Additional runtime-profile wire/diff/evidence cases beyond the shared graph and typed-record tests | [runtime_profile_test.go](../../internal/artifact/runtime_profile_test.go) |
-| Evaluation namespace, ownership, ordering, limits, assertion operands and Go regex syntax | [evaluation_test.go](../../internal/artifact/evaluation_test.go) |
-| Authored-policy reference/document/namespace failures and stale ancestors | [policy_binding_test.go](../../internal/artifact/policy_binding_test.go) |
+| Evaluation namespace, ownership, ordering, limits and assertion operands | Inventoried below; [reader-semantic-cases.json](reader-semantic-cases.json), existing reader/JSON cases and [regex-cases.json](regex-cases.json) |
+| Authored-policy reference/document/namespace failures and stale ancestors | Inventoried below; reader-semantic snapshots and shared [policy wire cases](../../policy/testdata/decode-cases.jsonl); native links remain native tests |
 | Additional JSON resource boundaries beyond shared bundle/graph coverage | [validate_test.go](../../internal/artifact/validate_test.go) |
 | Inventory presence and declared-mode conflicts | [inventory_presence_test.go](../../internal/artifact/inventory_presence_test.go), [content_identity_test.go](../../internal/artifact/content_identity_test.go) |
 | Additional native host access, links/special files and case-fold cases beyond the shared directory vectors | [Unix security](../../internal/artifact/directory_security_unix_test.go), [Windows security](../../internal/artifact/directory_security_windows_test.go), [artifact validation](../../internal/artifact/validate_test.go) |

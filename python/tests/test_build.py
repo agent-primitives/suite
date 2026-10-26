@@ -48,7 +48,7 @@ def test_wheel_and_sdist_preserve_exact_offline_bundle(tmp_path):
     venv.EnvBuilder(with_pip=True, symlinks=os.name != "nt").create(environment)
     python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     wheel, = rebuilt.glob("*.whl")
-    subprocess.run([str(python), "-m", "pip", "install", str(wheel)], cwd=tmp_path, check=True)
+    subprocess.run([str(python), "-m", "pip", "install", "--only-binary=google-re2", str(wheel)], cwd=tmp_path, check=True)
     smoke = """
 import agent_suite
 from agent_suite._schema import Bundle
@@ -72,7 +72,9 @@ import io
 assert callable(load_directory)
 assert load_oci_layout(Path('layout')).source_type == 'oci-layout'
 assert not load_layer(io.BytesIO(gzip.compress(b'', mtime=0))).entries
-assert not hasattr(agent_suite, 'Package')
+assert callable(agent_suite.Package.load)
+from importlib.metadata import version
+assert version('google-re2') == '1.1.20251105'
 bundle = Bundle.installed()
 assert len(bundle.schemas) == 15
 records = read_documents(load_oci_layout(Path('layout')), bundle)
@@ -119,8 +121,37 @@ equality.equal = original_equal
 for schema in bundle.schemas.values():
     bundle.registry.resolver(schema['$id'])
 assert bundle.validate('agent.schema.json', {}, Source('agent.json'))
-# Both installed distribution paths must preserve snapshots without source files.
+# Both distribution paths exercise the public complete reader with the REAL
+# native backend, full authored evaluations and no runtime checkout dependency.
 import shutil
+from agent_suite import Package, CaseView, PolicyV2
+public_directory = Package.load('rich-directory')
+public_oci = Package.load('rich-layout')
+assert public_directory.root_digest == public_oci.root_digest
+assert public_directory.artifact_digest is None
+assert public_oci.artifact_digest and public_oci.artifact_digest != public_oci.root_digest
+shutil.rmtree('rich-directory')
+shutil.rmtree('rich-layout')
+for package in (public_directory,public_oci):
+    with package:
+        agent = package.agents['writer']
+        assert agent.evaluations is not None and len(agent.evaluations.cases) == 4
+        assert isinstance(agent.policy.declaration,PolicyV2)
+        kinds = set()
+        for case in agent.evaluations.cases:
+            assert isinstance(case,CaseView)
+            for assertion in case.assertions:
+                kinds.add(assertion.kind)
+                assert assertion.source.file == case.source.file
+        assert {'contains','notContains','regex','toolCalled','toolNotCalled','llmJudge'} <= kinds
+        assert b''.join(agent.instructions.content.iter_bytes())
+        for provider in package.tool_providers.values():
+            for tool in provider.tools:
+                assert b''.join(tool.input_schema.content.iter_bytes())
+        assert package.validate() == ()
+    assert package.root_digest and package.agents['writer'].declaration.id == 'writer'
+# Keep all earlier private snapshot/record qualification too.
+
 from agent_suite._json import digest_bytes
 for path, loader, capture in [(Path('directory'),load_directory,capture_directory),
                                (Path('layout'),load_oci_layout,capture_oci_layout)]:
@@ -140,7 +171,7 @@ filesystem = Document(b'{"version":"agentsuite.policy/v1","denyWritePaths":["/da
 assert read_document(filesystem,PolicyV1,bundle).record.deny_write_paths == ('/data',)
 network = Document(b'{"version":"agentsuite.policy/v2","network":{"egressAllow":[]},"requiredCapabilities":["network/egress-allow/v1"]}',Source('network.json'))
 assert read_document(network,PolicyV2,bundle).record.network.egress_allow == ()
-print('installed offline bundle: 15 exact schemas; private snapshots/records; no public loader')
+print('installed offline bundle: 15 exact schemas; complete public reader; native RE2; source-independent snapshots')
 """
     cases = json.loads((ROOT / 'testdata/conformance/bundle-cases.json').read_bytes())['cases']
     baseline = next(c for c in cases if c['name'] == 'baseline-directory')
@@ -162,4 +193,18 @@ print('installed offline bundle: 15 exact schemas; private snapshots/records; no
         if os.name == 'nt':
             from _directory_windows_fixture import secure_fixture
             secure_fixture(directory)
+        rich = tmp_path/'rich-directory'
+        shutil.copytree(ROOT/'testdata/rich-evaluations',rich)
+        if os.name == 'nt':
+            secure_fixture(rich)
+        from test_capture import packed_fixture
+        from agent_suite._directory import load_directory
+        from agent_suite._graph import read_graph
+        from agent_suite._schema import Bundle
+        content = load_directory(rich)
+        bundle = Bundle.from_bytes({p.name:p.read_bytes() for p in (ROOT/'schema').glob('*.json')})
+        read_graph(content,bundle)
+        # Author archive modes from the portable inventory, not host stat modes
+        # (Windows host files commonly report 0666 regardless of bundle intent).
+        packed_fixture(rich,tmp_path/'rich-layout',{path:e.mode for path,e in content.entries.items()})
         subprocess.run([str(python), "-I", "-c", smoke], cwd=tmp_path, check=True)

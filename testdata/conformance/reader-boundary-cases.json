@@ -1,0 +1,1087 @@
+{
+  "controls": [
+    {
+      "name": "policy-boundary-base",
+      "origin": "d753475d3313507bb3297d06b28ec373287e3791:writePolicyBindingSuite/bindingV1",
+      "sourceType": "directory",
+      "valid": true,
+      "phase": "",
+      "refusal": "",
+      "fullPath": true,
+      "entries": [
+        {
+          "path": "agents",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "agents/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 571,
+          "digest": "sha256:dbf0eb9bc99342fffb3d4ac410a2dece0d6dcf27fe2d7462d77d81013711c603",
+          "linkTarget": "",
+          "bytes": "eyJpZCI6IndyaXRlciIsImluc3RydWN0aW9ucyI6eyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1Njo1MTZmZjM2MGE4ZWJiNWUzNmU4N2YwZDQwMWEzY2M3NDM2YWQyYWQxMDU5YWFlNjQ2NzBhZmYxMDc4MTcxZGY4IiwibWVkaWFUeXBlIjoidGV4dC9tYXJrZG93bjsgY2hhcnNldD11dGYtOCIsInNpemUiOjE1fSwicGF0aCI6Imluc3RydWN0aW9ucy93cml0ZXIubWQifSwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYWdlbnQudjEranNvbiIsIm1vZGVsIjp7Im1vZGVsIjoiZXhhbXBsZS1tb2RlbCIsInByb3RvY29sIjoib3BlbmFpLWNvbXBhdGlibGUifSwicG9saWN5Ijp7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OjViYzg2ZmE1Y2I1Y2FkYTdlNDJmYjQxYzhhNzgzMThhYzM4ZTU3ZDE5ZjYwOTViODM4ZWE1Y2U4ZGRmZGU1ZWYiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5wb2xpY3kudjEranNvbiIsInNpemUiOjEyMH0sInBhdGgiOiJwb2xpY2llcy93cml0ZXIuanNvbiJ9LCJzY2hlbWFWZXJzaW9uIjoiMS4wLjAtZHJhZnQifQ=="
+        },
+        {
+          "path": "agentsuite.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 1126,
+          "digest": "sha256:cbbb2d5833c5e02bb86068f398502676c17a2797a8e61838c39877f28b535f28",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudHMiOlt7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmRiZjBlYjliYzk5MzQyZmZmYjNkNGFjNDEwYTJkZWNlMGQ2ZGNmMjdmZTJkNzQ2MmQ3N2Q4MTAxMzcxMWM2MDMiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5hZ2VudC52MStqc29uIiwic2l6ZSI6NTcxfSwiaWQiOiJ3cml0ZXIiLCJwYXRoIjoiYWdlbnRzL3dyaXRlci5qc29uIn1dLCJidWlsZFByb2ZpbGVzIjpbeyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1NjphN2U2MTM2ZDdlN2RhZjJmY2Q3ZTYxYTE0OTAwMDM4MjAzMmRjYmYxNDBmMmRkYTEwNzZkMmVlODVkMGE2MmNkIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwic2l6ZSI6ODIwfSwiaWQiOiJkZWZhdWx0IiwicGF0aCI6ImJ1aWxkLXByb2ZpbGVzL2RlZmF1bHQuanNvbiJ9XSwiY29tcG9zaXRpb25zIjpbeyJhZ2VudCI6IndyaXRlciIsImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmMxOWE2MTczYTNiYWQ2NzIzYjVmNGMzNmY0OWM4ZWUyMWFmYmQ2NTMxN2Q5YzljNDI3NWViZDEzMGIyMjIzZDUiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwic2l6ZSI6MjAyfSwicGF0aCI6ImNvbXBvc2l0aW9ucy93cml0ZXItbGludXgtYW1kNjQuanNvbiIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLm1hbmlmZXN0LnYxK2pzb24iLCJuYW1lIjoiZXhhbXBsZSIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlckNhdGFsb2ciOnsiZGVzY3JpcHRvciI6eyJkaWdlc3QiOiJzaGEyNTY6OTMzMjgzYTFmYTkwZmQ0ODhkYjNmODcyZmI4OWRjMTU3MmE1ZjYzOGJmMGE4MTUxNGE1NDIzMzNlMzEwZWY5NSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLnRvb2wucHJvdmlkZXIuY2F0YWxvZy52MStqc29uIiwic2l6ZSI6MTIxfSwiaWQiOiJjYXRhbG9nIiwicGF0aCI6InRvb2wtcHJvdmlkZXJzL2NhdGFsb2cuanNvbiJ9fQ=="
+        },
+        {
+          "path": "build-profiles",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "build-profiles/default.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 820,
+          "digest": "sha256:a7e6136d7e7daf2fcd7e61a149000382032dcbf140f2dda1076d2ee85d0a62cd",
+          "linkTarget": "",
+          "bytes": "eyJoYXJuZXNzIjpbeyJpbWFnZSI6eyJkaWdlc3QiOiJzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5vY2kuaW1hZ2UubWFuaWZlc3QudjEranNvbiIsInNpemUiOjF9LCJpbWFnZVJlZiI6InJlZ2lzdHJ5LmV4YW1wbGUvYWdlbnRzdWl0ZS9oYXJuZXNzQHNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19XSwiaWQiOiJkZWZhdWx0IiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwicnVudGltZUJhc2UiOlt7ImltYWdlIjp7ImRpZ2VzdCI6InNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLm9jaS5pbWFnZS5tYW5pZmVzdC52MStqc29uIiwic2l6ZSI6MX0sImltYWdlUmVmIjoicmVnaXN0cnkuZXhhbXBsZS9hZ2VudHN1aXRlL3J1bnRpbWUtYmFzZUBzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInNvdXJjZUVwb2NoIjoxfQ=="
+        },
+        {
+          "path": "compositions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "compositions/writer-linux-amd64.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 202,
+          "digest": "sha256:c19a6173a3bad6723b5f4c36f49c8ee21afbd65317d9c9c4275ebd130b2223d5",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudCI6IndyaXRlciIsImJ1aWxkUHJvZmlsZSI6ImRlZmF1bHQiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        },
+        {
+          "path": "instructions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "instructions/writer.md",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 15,
+          "digest": "sha256:516ff360a8ebb5e36e87f0d401a3cc7436ad2ad1059aae64670aff1078171df8",
+          "linkTarget": "",
+          "bytes": "V3JpdGUgY2xlYXJseS4K"
+        },
+        {
+          "path": "policies",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "policies/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 120,
+          "digest": "sha256:5bc86fa5cb5cada7e42fb41c8a78318ac38e57d19f6095b838ea5ce8ddfde5ef",
+          "linkTarget": "",
+          "bytes": "eyJkZW55V3JpdGVQYXRocyI6WyIveiIsIi9hIiwiL3oiXSwicmVxdWlyZWRDYXBhYmlsaXRpZXMiOlsiZmlsZXN5c3RlbS9kZW55LXdyaXRlL3YxIl0sInZlcnNpb24iOiJhZ2VudHN1aXRlLnBvbGljeS92MSJ9"
+        },
+        {
+          "path": "tool-providers",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers/catalog.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 121,
+          "digest": "sha256:933283a1fa90fd488db3f872fb89dc1572a5f638bf0a81514a542333e310ef95",
+          "linkTarget": "",
+          "bytes": "eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS50b29sLnByb3ZpZGVyLmNhdGFsb2cudjEranNvbiIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        }
+      ]
+    },
+    {
+      "name": "policy-hardlink-control",
+      "origin": "d753475d3313507bb3297d06b28ec373287e3791:TestPolicyBindingRejectsOCIHardlink/regular-control",
+      "sourceType": "directory",
+      "valid": true,
+      "phase": "",
+      "refusal": "",
+      "fullPath": true,
+      "entries": [
+        {
+          "path": "agents",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "agents/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 571,
+          "digest": "sha256:dbf0eb9bc99342fffb3d4ac410a2dece0d6dcf27fe2d7462d77d81013711c603",
+          "linkTarget": "",
+          "bytes": "eyJpZCI6IndyaXRlciIsImluc3RydWN0aW9ucyI6eyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1Njo1MTZmZjM2MGE4ZWJiNWUzNmU4N2YwZDQwMWEzY2M3NDM2YWQyYWQxMDU5YWFlNjQ2NzBhZmYxMDc4MTcxZGY4IiwibWVkaWFUeXBlIjoidGV4dC9tYXJrZG93bjsgY2hhcnNldD11dGYtOCIsInNpemUiOjE1fSwicGF0aCI6Imluc3RydWN0aW9ucy93cml0ZXIubWQifSwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYWdlbnQudjEranNvbiIsIm1vZGVsIjp7Im1vZGVsIjoiZXhhbXBsZS1tb2RlbCIsInByb3RvY29sIjoib3BlbmFpLWNvbXBhdGlibGUifSwicG9saWN5Ijp7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OjViYzg2ZmE1Y2I1Y2FkYTdlNDJmYjQxYzhhNzgzMThhYzM4ZTU3ZDE5ZjYwOTViODM4ZWE1Y2U4ZGRmZGU1ZWYiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5wb2xpY3kudjEranNvbiIsInNpemUiOjEyMH0sInBhdGgiOiJwb2xpY2llcy93cml0ZXIuanNvbiJ9LCJzY2hlbWFWZXJzaW9uIjoiMS4wLjAtZHJhZnQifQ=="
+        },
+        {
+          "path": "agentsuite.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 1126,
+          "digest": "sha256:cbbb2d5833c5e02bb86068f398502676c17a2797a8e61838c39877f28b535f28",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudHMiOlt7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmRiZjBlYjliYzk5MzQyZmZmYjNkNGFjNDEwYTJkZWNlMGQ2ZGNmMjdmZTJkNzQ2MmQ3N2Q4MTAxMzcxMWM2MDMiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5hZ2VudC52MStqc29uIiwic2l6ZSI6NTcxfSwiaWQiOiJ3cml0ZXIiLCJwYXRoIjoiYWdlbnRzL3dyaXRlci5qc29uIn1dLCJidWlsZFByb2ZpbGVzIjpbeyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1NjphN2U2MTM2ZDdlN2RhZjJmY2Q3ZTYxYTE0OTAwMDM4MjAzMmRjYmYxNDBmMmRkYTEwNzZkMmVlODVkMGE2MmNkIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwic2l6ZSI6ODIwfSwiaWQiOiJkZWZhdWx0IiwicGF0aCI6ImJ1aWxkLXByb2ZpbGVzL2RlZmF1bHQuanNvbiJ9XSwiY29tcG9zaXRpb25zIjpbeyJhZ2VudCI6IndyaXRlciIsImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmMxOWE2MTczYTNiYWQ2NzIzYjVmNGMzNmY0OWM4ZWUyMWFmYmQ2NTMxN2Q5YzljNDI3NWViZDEzMGIyMjIzZDUiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwic2l6ZSI6MjAyfSwicGF0aCI6ImNvbXBvc2l0aW9ucy93cml0ZXItbGludXgtYW1kNjQuanNvbiIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLm1hbmlmZXN0LnYxK2pzb24iLCJuYW1lIjoiZXhhbXBsZSIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlckNhdGFsb2ciOnsiZGVzY3JpcHRvciI6eyJkaWdlc3QiOiJzaGEyNTY6OTMzMjgzYTFmYTkwZmQ0ODhkYjNmODcyZmI4OWRjMTU3MmE1ZjYzOGJmMGE4MTUxNGE1NDIzMzNlMzEwZWY5NSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLnRvb2wucHJvdmlkZXIuY2F0YWxvZy52MStqc29uIiwic2l6ZSI6MTIxfSwiaWQiOiJjYXRhbG9nIiwicGF0aCI6InRvb2wtcHJvdmlkZXJzL2NhdGFsb2cuanNvbiJ9fQ=="
+        },
+        {
+          "path": "build-profiles",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "build-profiles/default.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 820,
+          "digest": "sha256:a7e6136d7e7daf2fcd7e61a149000382032dcbf140f2dda1076d2ee85d0a62cd",
+          "linkTarget": "",
+          "bytes": "eyJoYXJuZXNzIjpbeyJpbWFnZSI6eyJkaWdlc3QiOiJzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5vY2kuaW1hZ2UubWFuaWZlc3QudjEranNvbiIsInNpemUiOjF9LCJpbWFnZVJlZiI6InJlZ2lzdHJ5LmV4YW1wbGUvYWdlbnRzdWl0ZS9oYXJuZXNzQHNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19XSwiaWQiOiJkZWZhdWx0IiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwicnVudGltZUJhc2UiOlt7ImltYWdlIjp7ImRpZ2VzdCI6InNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLm9jaS5pbWFnZS5tYW5pZmVzdC52MStqc29uIiwic2l6ZSI6MX0sImltYWdlUmVmIjoicmVnaXN0cnkuZXhhbXBsZS9hZ2VudHN1aXRlL3J1bnRpbWUtYmFzZUBzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInNvdXJjZUVwb2NoIjoxfQ=="
+        },
+        {
+          "path": "compositions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "compositions/writer-linux-amd64.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 202,
+          "digest": "sha256:c19a6173a3bad6723b5f4c36f49c8ee21afbd65317d9c9c4275ebd130b2223d5",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudCI6IndyaXRlciIsImJ1aWxkUHJvZmlsZSI6ImRlZmF1bHQiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        },
+        {
+          "path": "instructions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "instructions/writer.md",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 15,
+          "digest": "sha256:516ff360a8ebb5e36e87f0d401a3cc7436ad2ad1059aae64670aff1078171df8",
+          "linkTarget": "",
+          "bytes": "V3JpdGUgY2xlYXJseS4K"
+        },
+        {
+          "path": "metadata",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "metadata/original.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 120,
+          "digest": "sha256:5bc86fa5cb5cada7e42fb41c8a78318ac38e57d19f6095b838ea5ce8ddfde5ef",
+          "linkTarget": "",
+          "bytes": "eyJkZW55V3JpdGVQYXRocyI6WyIveiIsIi9hIiwiL3oiXSwicmVxdWlyZWRDYXBhYmlsaXRpZXMiOlsiZmlsZXN5c3RlbS9kZW55LXdyaXRlL3YxIl0sInZlcnNpb24iOiJhZ2VudHN1aXRlLnBvbGljeS92MSJ9"
+        },
+        {
+          "path": "policies",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "policies/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 120,
+          "digest": "sha256:5bc86fa5cb5cada7e42fb41c8a78318ac38e57d19f6095b838ea5ce8ddfde5ef",
+          "linkTarget": "",
+          "bytes": "eyJkZW55V3JpdGVQYXRocyI6WyIveiIsIi9hIiwiL3oiXSwicmVxdWlyZWRDYXBhYmlsaXRpZXMiOlsiZmlsZXN5c3RlbS9kZW55LXdyaXRlL3YxIl0sInZlcnNpb24iOiJhZ2VudHN1aXRlLnBvbGljeS92MSJ9"
+        },
+        {
+          "path": "tool-providers",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers/catalog.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 121,
+          "digest": "sha256:933283a1fa90fd488db3f872fb89dc1572a5f638bf0a81514a542333e310ef95",
+          "linkTarget": "",
+          "bytes": "eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS50b29sLnByb3ZpZGVyLmNhdGFsb2cudjEranNvbiIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "name": "policy-hardlink-writer",
+      "origin": "d753475d3313507bb3297d06b28ec373287e3791:TestPolicyBindingRejectsOCIHardlink",
+      "sourceType": "archive",
+      "valid": false,
+      "phase": "ValidatePath",
+      "refusal": "agent writer policy: policies/writer.json is not a regular file",
+      "fullPath": false,
+      "entries": [
+        {
+          "path": "agents/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 571,
+          "digest": "sha256:dbf0eb9bc99342fffb3d4ac410a2dece0d6dcf27fe2d7462d77d81013711c603",
+          "linkTarget": "",
+          "bytes": "eyJpZCI6IndyaXRlciIsImluc3RydWN0aW9ucyI6eyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1Njo1MTZmZjM2MGE4ZWJiNWUzNmU4N2YwZDQwMWEzY2M3NDM2YWQyYWQxMDU5YWFlNjQ2NzBhZmYxMDc4MTcxZGY4IiwibWVkaWFUeXBlIjoidGV4dC9tYXJrZG93bjsgY2hhcnNldD11dGYtOCIsInNpemUiOjE1fSwicGF0aCI6Imluc3RydWN0aW9ucy93cml0ZXIubWQifSwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYWdlbnQudjEranNvbiIsIm1vZGVsIjp7Im1vZGVsIjoiZXhhbXBsZS1tb2RlbCIsInByb3RvY29sIjoib3BlbmFpLWNvbXBhdGlibGUifSwicG9saWN5Ijp7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OjViYzg2ZmE1Y2I1Y2FkYTdlNDJmYjQxYzhhNzgzMThhYzM4ZTU3ZDE5ZjYwOTViODM4ZWE1Y2U4ZGRmZGU1ZWYiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5wb2xpY3kudjEranNvbiIsInNpemUiOjEyMH0sInBhdGgiOiJwb2xpY2llcy93cml0ZXIuanNvbiJ9LCJzY2hlbWFWZXJzaW9uIjoiMS4wLjAtZHJhZnQifQ=="
+        },
+        {
+          "path": "agentsuite.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 1126,
+          "digest": "sha256:cbbb2d5833c5e02bb86068f398502676c17a2797a8e61838c39877f28b535f28",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudHMiOlt7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmRiZjBlYjliYzk5MzQyZmZmYjNkNGFjNDEwYTJkZWNlMGQ2ZGNmMjdmZTJkNzQ2MmQ3N2Q4MTAxMzcxMWM2MDMiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5hZ2VudC52MStqc29uIiwic2l6ZSI6NTcxfSwiaWQiOiJ3cml0ZXIiLCJwYXRoIjoiYWdlbnRzL3dyaXRlci5qc29uIn1dLCJidWlsZFByb2ZpbGVzIjpbeyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1NjphN2U2MTM2ZDdlN2RhZjJmY2Q3ZTYxYTE0OTAwMDM4MjAzMmRjYmYxNDBmMmRkYTEwNzZkMmVlODVkMGE2MmNkIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwic2l6ZSI6ODIwfSwiaWQiOiJkZWZhdWx0IiwicGF0aCI6ImJ1aWxkLXByb2ZpbGVzL2RlZmF1bHQuanNvbiJ9XSwiY29tcG9zaXRpb25zIjpbeyJhZ2VudCI6IndyaXRlciIsImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmMxOWE2MTczYTNiYWQ2NzIzYjVmNGMzNmY0OWM4ZWUyMWFmYmQ2NTMxN2Q5YzljNDI3NWViZDEzMGIyMjIzZDUiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwic2l6ZSI6MjAyfSwicGF0aCI6ImNvbXBvc2l0aW9ucy93cml0ZXItbGludXgtYW1kNjQuanNvbiIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLm1hbmlmZXN0LnYxK2pzb24iLCJuYW1lIjoiZXhhbXBsZSIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlckNhdGFsb2ciOnsiZGVzY3JpcHRvciI6eyJkaWdlc3QiOiJzaGEyNTY6OTMzMjgzYTFmYTkwZmQ0ODhkYjNmODcyZmI4OWRjMTU3MmE1ZjYzOGJmMGE4MTUxNGE1NDIzMzNlMzEwZWY5NSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLnRvb2wucHJvdmlkZXIuY2F0YWxvZy52MStqc29uIiwic2l6ZSI6MTIxfSwiaWQiOiJjYXRhbG9nIiwicGF0aCI6InRvb2wtcHJvdmlkZXJzL2NhdGFsb2cuanNvbiJ9fQ=="
+        },
+        {
+          "path": "build-profiles/default.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 820,
+          "digest": "sha256:a7e6136d7e7daf2fcd7e61a149000382032dcbf140f2dda1076d2ee85d0a62cd",
+          "linkTarget": "",
+          "bytes": "eyJoYXJuZXNzIjpbeyJpbWFnZSI6eyJkaWdlc3QiOiJzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5vY2kuaW1hZ2UubWFuaWZlc3QudjEranNvbiIsInNpemUiOjF9LCJpbWFnZVJlZiI6InJlZ2lzdHJ5LmV4YW1wbGUvYWdlbnRzdWl0ZS9oYXJuZXNzQHNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19XSwiaWQiOiJkZWZhdWx0IiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwicnVudGltZUJhc2UiOlt7ImltYWdlIjp7ImRpZ2VzdCI6InNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLm9jaS5pbWFnZS5tYW5pZmVzdC52MStqc29uIiwic2l6ZSI6MX0sImltYWdlUmVmIjoicmVnaXN0cnkuZXhhbXBsZS9hZ2VudHN1aXRlL3J1bnRpbWUtYmFzZUBzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInNvdXJjZUVwb2NoIjoxfQ=="
+        },
+        {
+          "path": "compositions/writer-linux-amd64.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 202,
+          "digest": "sha256:c19a6173a3bad6723b5f4c36f49c8ee21afbd65317d9c9c4275ebd130b2223d5",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudCI6IndyaXRlciIsImJ1aWxkUHJvZmlsZSI6ImRlZmF1bHQiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        },
+        {
+          "path": "instructions/writer.md",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 15,
+          "digest": "sha256:516ff360a8ebb5e36e87f0d401a3cc7436ad2ad1059aae64670aff1078171df8",
+          "linkTarget": "",
+          "bytes": "V3JpdGUgY2xlYXJseS4K"
+        },
+        {
+          "path": "metadata/original.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 120,
+          "digest": "sha256:5bc86fa5cb5cada7e42fb41c8a78318ac38e57d19f6095b838ea5ce8ddfde5ef",
+          "linkTarget": "",
+          "bytes": "eyJkZW55V3JpdGVQYXRocyI6WyIveiIsIi9hIiwiL3oiXSwicmVxdWlyZWRDYXBhYmlsaXRpZXMiOlsiZmlsZXN5c3RlbS9kZW55LXdyaXRlL3YxIl0sInZlcnNpb24iOiJhZ2VudHN1aXRlLnBvbGljeS92MSJ9"
+        },
+        {
+          "path": "policies/writer.json",
+          "type": "hardlink",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "metadata/original.json",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers/catalog.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 121,
+          "digest": "sha256:933283a1fa90fd488db3f872fb89dc1572a5f638bf0a81514a542333e310ef95",
+          "linkTarget": "",
+          "bytes": "eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS50b29sLnByb3ZpZGVyLmNhdGFsb2cudjEranNvbiIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        }
+      ],
+      "control": "policy-hardlink-control",
+      "body": null
+    },
+    {
+      "name": "policy-oversized",
+      "origin": "d753475d3313507bb3297d06b28ec373287e3791:TestPolicyBindingRejectsUnownedContent/oversized",
+      "sourceType": "directory",
+      "valid": false,
+      "phase": "ValidatePath",
+      "refusal": "agent writer policy: policies/writer.json is not retained metadata",
+      "fullPath": true,
+      "entries": [
+        {
+          "path": "agents",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "agents/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 575,
+          "digest": "sha256:1dd44e3f93c8353188acf17686781dfa1b4c9c41079df70d21643d43cb25cccf",
+          "linkTarget": "",
+          "bytes": "eyJpZCI6IndyaXRlciIsImluc3RydWN0aW9ucyI6eyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1Njo1MTZmZjM2MGE4ZWJiNWUzNmU4N2YwZDQwMWEzY2M3NDM2YWQyYWQxMDU5YWFlNjQ2NzBhZmYxMDc4MTcxZGY4IiwibWVkaWFUeXBlIjoidGV4dC9tYXJrZG93bjsgY2hhcnNldD11dGYtOCIsInNpemUiOjE1fSwicGF0aCI6Imluc3RydWN0aW9ucy93cml0ZXIubWQifSwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYWdlbnQudjEranNvbiIsIm1vZGVsIjp7Im1vZGVsIjoiZXhhbXBsZS1tb2RlbCIsInByb3RvY29sIjoib3BlbmFpLWNvbXBhdGlibGUifSwicG9saWN5Ijp7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OjI2NTBmNTQ1MjQ1OTA4MWFiZjY2MDJjMTYyMGVmOGM4MDlhOGExODg3YTJmNDY5MjM2OTU3NWJkMTBlYTJiODUiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5wb2xpY3kudjEranNvbiIsInNpemUiOjQxOTQzMDV9LCJwYXRoIjoicG9saWNpZXMvd3JpdGVyLmpzb24ifSwic2NoZW1hVmVyc2lvbiI6IjEuMC4wLWRyYWZ0In0="
+        },
+        {
+          "path": "agentsuite.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 1126,
+          "digest": "sha256:f26d7a75b3fc17dd694c97506f9918481709fc692ef4b115528a4b11b23b5cc3",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudHMiOlt7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OjFkZDQ0ZTNmOTNjODM1MzE4OGFjZjE3Njg2NzgxZGZhMWI0YzljNDEwNzlkZjcwZDIxNjQzZDQzY2IyNWNjY2YiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5hZ2VudC52MStqc29uIiwic2l6ZSI6NTc1fSwiaWQiOiJ3cml0ZXIiLCJwYXRoIjoiYWdlbnRzL3dyaXRlci5qc29uIn1dLCJidWlsZFByb2ZpbGVzIjpbeyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1NjphN2U2MTM2ZDdlN2RhZjJmY2Q3ZTYxYTE0OTAwMDM4MjAzMmRjYmYxNDBmMmRkYTEwNzZkMmVlODVkMGE2MmNkIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwic2l6ZSI6ODIwfSwiaWQiOiJkZWZhdWx0IiwicGF0aCI6ImJ1aWxkLXByb2ZpbGVzL2RlZmF1bHQuanNvbiJ9XSwiY29tcG9zaXRpb25zIjpbeyJhZ2VudCI6IndyaXRlciIsImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmMxOWE2MTczYTNiYWQ2NzIzYjVmNGMzNmY0OWM4ZWUyMWFmYmQ2NTMxN2Q5YzljNDI3NWViZDEzMGIyMjIzZDUiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwic2l6ZSI6MjAyfSwicGF0aCI6ImNvbXBvc2l0aW9ucy93cml0ZXItbGludXgtYW1kNjQuanNvbiIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLm1hbmlmZXN0LnYxK2pzb24iLCJuYW1lIjoiZXhhbXBsZSIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlckNhdGFsb2ciOnsiZGVzY3JpcHRvciI6eyJkaWdlc3QiOiJzaGEyNTY6OTMzMjgzYTFmYTkwZmQ0ODhkYjNmODcyZmI4OWRjMTU3MmE1ZjYzOGJmMGE4MTUxNGE1NDIzMzNlMzEwZWY5NSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLnRvb2wucHJvdmlkZXIuY2F0YWxvZy52MStqc29uIiwic2l6ZSI6MTIxfSwiaWQiOiJjYXRhbG9nIiwicGF0aCI6InRvb2wtcHJvdmlkZXJzL2NhdGFsb2cuanNvbiJ9fQ=="
+        },
+        {
+          "path": "build-profiles",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "build-profiles/default.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 820,
+          "digest": "sha256:a7e6136d7e7daf2fcd7e61a149000382032dcbf140f2dda1076d2ee85d0a62cd",
+          "linkTarget": "",
+          "bytes": "eyJoYXJuZXNzIjpbeyJpbWFnZSI6eyJkaWdlc3QiOiJzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5vY2kuaW1hZ2UubWFuaWZlc3QudjEranNvbiIsInNpemUiOjF9LCJpbWFnZVJlZiI6InJlZ2lzdHJ5LmV4YW1wbGUvYWdlbnRzdWl0ZS9oYXJuZXNzQHNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19XSwiaWQiOiJkZWZhdWx0IiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwicnVudGltZUJhc2UiOlt7ImltYWdlIjp7ImRpZ2VzdCI6InNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLm9jaS5pbWFnZS5tYW5pZmVzdC52MStqc29uIiwic2l6ZSI6MX0sImltYWdlUmVmIjoicmVnaXN0cnkuZXhhbXBsZS9hZ2VudHN1aXRlL3J1bnRpbWUtYmFzZUBzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInNvdXJjZUVwb2NoIjoxfQ=="
+        },
+        {
+          "path": "compositions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "compositions/writer-linux-amd64.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 202,
+          "digest": "sha256:c19a6173a3bad6723b5f4c36f49c8ee21afbd65317d9c9c4275ebd130b2223d5",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudCI6IndyaXRlciIsImJ1aWxkUHJvZmlsZSI6ImRlZmF1bHQiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        },
+        {
+          "path": "instructions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "instructions/writer.md",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 15,
+          "digest": "sha256:516ff360a8ebb5e36e87f0d401a3cc7436ad2ad1059aae64670aff1078171df8",
+          "linkTarget": "",
+          "bytes": "V3JpdGUgY2xlYXJseS4K"
+        },
+        {
+          "path": "policies",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "policies/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 4194305,
+          "digest": "sha256:2650f5452459081abf6602c1620ef8c809a8a1887a2f4692369575bd10ea2b85",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers/catalog.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 121,
+          "digest": "sha256:933283a1fa90fd488db3f872fb89dc1572a5f638bf0a81514a542333e310ef95",
+          "linkTarget": "",
+          "bytes": "eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS50b29sLnByb3ZpZGVyLmNhdGFsb2cudjEranNvbiIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        }
+      ],
+      "control": "policy-boundary-base",
+      "body": {
+        "path": "policies/writer.json",
+        "block": "IA==",
+        "repeat": 4194305
+      }
+    },
+    {
+      "name": "policy-symlink-root",
+      "origin": "d753475d3313507bb3297d06b28ec373287e3791:TestPolicyBindingRejectsUnownedContent/symlink policies",
+      "sourceType": "directory",
+      "valid": false,
+      "phase": "ValidatePath",
+      "refusal": "agent writer policy: required file policies/writer.json is missing",
+      "fullPath": true,
+      "entries": [
+        {
+          "path": "agents",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "agents/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 571,
+          "digest": "sha256:dbf0eb9bc99342fffb3d4ac410a2dece0d6dcf27fe2d7462d77d81013711c603",
+          "linkTarget": "",
+          "bytes": "eyJpZCI6IndyaXRlciIsImluc3RydWN0aW9ucyI6eyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1Njo1MTZmZjM2MGE4ZWJiNWUzNmU4N2YwZDQwMWEzY2M3NDM2YWQyYWQxMDU5YWFlNjQ2NzBhZmYxMDc4MTcxZGY4IiwibWVkaWFUeXBlIjoidGV4dC9tYXJrZG93bjsgY2hhcnNldD11dGYtOCIsInNpemUiOjE1fSwicGF0aCI6Imluc3RydWN0aW9ucy93cml0ZXIubWQifSwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYWdlbnQudjEranNvbiIsIm1vZGVsIjp7Im1vZGVsIjoiZXhhbXBsZS1tb2RlbCIsInByb3RvY29sIjoib3BlbmFpLWNvbXBhdGlibGUifSwicG9saWN5Ijp7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OjViYzg2ZmE1Y2I1Y2FkYTdlNDJmYjQxYzhhNzgzMThhYzM4ZTU3ZDE5ZjYwOTViODM4ZWE1Y2U4ZGRmZGU1ZWYiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5wb2xpY3kudjEranNvbiIsInNpemUiOjEyMH0sInBhdGgiOiJwb2xpY2llcy93cml0ZXIuanNvbiJ9LCJzY2hlbWFWZXJzaW9uIjoiMS4wLjAtZHJhZnQifQ=="
+        },
+        {
+          "path": "agentsuite.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 1126,
+          "digest": "sha256:cbbb2d5833c5e02bb86068f398502676c17a2797a8e61838c39877f28b535f28",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudHMiOlt7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmRiZjBlYjliYzk5MzQyZmZmYjNkNGFjNDEwYTJkZWNlMGQ2ZGNmMjdmZTJkNzQ2MmQ3N2Q4MTAxMzcxMWM2MDMiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5hZ2VudC52MStqc29uIiwic2l6ZSI6NTcxfSwiaWQiOiJ3cml0ZXIiLCJwYXRoIjoiYWdlbnRzL3dyaXRlci5qc29uIn1dLCJidWlsZFByb2ZpbGVzIjpbeyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1NjphN2U2MTM2ZDdlN2RhZjJmY2Q3ZTYxYTE0OTAwMDM4MjAzMmRjYmYxNDBmMmRkYTEwNzZkMmVlODVkMGE2MmNkIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwic2l6ZSI6ODIwfSwiaWQiOiJkZWZhdWx0IiwicGF0aCI6ImJ1aWxkLXByb2ZpbGVzL2RlZmF1bHQuanNvbiJ9XSwiY29tcG9zaXRpb25zIjpbeyJhZ2VudCI6IndyaXRlciIsImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmMxOWE2MTczYTNiYWQ2NzIzYjVmNGMzNmY0OWM4ZWUyMWFmYmQ2NTMxN2Q5YzljNDI3NWViZDEzMGIyMjIzZDUiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwic2l6ZSI6MjAyfSwicGF0aCI6ImNvbXBvc2l0aW9ucy93cml0ZXItbGludXgtYW1kNjQuanNvbiIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLm1hbmlmZXN0LnYxK2pzb24iLCJuYW1lIjoiZXhhbXBsZSIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlckNhdGFsb2ciOnsiZGVzY3JpcHRvciI6eyJkaWdlc3QiOiJzaGEyNTY6OTMzMjgzYTFmYTkwZmQ0ODhkYjNmODcyZmI4OWRjMTU3MmE1ZjYzOGJmMGE4MTUxNGE1NDIzMzNlMzEwZWY5NSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLnRvb2wucHJvdmlkZXIuY2F0YWxvZy52MStqc29uIiwic2l6ZSI6MTIxfSwiaWQiOiJjYXRhbG9nIiwicGF0aCI6InRvb2wtcHJvdmlkZXJzL2NhdGFsb2cuanNvbiJ9fQ=="
+        },
+        {
+          "path": "build-profiles",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "build-profiles/default.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 820,
+          "digest": "sha256:a7e6136d7e7daf2fcd7e61a149000382032dcbf140f2dda1076d2ee85d0a62cd",
+          "linkTarget": "",
+          "bytes": "eyJoYXJuZXNzIjpbeyJpbWFnZSI6eyJkaWdlc3QiOiJzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5vY2kuaW1hZ2UubWFuaWZlc3QudjEranNvbiIsInNpemUiOjF9LCJpbWFnZVJlZiI6InJlZ2lzdHJ5LmV4YW1wbGUvYWdlbnRzdWl0ZS9oYXJuZXNzQHNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19XSwiaWQiOiJkZWZhdWx0IiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwicnVudGltZUJhc2UiOlt7ImltYWdlIjp7ImRpZ2VzdCI6InNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLm9jaS5pbWFnZS5tYW5pZmVzdC52MStqc29uIiwic2l6ZSI6MX0sImltYWdlUmVmIjoicmVnaXN0cnkuZXhhbXBsZS9hZ2VudHN1aXRlL3J1bnRpbWUtYmFzZUBzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInNvdXJjZUVwb2NoIjoxfQ=="
+        },
+        {
+          "path": "compositions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "compositions/writer-linux-amd64.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 202,
+          "digest": "sha256:c19a6173a3bad6723b5f4c36f49c8ee21afbd65317d9c9c4275ebd130b2223d5",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudCI6IndyaXRlciIsImJ1aWxkUHJvZmlsZSI6ImRlZmF1bHQiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        },
+        {
+          "path": "instructions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "instructions/writer.md",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 15,
+          "digest": "sha256:516ff360a8ebb5e36e87f0d401a3cc7436ad2ad1059aae64670aff1078171df8",
+          "linkTarget": "",
+          "bytes": "V3JpdGUgY2xlYXJseS4K"
+        },
+        {
+          "path": "policies",
+          "type": "symlink",
+          "mode": 511,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "real-policies",
+          "bytes": null
+        },
+        {
+          "path": "real-policies",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "real-policies/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 120,
+          "digest": "sha256:5bc86fa5cb5cada7e42fb41c8a78318ac38e57d19f6095b838ea5ce8ddfde5ef",
+          "linkTarget": "",
+          "bytes": "eyJkZW55V3JpdGVQYXRocyI6WyIveiIsIi9hIiwiL3oiXSwicmVxdWlyZWRDYXBhYmlsaXRpZXMiOlsiZmlsZXN5c3RlbS9kZW55LXdyaXRlL3YxIl0sInZlcnNpb24iOiJhZ2VudHN1aXRlLnBvbGljeS92MSJ9"
+        },
+        {
+          "path": "tool-providers",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers/catalog.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 121,
+          "digest": "sha256:933283a1fa90fd488db3f872fb89dc1572a5f638bf0a81514a542333e310ef95",
+          "linkTarget": "",
+          "bytes": "eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS50b29sLnByb3ZpZGVyLmNhdGFsb2cudjEranNvbiIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        }
+      ],
+      "control": "policy-boundary-base",
+      "body": null
+    },
+    {
+      "name": "policy-symlink-writer",
+      "origin": "d753475d3313507bb3297d06b28ec373287e3791:TestPolicyBindingRejectsUnownedContent/symlink policies/writer.json",
+      "sourceType": "directory",
+      "valid": false,
+      "phase": "ValidatePath",
+      "refusal": "agent writer policy: policies/writer.json is not a regular file",
+      "fullPath": true,
+      "entries": [
+        {
+          "path": "agents",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "agents/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 571,
+          "digest": "sha256:dbf0eb9bc99342fffb3d4ac410a2dece0d6dcf27fe2d7462d77d81013711c603",
+          "linkTarget": "",
+          "bytes": "eyJpZCI6IndyaXRlciIsImluc3RydWN0aW9ucyI6eyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1Njo1MTZmZjM2MGE4ZWJiNWUzNmU4N2YwZDQwMWEzY2M3NDM2YWQyYWQxMDU5YWFlNjQ2NzBhZmYxMDc4MTcxZGY4IiwibWVkaWFUeXBlIjoidGV4dC9tYXJrZG93bjsgY2hhcnNldD11dGYtOCIsInNpemUiOjE1fSwicGF0aCI6Imluc3RydWN0aW9ucy93cml0ZXIubWQifSwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYWdlbnQudjEranNvbiIsIm1vZGVsIjp7Im1vZGVsIjoiZXhhbXBsZS1tb2RlbCIsInByb3RvY29sIjoib3BlbmFpLWNvbXBhdGlibGUifSwicG9saWN5Ijp7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OjViYzg2ZmE1Y2I1Y2FkYTdlNDJmYjQxYzhhNzgzMThhYzM4ZTU3ZDE5ZjYwOTViODM4ZWE1Y2U4ZGRmZGU1ZWYiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5wb2xpY3kudjEranNvbiIsInNpemUiOjEyMH0sInBhdGgiOiJwb2xpY2llcy93cml0ZXIuanNvbiJ9LCJzY2hlbWFWZXJzaW9uIjoiMS4wLjAtZHJhZnQifQ=="
+        },
+        {
+          "path": "agentsuite.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 1126,
+          "digest": "sha256:cbbb2d5833c5e02bb86068f398502676c17a2797a8e61838c39877f28b535f28",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudHMiOlt7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmRiZjBlYjliYzk5MzQyZmZmYjNkNGFjNDEwYTJkZWNlMGQ2ZGNmMjdmZTJkNzQ2MmQ3N2Q4MTAxMzcxMWM2MDMiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5hZ2VudC52MStqc29uIiwic2l6ZSI6NTcxfSwiaWQiOiJ3cml0ZXIiLCJwYXRoIjoiYWdlbnRzL3dyaXRlci5qc29uIn1dLCJidWlsZFByb2ZpbGVzIjpbeyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1NjphN2U2MTM2ZDdlN2RhZjJmY2Q3ZTYxYTE0OTAwMDM4MjAzMmRjYmYxNDBmMmRkYTEwNzZkMmVlODVkMGE2MmNkIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwic2l6ZSI6ODIwfSwiaWQiOiJkZWZhdWx0IiwicGF0aCI6ImJ1aWxkLXByb2ZpbGVzL2RlZmF1bHQuanNvbiJ9XSwiY29tcG9zaXRpb25zIjpbeyJhZ2VudCI6IndyaXRlciIsImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmMxOWE2MTczYTNiYWQ2NzIzYjVmNGMzNmY0OWM4ZWUyMWFmYmQ2NTMxN2Q5YzljNDI3NWViZDEzMGIyMjIzZDUiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwic2l6ZSI6MjAyfSwicGF0aCI6ImNvbXBvc2l0aW9ucy93cml0ZXItbGludXgtYW1kNjQuanNvbiIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLm1hbmlmZXN0LnYxK2pzb24iLCJuYW1lIjoiZXhhbXBsZSIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlckNhdGFsb2ciOnsiZGVzY3JpcHRvciI6eyJkaWdlc3QiOiJzaGEyNTY6OTMzMjgzYTFmYTkwZmQ0ODhkYjNmODcyZmI4OWRjMTU3MmE1ZjYzOGJmMGE4MTUxNGE1NDIzMzNlMzEwZWY5NSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLnRvb2wucHJvdmlkZXIuY2F0YWxvZy52MStqc29uIiwic2l6ZSI6MTIxfSwiaWQiOiJjYXRhbG9nIiwicGF0aCI6InRvb2wtcHJvdmlkZXJzL2NhdGFsb2cuanNvbiJ9fQ=="
+        },
+        {
+          "path": "build-profiles",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "build-profiles/default.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 820,
+          "digest": "sha256:a7e6136d7e7daf2fcd7e61a149000382032dcbf140f2dda1076d2ee85d0a62cd",
+          "linkTarget": "",
+          "bytes": "eyJoYXJuZXNzIjpbeyJpbWFnZSI6eyJkaWdlc3QiOiJzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5vY2kuaW1hZ2UubWFuaWZlc3QudjEranNvbiIsInNpemUiOjF9LCJpbWFnZVJlZiI6InJlZ2lzdHJ5LmV4YW1wbGUvYWdlbnRzdWl0ZS9oYXJuZXNzQHNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19XSwiaWQiOiJkZWZhdWx0IiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwicnVudGltZUJhc2UiOlt7ImltYWdlIjp7ImRpZ2VzdCI6InNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLm9jaS5pbWFnZS5tYW5pZmVzdC52MStqc29uIiwic2l6ZSI6MX0sImltYWdlUmVmIjoicmVnaXN0cnkuZXhhbXBsZS9hZ2VudHN1aXRlL3J1bnRpbWUtYmFzZUBzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInNvdXJjZUVwb2NoIjoxfQ=="
+        },
+        {
+          "path": "compositions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "compositions/writer-linux-amd64.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 202,
+          "digest": "sha256:c19a6173a3bad6723b5f4c36f49c8ee21afbd65317d9c9c4275ebd130b2223d5",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudCI6IndyaXRlciIsImJ1aWxkUHJvZmlsZSI6ImRlZmF1bHQiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        },
+        {
+          "path": "instructions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "instructions/writer.md",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 15,
+          "digest": "sha256:516ff360a8ebb5e36e87f0d401a3cc7436ad2ad1059aae64670aff1078171df8",
+          "linkTarget": "",
+          "bytes": "V3JpdGUgY2xlYXJseS4K"
+        },
+        {
+          "path": "policies",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "policies/writer.json",
+          "type": "symlink",
+          "mode": 511,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "../instructions/writer.md",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers/catalog.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 121,
+          "digest": "sha256:933283a1fa90fd488db3f872fb89dc1572a5f638bf0a81514a542333e310ef95",
+          "linkTarget": "",
+          "bytes": "eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS50b29sLnByb3ZpZGVyLmNhdGFsb2cudjEranNvbiIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        }
+      ],
+      "control": "policy-boundary-base",
+      "body": null
+    },
+    {
+      "name": "policy-symlink-extra",
+      "origin": "d753475d3313507bb3297d06b28ec373287e3791:TestPolicyBindingRejectsUnownedContent/symlink policies/extra.json",
+      "sourceType": "directory",
+      "valid": false,
+      "phase": "ValidatePath",
+      "refusal": "policy path policies/extra.json is orphaned, unreferenced, or not a regular policy file",
+      "fullPath": true,
+      "entries": [
+        {
+          "path": "agents",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "agents/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 571,
+          "digest": "sha256:dbf0eb9bc99342fffb3d4ac410a2dece0d6dcf27fe2d7462d77d81013711c603",
+          "linkTarget": "",
+          "bytes": "eyJpZCI6IndyaXRlciIsImluc3RydWN0aW9ucyI6eyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1Njo1MTZmZjM2MGE4ZWJiNWUzNmU4N2YwZDQwMWEzY2M3NDM2YWQyYWQxMDU5YWFlNjQ2NzBhZmYxMDc4MTcxZGY4IiwibWVkaWFUeXBlIjoidGV4dC9tYXJrZG93bjsgY2hhcnNldD11dGYtOCIsInNpemUiOjE1fSwicGF0aCI6Imluc3RydWN0aW9ucy93cml0ZXIubWQifSwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYWdlbnQudjEranNvbiIsIm1vZGVsIjp7Im1vZGVsIjoiZXhhbXBsZS1tb2RlbCIsInByb3RvY29sIjoib3BlbmFpLWNvbXBhdGlibGUifSwicG9saWN5Ijp7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OjViYzg2ZmE1Y2I1Y2FkYTdlNDJmYjQxYzhhNzgzMThhYzM4ZTU3ZDE5ZjYwOTViODM4ZWE1Y2U4ZGRmZGU1ZWYiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5wb2xpY3kudjEranNvbiIsInNpemUiOjEyMH0sInBhdGgiOiJwb2xpY2llcy93cml0ZXIuanNvbiJ9LCJzY2hlbWFWZXJzaW9uIjoiMS4wLjAtZHJhZnQifQ=="
+        },
+        {
+          "path": "agentsuite.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 1126,
+          "digest": "sha256:cbbb2d5833c5e02bb86068f398502676c17a2797a8e61838c39877f28b535f28",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudHMiOlt7ImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmRiZjBlYjliYzk5MzQyZmZmYjNkNGFjNDEwYTJkZWNlMGQ2ZGNmMjdmZTJkNzQ2MmQ3N2Q4MTAxMzcxMWM2MDMiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5hZ2VudC52MStqc29uIiwic2l6ZSI6NTcxfSwiaWQiOiJ3cml0ZXIiLCJwYXRoIjoiYWdlbnRzL3dyaXRlci5qc29uIn1dLCJidWlsZFByb2ZpbGVzIjpbeyJkZXNjcmlwdG9yIjp7ImRpZ2VzdCI6InNoYTI1NjphN2U2MTM2ZDdlN2RhZjJmY2Q3ZTYxYTE0OTAwMDM4MjAzMmRjYmYxNDBmMmRkYTEwNzZkMmVlODVkMGE2MmNkIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwic2l6ZSI6ODIwfSwiaWQiOiJkZWZhdWx0IiwicGF0aCI6ImJ1aWxkLXByb2ZpbGVzL2RlZmF1bHQuanNvbiJ9XSwiY29tcG9zaXRpb25zIjpbeyJhZ2VudCI6IndyaXRlciIsImRlc2NyaXB0b3IiOnsiZGlnZXN0Ijoic2hhMjU2OmMxOWE2MTczYTNiYWQ2NzIzYjVmNGMzNmY0OWM4ZWUyMWFmYmQ2NTMxN2Q5YzljNDI3NWViZDEzMGIyMjIzZDUiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwic2l6ZSI6MjAyfSwicGF0aCI6ImNvbXBvc2l0aW9ucy93cml0ZXItbGludXgtYW1kNjQuanNvbiIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLm1hbmlmZXN0LnYxK2pzb24iLCJuYW1lIjoiZXhhbXBsZSIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlckNhdGFsb2ciOnsiZGVzY3JpcHRvciI6eyJkaWdlc3QiOiJzaGEyNTY6OTMzMjgzYTFmYTkwZmQ0ODhkYjNmODcyZmI4OWRjMTU3MmE1ZjYzOGJmMGE4MTUxNGE1NDIzMzNlMzEwZWY5NSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5hZ2VudHN1aXRlLnRvb2wucHJvdmlkZXIuY2F0YWxvZy52MStqc29uIiwic2l6ZSI6MTIxfSwiaWQiOiJjYXRhbG9nIiwicGF0aCI6InRvb2wtcHJvdmlkZXJzL2NhdGFsb2cuanNvbiJ9fQ=="
+        },
+        {
+          "path": "build-profiles",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "build-profiles/default.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 820,
+          "digest": "sha256:a7e6136d7e7daf2fcd7e61a149000382032dcbf140f2dda1076d2ee85d0a62cd",
+          "linkTarget": "",
+          "bytes": "eyJoYXJuZXNzIjpbeyJpbWFnZSI6eyJkaWdlc3QiOiJzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsIm1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5vY2kuaW1hZ2UubWFuaWZlc3QudjEranNvbiIsInNpemUiOjF9LCJpbWFnZVJlZiI6InJlZ2lzdHJ5LmV4YW1wbGUvYWdlbnRzdWl0ZS9oYXJuZXNzQHNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19XSwiaWQiOiJkZWZhdWx0IiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmFnZW50c3VpdGUuYnVpbGQucHJvZmlsZS52MStqc29uIiwicnVudGltZUJhc2UiOlt7ImltYWdlIjp7ImRpZ2VzdCI6InNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLm9jaS5pbWFnZS5tYW5pZmVzdC52MStqc29uIiwic2l6ZSI6MX0sImltYWdlUmVmIjoicmVnaXN0cnkuZXhhbXBsZS9hZ2VudHN1aXRlL3J1bnRpbWUtYmFzZUBzaGEyNTY6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInBsYXRmb3JtIjp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0Iiwib3MiOiJsaW51eCJ9fV0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInNvdXJjZUVwb2NoIjoxfQ=="
+        },
+        {
+          "path": "compositions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "compositions/writer-linux-amd64.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 202,
+          "digest": "sha256:c19a6173a3bad6723b5f4c36f49c8ee21afbd65317d9c9c4275ebd130b2223d5",
+          "linkTarget": "",
+          "bytes": "eyJhZ2VudCI6IndyaXRlciIsImJ1aWxkUHJvZmlsZSI6ImRlZmF1bHQiLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS5jb21wb3NpdGlvbi52MStqc29uIiwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In0sInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        },
+        {
+          "path": "instructions",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "instructions/writer.md",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 15,
+          "digest": "sha256:516ff360a8ebb5e36e87f0d401a3cc7436ad2ad1059aae64670aff1078171df8",
+          "linkTarget": "",
+          "bytes": "V3JpdGUgY2xlYXJseS4K"
+        },
+        {
+          "path": "policies",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "policies/extra.json",
+          "type": "symlink",
+          "mode": 511,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "writer.json",
+          "bytes": null
+        },
+        {
+          "path": "policies/writer.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 120,
+          "digest": "sha256:5bc86fa5cb5cada7e42fb41c8a78318ac38e57d19f6095b838ea5ce8ddfde5ef",
+          "linkTarget": "",
+          "bytes": "eyJkZW55V3JpdGVQYXRocyI6WyIveiIsIi9hIiwiL3oiXSwicmVxdWlyZWRDYXBhYmlsaXRpZXMiOlsiZmlsZXN5c3RlbS9kZW55LXdyaXRlL3YxIl0sInZlcnNpb24iOiJhZ2VudHN1aXRlLnBvbGljeS92MSJ9"
+        },
+        {
+          "path": "tool-providers",
+          "type": "directory",
+          "mode": 493,
+          "uid": 0,
+          "gid": 0,
+          "size": 0,
+          "digest": "",
+          "linkTarget": "",
+          "bytes": null
+        },
+        {
+          "path": "tool-providers/catalog.json",
+          "type": "file",
+          "mode": 420,
+          "uid": 0,
+          "gid": 0,
+          "size": 121,
+          "digest": "sha256:933283a1fa90fd488db3f872fb89dc1572a5f638bf0a81514a542333e310ef95",
+          "linkTarget": "",
+          "bytes": "eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuYWdlbnRzdWl0ZS50b29sLnByb3ZpZGVyLmNhdGFsb2cudjEranNvbiIsInNjaGVtYVZlcnNpb24iOiIxLjAuMC1kcmFmdCIsInRvb2xQcm92aWRlcnMiOltdfQ=="
+        }
+      ],
+      "control": "policy-boundary-base",
+      "body": null
+    }
+  ]
+}

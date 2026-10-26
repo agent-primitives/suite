@@ -52,9 +52,17 @@ available from the original document rather than reconstructed typed data.
 Full owning-schema checks plus local Go declaration rules cover identities,
 invocation declarations, deployment
 environment names, tools, remote headers, delegated authorization and extensions.
-Variant bodies remain explicit raw fragments pending inventory/closure validation;
-other graph manifests remain raw pinned documents. Collection is not whole-graph
-validation, runtime support, verified root identity, or a public partial reader.
+Variants and their inventories, runtime, environment, network and dependencies
+are now frozen typed records with explicit original raw fragments for identity.
+Private bundled-subsystem checks bind directory-source modes, compare complete
+payload inventories, validate every dependency graph and detect collisions within
+caller-selected installation sets. Archive/OCI modes remain authoritative; host
+access policy and permissions are unchanged. Dependency traversal does not impose
+Python's process recursion limit. Other graph manifests remain raw pinned documents.
+Neither collection nor successful bundled checks establish whole-graph validation,
+runtime support, verified root identity, or a public partial reader. Composition,
+profile/image/execution graph integration and retention/capability agreement remain
+separate work.
 Evaluation indexes and policies also require canonical stored JSON; policy keeps
 its own version envelope. Their references are preserved, while semantic
 completion remains separate.

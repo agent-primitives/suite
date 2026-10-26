@@ -46,6 +46,15 @@ REQUIRED |= {
     f"test_optional_manifest_pins_require_canonical_object_bytes[{bad}-{target}]"
     for bad in (False, True) for target in ("policy", "evals")
 }
+REQUIRED |= {
+    "test_shared_bundle_cases", "test_private_variant_inventory_and_directory_modes",
+    "test_bundled_native_directory_and_archive_authority",
+    "test_directory_mode_binding_does_not_rewrite_archive_or_allow_conflicts",
+    "test_all_variants_bind_directory_modes_even_if_not_selected",
+    "test_dependency_closure_exact_order_cycles_and_deep_chain",
+    "test_dependency_edge_is_checked_before_visited_reuse",
+    "test_collision_equality_ignores_path_and_component_but_not_metadata",
+}
 PASSED = set()
 SKIPPED = []
 

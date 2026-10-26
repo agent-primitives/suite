@@ -56,7 +56,13 @@ from agent_suite._directory import load_directory
 from agent_suite._archive import load_layer
 from agent_suite._oci import load_oci_layout
 from agent_suite._documents import read_documents
-from agent_suite._records import Agent
+from agent_suite._records import Agent, ToolProvider, ToolProviderVariant
+from agent_suite._bundles import validate_bundles
+from agent_suite._content import Content, Entry
+from agent_suite._record_decode import read_document
+from agent_suite._models import Document
+import base64
+import json
 from pathlib import Path
 import gzip
 import io
@@ -71,11 +77,23 @@ assert isinstance(records.agents[0].record, Agent)
 assert records.agents[0].record.id == 'writer'
 assert records.agents[0].record.instructions.source.pointer == '/instructions'
 assert not hasattr(records, 'verified_root_digest')
+case = json.loads(Path('bundle-case.json').read_bytes())
+row = case['providers'][0]
+provider = read_document(Document(base64.b64decode(row['bytes']), Source(row['file'])), ToolProvider, bundle).record
+assert isinstance(provider.variants[0], ToolProviderVariant)
+content = Content()
+for e in case['entries']:
+    content.add(Entry(e['path'], kind=e['type'], mode=e['mode'], uid=e['uid'], gid=e['gid'],
+                      size=e['size'], digest=e['digest'], link_target=e['linkTarget']))
+validate_bundles(content, {row['key']: provider})
 for schema in bundle.schemas.values():
     bundle.registry.resolver(schema['$id'])
 assert bundle.validate('agent.schema.json', {}, Source('agent.json'))
 print('installed offline bundle: 15 exact schemas; no public loader')
 """
+    cases = json.loads((ROOT / 'testdata/conformance/bundle-cases.json').read_bytes())['cases']
+    baseline = next(c for c in cases if c['name'] == 'baseline-directory')
+    (tmp_path / 'bundle-case.json').write_text(json.dumps(baseline), encoding='utf-8')
     from test_oci import materialize
     materialize(tmp_path / 'layout', {'layout': 'minimal-0644'})
     subprocess.run([str(python), "-I", "-c", smoke], cwd=tmp_path, check=True)

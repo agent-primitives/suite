@@ -9,10 +9,12 @@ from ._json import Number
 from ._models import Descriptor, Diagnostic, Document, Platform, Source
 from ._records import (
     Agent, AgentInvoke, BrokeredCredential, Catalog, CompositionRef,
-    DelegatedAuthorization, Extension, FileRef, InferenceRequirements, Loaded,
-    ManifestRef, ModelRequirement, RawFragment, RemoteHeader,
-    RemoteNetworkRequirement, RemoteTimeouts, RemoteToolProvider, SecretKeyRef,
-    Suite, Tool, ToolProvider, ToolProviderCompositionRef, ToolProviderRequirement,
+    DelegatedAuthorization, EnvironmentName, Extension, FileRef, InferenceRequirements,
+    InventoryEntry, Loaded, ManifestRef, ModelRequirement, NetworkAccess, RawFragment,
+    RemoteHeader, RemoteNetworkRequirement, RemoteTimeouts, RemoteToolProvider,
+    RuntimeRequirement, SecretKeyRef, Suite, Tool, ToolProvider,
+    ToolProviderCompositionRef, ToolProviderDependency, ToolProviderRequirement,
+    ToolProviderVariant,
 )
 from ._schema import Bundle
 
@@ -221,11 +223,99 @@ def _remote(n: _Node) -> RemoteToolProvider:
                               n.text("cancellation"), n.text("connection"), source=n.source)
 
 
+def _environment(n: _Node) -> EnvironmentName:
+    n.closed("name required secret delivery")
+    return EnvironmentName(
+        name=n.text("name"),
+        required=n.field("required", False).boolean(),
+        secret=n.field("secret", False).boolean(),
+        delivery=n.text("delivery"),
+        source=n.source,
+    )
+
+
+def _network_access(n: _Node) -> NetworkAccess:
+    n.closed("scheme host port")
+    return NetworkAccess(
+        scheme=n.text("scheme"),
+        host=n.text("host"),
+        port=n.integer("port"),
+        source=n.source,
+    )
+
+
+def _runtime_requirement(n: _Node) -> RuntimeRequirement:
+    n.closed("abi abiVersion cpuBaseline requiredBasePaths")
+    return RuntimeRequirement(
+        abi=n.text("abi"),
+        abi_version=n.text("abiVersion"),
+        cpu_baseline=n.text("cpuBaseline"),
+        required_base_paths=n.array("requiredBasePaths", _Node.string),
+        source=n.source,
+    )
+
+
+def _inventory(n: _Node) -> InventoryEntry:
+    n.closed("path type mode uid gid size digest linkTarget component")
+    mode = n.integer("mode")
+    if not 0 <= mode < (1 << 32):
+        fail(n.field("mode").source, "document.integer", "integer outside uint32")
+    return InventoryEntry(
+        path=n.text("path"),
+        type=n.text("type"),
+        mode=mode,
+        uid=n.integer("uid"),
+        gid=n.integer("gid"),
+        # The full schema requires size for files; other kinds default to zero.
+        size=n.integer("size") if "size" in n.value else 0,
+        digest=n.text("digest"),
+        link_target=n.text("linkTarget"),
+        component=n.text("component"),
+        source=n.source,
+    )
+
+
+def _dependency(n: _Node) -> ToolProviderDependency:
+    n.closed("id version variantDigest")
+    return ToolProviderDependency(
+        id=n.text("id"),
+        version=n.text("version"),
+        variant_digest=n.text("variantDigest"),
+        source=n.source,
+    )
+
+
+def _variant(n: _Node) -> ToolProviderVariant:
+    n.closed("platform variantDigest installRoot relocatable payloadRoot entrypoint arguments searchPath "
+             "environment writablePaths network runtime files dependencies sbom provenance")
+    return ToolProviderVariant(
+        platform=n.primitive("platform", Platform),
+        variant_digest=n.text("variantDigest"),
+        install_root=n.text("installRoot"),
+        relocatable=n.field("relocatable", False).boolean(),
+        payload_root=n.text("payloadRoot"),
+        entrypoint=n.text("entrypoint"),
+        arguments=n.array("arguments", _Node.string),
+        search_path=n.array("searchPath", _Node.string),
+        writable_paths=n.array("writablePaths", _Node.string),
+        environment=n.array("environment", _environment),
+        network=n.array("network", _network_access),
+        runtime=_runtime_requirement(n.field("runtime")),
+        files=n.array("files", _inventory),
+        dependencies=n.array("dependencies", _dependency),
+        sbom=n.primitive("sbom", Descriptor) if "sbom" in n.value else None,
+        provenance=n.primitive("provenance", Descriptor) if "provenance" in n.value else None,
+        # Defaults are views only: identity must retain the original authored tree.
+        raw=RawFragment(n.document, n.path),
+        source=n.source,
+    )
+
+
 def _provider(n: _Node) -> ToolProvider:
     n.closed("schemaVersion mediaType id version retained protocol revision tools variants remote extensions")
     return ToolProvider(n.text("schemaVersion"), n.text("mediaType"), n.text("id"), n.text("version"),
                         n.optional("retained", _Node.boolean), n.text("protocol"), n.text("revision"),
-                        n.array("tools", _tool), n.array("variants", lambda v: RawFragment(v.document, v.path)),
+                        n.array("tools", _tool), n.array("variants", _variant),
                         n.optional("remote", _remote), n.array("extensions", _extension), source=n.source)
 
 

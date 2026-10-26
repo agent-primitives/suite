@@ -98,17 +98,21 @@ def test_remote_provider_is_typed_to_secret_and_credential_leaves(bundle):
     assert remote.timeouts.source.pointer == "/remote/timeouts"
 
 
-def test_variants_are_explicit_raw_fragments_not_typed_claims(bundle):
+def test_typed_variants_keep_explicit_authoritative_raw_fragments(bundle):
     doc = document("tool-providers/kubectl-tool-provider.json")
     provider = read_document(doc, ToolProvider, bundle).record
-    fragment = provider.variants[0]
+    variant = provider.variants[0]
+    fragment = variant.raw
     assert isinstance(fragment, RawFragment)
+    assert variant.source == fragment.source
+    assert fragment.document.data == doc.data
     assert fragment.document is doc
     assert fragment.path == ("variants", 0)
     assert fragment.source == Source(doc.source.file, "/variants/0")
     value = fragment.value
     value["files"].clear()
-    assert fragment.value["files"]
+    assert len(fragment.value["files"]) == len(variant.files) == 2
+    assert fragment.value is not fragment.value
     assert isinstance(fragment.value["files"][0]["mode"], Number)
     assert fragment.value["files"][0]["mode"].lexeme.isdigit()
     escaped = RawFragment(Document.from_bytes(b'{"a/b~c":[1e0]}', Source("f", "/base")),

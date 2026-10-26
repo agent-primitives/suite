@@ -239,10 +239,27 @@ def test_stale_variant_points_to_selected_resolution(bundle):
     assert error.value.diagnostics[0].source == Source(path, '/toolProviders/0/variantDigest')
 
 
+@pytest.mark.parametrize('name,code,pointer', [
+    ('minimal', None, None),
+    ('composition-providers-omitted', 'schema.required', ''),
+    ('composition-providers-null', 'schema.type', '/toolProviders'),
+], ids=['empty', 'omitted', 'null'])
+def test_shared_composition_provider_presence(bundle, name, code, pointer):
+    cases = json.loads((ROOT/'testdata/conformance/graph-cases.json').read_bytes())['cases']
+    content = corpus_content(next(c for c in cases if c['name'] == name))
+    if code is None:
+        assert read_graph(content, bundle).compositions[0].record.tool_providers == ()
+    else:
+        with pytest.raises(DocumentError) as error:
+            read_graph(content, bundle)
+        assert error.value.diagnostics[0].code == code
+        assert error.value.diagnostics[0].source == Source('compositions/writer-linux-amd64.json', pointer)
+
+
 def test_shared_graph_cases(bundle):
     cases = json.loads((ROOT/'testdata/conformance/graph-cases.json').read_bytes())['cases']
-    assert len(cases) == len({c['name'] for c in cases}) == 69
-    assert sum(c['fullPath'] for c in cases) == 67
+    assert len(cases) == len({c['name'] for c in cases}) == 71
+    assert sum(c['fullPath'] for c in cases) == 69
     assert sum(c['sourceType'] == 'archive' for c in cases) == 2
     for case in cases:
         assert type(case['valid']) is bool and type(case['fullPath']) is bool

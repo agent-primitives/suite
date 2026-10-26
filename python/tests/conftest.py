@@ -81,6 +81,7 @@ REQUIRED |= {
 }
 REQUIRED |= {f'test_wide_valid_execution_uniqueness_work[{size}]' for size in (256,512,1024,2048)}
 REQUIRED |= {f'test_unique_items_reference_diagnostics_and_work[{ref}]' for ref in ('$ref', '$dynamicRef')}
+REQUIRED |= {f'test_shared_composition_provider_presence[{case}]' for case in ('empty', 'omitted', 'null')}
 PASSED = set()
 SKIPPED = []
 

@@ -205,10 +205,10 @@ func TestSharedGraphCases(t *testing.T) {
 			}
 		})
 	}
-	if len(corpus.Cases) != 69 || fullPaths != 67 || archive != 2 {
-		t.Fatalf("corpus counts cases/fullPath/archive = %d/%d/%d, want 69/67/2", len(corpus.Cases), fullPaths, archive)
+	if len(corpus.Cases) != 71 || fullPaths != 69 || archive != 2 {
+		t.Fatalf("corpus counts cases/fullPath/archive = %d/%d/%d, want 71/69/2", len(corpus.Cases), fullPaths, archive)
 	}
-	for _, name := range []string{"minimal", "coordinator", "remote", "bundled", "runtime-two-profiles", "shared-provider", "standalone", "retained-true", "dependency-inward", "unselected-variant-dependency", "sorted-resolutions", "standalone-collision"} {
+	for _, name := range []string{"minimal", "composition-providers-omitted", "composition-providers-null", "coordinator", "remote", "bundled", "runtime-two-profiles", "shared-provider", "standalone", "retained-true", "dependency-inward", "unselected-variant-dependency", "sorted-resolutions", "standalone-collision"} {
 		if !names[name] {
 			t.Fatalf("required fixture %q missing", name)
 		}

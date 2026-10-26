@@ -8,13 +8,13 @@ from typing import Any, NoReturn, TypeVar, cast
 from ._json import Number
 from ._models import Descriptor, Diagnostic, Document, Platform, Source
 from ._records import (
-    Agent, AgentInvoke, BrokeredCredential, Catalog, CompositionRef,
-    DelegatedAuthorization, EnvironmentName, Extension, FileRef, InferenceRequirements,
-    InventoryEntry, Loaded, ManifestRef, ModelRequirement, NetworkAccess, RawFragment,
-    RemoteHeader, RemoteNetworkRequirement, RemoteTimeouts, RemoteToolProvider,
-    RuntimeRequirement, SecretKeyRef, Suite, Tool, ToolProvider,
-    ToolProviderCompositionRef, ToolProviderDependency, ToolProviderRequirement,
-    ToolProviderVariant,
+    Agent, AgentInvoke, BrokeredCredential, BuildProfile, Catalog, Composition, CompositionRef,
+    DelegatedAuthorization, EnvironmentName, ExecutionContract, ExecutionInput, Extension, FileRef,
+    Implementation, InferenceRequirements, InventoryEntry, Loaded, ManifestRef, ModelRequirement,
+    NetworkAccess, PlatformImage, RawFragment, RemoteHeader, RemoteNetworkRequirement, RemoteTimeouts,
+    RemoteToolProvider, ResolvedToolProvider, RuntimeProfile, RuntimeRequirement, SecretKeyRef, Suite,
+    Tool, ToolProvider, ToolProviderComposition, ToolProviderCompositionRef, ToolProviderDependency,
+    ToolProviderRequirement, ToolProviderVariant,
 )
 from ._schema import Bundle
 
@@ -319,6 +319,106 @@ def _provider(n: _Node) -> ToolProvider:
                         n.optional("remote", _remote), n.array("extensions", _extension), source=n.source)
 
 
+def _execution_input(n: _Node) -> ExecutionInput:
+    n.closed("name environment secret")
+    return ExecutionInput(n.text("name"), n.text("environment"), n.field("secret").boolean(),
+                          source=n.source)
+
+
+def _execution(n: _Node) -> ExecutionContract:
+    n.closed("configuration kind protocol port healthPath inputs")
+    return ExecutionContract(
+        configuration=n.text("configuration"),
+        kind=n.text("kind"),
+        protocol=n.text("protocol"),
+        port=n.integer("port"),
+        health_path=n.text("healthPath"),
+        inputs=n.array("inputs", _execution_input),
+        source=n.source,
+    )
+
+
+def _platform_image(n: _Node) -> PlatformImage:
+    n.closed("platform imageRef image")
+    return PlatformImage(n.primitive("platform", Platform), n.text("imageRef"),
+                         n.primitive("image", Descriptor), source=n.source)
+
+
+def _build_profile(n: _Node) -> BuildProfile:
+    n.closed("schemaVersion mediaType id runtimeBase harness sourceEpoch execution")
+    return BuildProfile(
+        schema_version=n.text("schemaVersion"),
+        media_type=n.text("mediaType"),
+        id=n.text("id"),
+        runtime_base=n.array("runtimeBase", _platform_image),
+        harness=n.array("harness", _platform_image),
+        source_epoch=n.integer("sourceEpoch"),
+        execution=n.optional("execution", _execution),
+        source=n.source,
+    )
+
+
+def _implementation(n: _Node) -> Implementation:
+    n.closed("id version digest")
+    return Implementation(n.text("id"), n.text("version"), n.text("digest"), source=n.source)
+
+
+def _runtime_profile(n: _Node) -> RuntimeProfile:
+    n.closed("schemaVersion mediaType id runtime harness renderer configurationABI imageRequired")
+    return RuntimeProfile(
+        schema_version=n.text("schemaVersion"),
+        media_type=n.text("mediaType"),
+        id=n.text("id"),
+        runtime=_implementation(n.field("runtime")),
+        harness=_implementation(n.field("harness")),
+        renderer=_implementation(n.field("renderer")),
+        configuration_abi=n.text("configurationABI"),
+        image_required=n.field("imageRequired").boolean(),
+        source=n.source,
+    )
+
+
+def _resolved_provider(n: _Node) -> ResolvedToolProvider:
+    n.closed("id version manifestDigest variantDigest executionMode")
+    return ResolvedToolProvider(
+        id=n.text("id"),
+        version=n.text("version"),
+        manifest_digest=n.text("manifestDigest"),
+        variant_digest=n.text("variantDigest"),
+        execution_mode=n.text("executionMode"),
+        source=n.source,
+    )
+
+
+def _composition_document(n: _Node) -> Composition:
+    n.closed("schemaVersion mediaType agent platform buildProfile toolProviders runtimeProfile")
+    return Composition(
+        schema_version=n.text("schemaVersion"),
+        media_type=n.text("mediaType"),
+        agent=n.text("agent"),
+        platform=n.primitive("platform", Platform),
+        build_profile=n.text("buildProfile"),
+        tool_providers=n.array("toolProviders", _resolved_provider),
+        runtime_profile=n.text("runtimeProfile"),
+        source=n.source,
+    )
+
+
+def _provider_composition_document(n: _Node) -> ToolProviderComposition:
+    n.closed("schemaVersion mediaType id version manifestDigest platform variantDigest buildProfile")
+    return ToolProviderComposition(
+        schema_version=n.text("schemaVersion"),
+        media_type=n.text("mediaType"),
+        id=n.text("id"),
+        version=n.text("version"),
+        manifest_digest=n.text("manifestDigest"),
+        platform=n.primitive("platform", Platform),
+        variant_digest=n.text("variantDigest"),
+        build_profile=n.text("buildProfile"),
+        source=n.source,
+    )
+
+
 def read_document(document: Document, kind: type[T], bundle: Bundle) -> Loaded[T]:
     try:
         value = document.value
@@ -330,6 +430,14 @@ def read_document(document: Document, kind: type[T], bundle: Bundle) -> Loaded[T
         schema = "agent.schema.json"
     elif kind is ToolProvider:
         schema = "tool-provider.schema.json"
+    elif kind is BuildProfile:
+        schema = "build-profile.schema.json"
+    elif kind is RuntimeProfile:
+        schema = "runtime-profile.schema.json"
+    elif kind is Composition:
+        schema = "composition.schema.json"
+    elif kind is ToolProviderComposition:
+        schema = "tool-provider-composition.schema.json"
     elif kind is Catalog:
         schema = None
     else:
@@ -345,6 +453,14 @@ def read_document(document: Document, kind: type[T], bundle: Bundle) -> Loaded[T
         record = _agent(node)
     elif kind is ToolProvider:
         record = _provider(node)
+    elif kind is BuildProfile:
+        record = _build_profile(node)
+    elif kind is RuntimeProfile:
+        record = _runtime_profile(node)
+    elif kind is Composition:
+        record = _composition_document(node)
+    elif kind is ToolProviderComposition:
+        record = _provider_composition_document(node)
     else:
         record = _catalog(node)
     return Loaded(document, cast(T, record))

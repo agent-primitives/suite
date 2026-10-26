@@ -56,6 +56,7 @@ from agent_suite._directory import load_directory
 from agent_suite._archive import load_layer
 from agent_suite._oci import load_oci_layout
 from agent_suite._documents import read_documents
+from agent_suite._graph import read_graph
 from agent_suite._records import Agent, ToolProvider, ToolProviderVariant
 from agent_suite._bundles import validate_bundles
 from agent_suite._content import Content, Entry
@@ -86,6 +87,16 @@ for e in case['entries']:
     content.add(Entry(e['path'], kind=e['type'], mode=e['mode'], uid=e['uid'], gid=e['gid'],
                       size=e['size'], digest=e['digest'], link_target=e['linkTarget']))
 validate_bundles(content, {row['key']: provider})
+assert read_graph(load_oci_layout(Path('layout')), bundle).compositions
+case = json.loads(Path('graph-case.json').read_bytes())
+content = Content()
+for e in case['entries']:
+    body = base64.b64decode(e['bytes']) if e['bytes'] is not None else None
+    content.add(Entry(e['path'], kind=e['type'], mode=e['mode'], uid=e['uid'], gid=e['gid'],
+                      size=e['size'], digest=e['digest'], link_target=e['linkTarget'], data=body))
+parts = read_graph(content, bundle)
+assert len(parts.runtime_profiles) == len(parts.compositions) == 2
+assert not hasattr(parts, 'verified_root_digest')
 for schema in bundle.schemas.values():
     bundle.registry.resolver(schema['$id'])
 assert bundle.validate('agent.schema.json', {}, Source('agent.json'))
@@ -94,6 +105,9 @@ print('installed offline bundle: 15 exact schemas; no public loader')
     cases = json.loads((ROOT / 'testdata/conformance/bundle-cases.json').read_bytes())['cases']
     baseline = next(c for c in cases if c['name'] == 'baseline-directory')
     (tmp_path / 'bundle-case.json').write_text(json.dumps(baseline), encoding='utf-8')
+    graph_cases = json.loads((ROOT / 'testdata/conformance/graph-cases.json').read_bytes())['cases']
+    graph_case = next(c for c in graph_cases if c['name'] == 'runtime-two-profiles')
+    (tmp_path / 'graph-case.json').write_text(json.dumps(graph_case), encoding='utf-8')
     from test_oci import materialize
     materialize(tmp_path / 'layout', {'layout': 'minimal-0644'})
     subprocess.run([str(python), "-I", "-c", smoke], cwd=tmp_path, check=True)

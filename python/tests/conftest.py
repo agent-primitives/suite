@@ -55,6 +55,16 @@ REQUIRED |= {
     "test_dependency_edge_is_checked_before_visited_reuse",
     "test_collision_equality_ignores_path_and_component_but_not_metadata",
 }
+REQUIRED |= {
+    "test_shared_graph_cases", "test_private_graph_minimal_and_original_bytes",
+    "test_graph_native_directory_and_oci", "test_schema_valid_duplicate_execution_fields",
+    "test_schema_valid_duplicate_image_platform", "test_image_semantics_after_owning_schema",
+    "test_schema_valid_trailing_newline_profile_values",
+    "test_schema_valid_duplicate_graph_selection_keys[buildProfiles-minimal]",
+    "test_schema_valid_duplicate_graph_selection_keys[compositions-minimal]",
+    "test_schema_valid_duplicate_graph_selection_keys[runtimeProfiles-runtime-two-profiles]",
+    "test_schema_valid_duplicate_graph_selection_keys[toolProviderCompositions-standalone]",
+}
 PASSED = set()
 SKIPPED = []
 

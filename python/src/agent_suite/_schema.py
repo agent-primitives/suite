@@ -3,16 +3,18 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib.resources import files
 from typing import Any
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, validators
 from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT202012
 from referencing.exceptions import Unresolvable
 
 from ._json import decode, digest_bytes
 from ._models import Diagnostic, Source
+from ._schema_uniqueness import Validator
 
 
 def _check_references(resource: Resource[Any], resolver: Any) -> None:
@@ -26,10 +28,22 @@ def _check_references(resource: Resource[Any], resolver: Any) -> None:
         _check_references(child, resolver.in_subresource(child))
 
 
+def _no_nested_dialect(value: Any) -> bool:
+    # A JSON Pointer can reach schemas under unknown keywords too. Conservatively
+    # retain stock behavior even for schema-looking literal data; never rewrite it.
+    if isinstance(value, dict):
+        return '$schema' not in value and all(_no_nested_dialect(child) for child in value.values())
+    if isinstance(value, list):
+        return all(_no_nested_dialect(child) for child in value)
+    return True
+
+
 @dataclass(frozen=True)
 class Bundle:
     schemas: Mapping[str, Any]
     registry: Registry[Any]
+    _validation_schemas: Mapping[str, Any] | None = field(default=None, repr=False, compare=False)
+    _validation_registry: Registry[Any] | None = field(default=None, repr=False, compare=False)
 
     @classmethod
     def from_bytes(cls, documents: Mapping[str, bytes]) -> Bundle:
@@ -52,6 +66,27 @@ class Bundle:
                 _check_references(resource, registry.resolver(identity))
         except Unresolvable as error:
             raise ValueError("unresolved offline schema reference in bundle") from error
+        # Explicit dialect declarations make jsonschema.evolve select the stock
+        # class again across references. Local views keep this equivalent keyword
+        # extension active without registering or modifying a global validator.
+        if all(validators.validator_for(schema, default=None) is Draft202012Validator
+               for schema in schemas.values()) and all(
+                   _no_nested_dialect(child) for schema in schemas.values()
+                   for key, child in schema.items() if key != '$schema'):
+            views = {name: {k: v for k, v in schema.items() if k != '$schema'}
+                     for name, schema in schemas.items()}
+            view_registry = Registry().with_resources(
+                (view['$id'], Resource.from_contents(view, default_specification=DRAFT202012)) for view in views.values()
+            ).crawl()
+            try:
+                for identity, resource in view_registry.items():
+                    _check_references(resource, view_registry.resolver(identity))
+            except Unresolvable:
+                # A reference into removed dialect metadata must keep the original
+                # registry/validator, as must mixed or nested-dialect bundles above.
+                pass
+            else:
+                return cls(schemas, registry, views, view_registry)
         return cls(schemas, registry)
 
     @classmethod
@@ -72,7 +107,10 @@ class Bundle:
         return cls.from_bytes(documents)
 
     def validate(self, name: str, value: Any, source: Source) -> list[Diagnostic]:
-        validator = Draft202012Validator(self.schemas[name], registry=self.registry)
+        if self._validation_schemas is not None and self._validation_registry is not None:
+            validator = Validator(self._validation_schemas[name], registry=self._validation_registry)
+        else:
+            validator = Draft202012Validator(self.schemas[name], registry=self.registry)
         try:
             errors = list(validator.iter_errors(value))
         except Unresolvable as error:

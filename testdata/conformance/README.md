@@ -79,10 +79,10 @@ regeneration tool. Native/no-skip required gates and installed-wheel coverage ap
 
 ## Private profile and composition graph prerequisites
 
-[graph-cases.json](graph-cases.json) freezes **70 complete actual-Go inputs**:
+[graph-cases.json](graph-cases.json) freezes **69 distinct complete actual-Go inputs**:
 portable entry metadata and exact base64 bytes for every regular fixture file.
-All 70 run through the real ordinary Go graph phases, excluding only stored
-policy/evaluation semantics. **68 complete directory snapshots also replay full
+All 69 run through the real ordinary Go graph phases, excluding only stored
+policy/evaluation semantics. **67 complete directory snapshots also replay full
 `ValidatePath`**; two archive metadata controls keep archive mode authority.
 The phase and refusal are frozen, and full-path cases must reach the intended
 refusal rather than an incidental stale ancestor. Required normal/native no-skip
@@ -112,6 +112,16 @@ Installed wheels exercise both OCI graph collection and the two-profile snapshot
 This remains **private graph-prerequisite validation**, not a finished public
 package reader or verified root identity. Policy/evaluation semantics stay pending;
 no model, evaluation, image or runtime is executed and nothing is fetched.
+
+The `standalone` snapshot also covers provider-only inward retention; it is counted
+once, not repeated under an alias. Python object-array uniqueness uses structural
+JSON keys instead of all-pairs object comparisons. Deterministic regressions count
+comparison/key work through wide execution inputs and resolved providers, while
+stock-validator parity checks retain boolean/numeric distinctions, numeric equality,
+object-key independence, array order and exact diagnostic locations. Schema bytes
+are unchanged. Bundle-local validation views preserve the extension across owned
+2020-12 references; mixed/nested dialects or metadata-sensitive references keep
+stock validation. This is not an aggregate CPU or worst-case hash-work guarantee.
 
 ## Local declarations and private typed documents
 

@@ -1,0 +1,76 @@
+{
+  "cases": [
+    {
+      "name": "instructions-empty",
+      "target": "instructions",
+      "path": "instructions/empty.data",
+      "prefix": "",
+      "block": "",
+      "repeat": 0,
+      "suffix": "",
+      "size": 0,
+      "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rootDigest": "sha256:ca54fc57ece3f09a2b6a98e7d9410ec47e9a2d1a1a5f642e059dbc930e0e42cb"
+    },
+    {
+      "name": "instructions-non-utf8",
+      "target": "instructions",
+      "path": "instructions/non-utf8.data",
+      "prefix": "AP/+QQ0K",
+      "block": "",
+      "repeat": 0,
+      "suffix": "",
+      "size": 6,
+      "digest": "sha256:262a969404d685b364c5d2be2811137f44c0d8b5f5e1f7de46810f0cc2030c1f",
+      "rootDigest": "sha256:fb35c8d70f82f5c46aa5e822a21a00c5253fe764b2749f57d8989b0fecf8a1ee"
+    },
+    {
+      "name": "instructions-above-4mib",
+      "target": "instructions",
+      "path": "instructions/large.data",
+      "prefix": "",
+      "block": "eA==",
+      "repeat": 4194305,
+      "suffix": "",
+      "size": 4194305,
+      "digest": "sha256:8d3d3c04baadfd31cbebf771836900097b5f36cc142b74e40747c7b372beab8b",
+      "rootDigest": "sha256:54ca5c331a37c453c50fb9ba259c458452aec349c2f079011c31af2bb771cf29"
+    },
+    {
+      "name": "schema-noncanonical",
+      "target": "inputSchema",
+      "path": "schemas/noncanonical.data",
+      "prefix": "ewogICJ0eXBlIiA6ICJzdHJpbmciLCAiZGVzY3JpcHRpb24iOiAibGl0ZXJhbCBvcmRlciIKfQo=",
+      "block": "",
+      "repeat": 0,
+      "suffix": "",
+      "size": 56,
+      "digest": "sha256:6f5254e72fc6532c0b721ac21b5401550ecfc4a2ffa339cdc9cec15060cb8709",
+      "rootDigest": "sha256:e753f08223115100c21ffa5aef6816a13215e4b2a83ff8e6a3af42d3bead6d4c"
+    },
+    {
+      "name": "input-schema-above-4mib",
+      "target": "inputSchema",
+      "path": "schemas/large-input.json",
+      "prefix": "eyJkZXNjcmlwdGlvbiI6Ig==",
+      "block": "eA==",
+      "repeat": 4194304,
+      "suffix": "IiwidHlwZSI6InN0cmluZyJ9Cg==",
+      "size": 4194339,
+      "digest": "sha256:2a7c0f9be4abf15a31b93f06b46460121182d0affcee656b6ae263dc754c49cf",
+      "rootDigest": "sha256:e2f81b632c57fbb17ea82dfee4da00887ebd34b8b360e8890b7ac39429ab23ee"
+    },
+    {
+      "name": "output-schema-above-4mib",
+      "target": "outputSchema",
+      "path": "schemas/large-output.data",
+      "prefix": "eyJkZXNjcmlwdGlvbiI6Ig==",
+      "block": "eA==",
+      "repeat": 4194304,
+      "suffix": "IiwidHlwZSI6InN0cmluZyJ9Cg==",
+      "size": 4194339,
+      "digest": "sha256:2a7c0f9be4abf15a31b93f06b46460121182d0affcee656b6ae263dc754c49cf",
+      "rootDigest": "sha256:09d444cd6f0f0f2266d0b2380a5fb3fef760f0e479a0bd210f6baa28b9512aca"
+    }
+  ]
+}

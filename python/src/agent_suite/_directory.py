@@ -12,9 +12,9 @@ from . import _content as c
 from ._paths import validate_link, validate_path
 
 if sys.platform == "win32":
-    from ._directory_windows import Native
+    from ._directory_windows import Native as Native
 else:
-    from ._directory_posix import Native
+    from ._directory_posix import Native as Native
 
 _READ_SIZE = 128 << 10
 

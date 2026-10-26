@@ -370,3 +370,69 @@ class ToolProvider(Located):
     variants: tuple[ToolProviderVariant, ...]
     remote: RemoteToolProvider | None
     extensions: tuple[Extension, ...]
+
+
+@dataclass(frozen=True)
+class EvaluationLimits(Located):
+    max_cases: int
+    max_case_bytes: int
+
+
+@dataclass(frozen=True)
+class EvaluationIndex(Located):
+    schema_version: str
+    media_type: str
+    agent: str
+    cases: tuple[FileRef, ...]
+    limits: EvaluationLimits
+
+
+@dataclass(frozen=True)
+class EvaluationAssertion(Located):
+    id: str
+    kind: str
+    critical: bool | None
+    value: str | None
+    pattern: str | None
+    tool: str | None
+    rubric: str | None
+    min_score: int | None
+    judge_model: str | None
+    judge_version: str | None
+
+
+@dataclass(frozen=True)
+class EvaluationCase(Located):
+    schema_version: str
+    media_type: str
+    id: str
+    input: str
+    runs: int | None
+    min_passes: int | None
+    assertions: tuple[EvaluationAssertion, ...]
+
+
+@dataclass(frozen=True)
+class PolicyV1(Located):
+    version: str
+    deny_write_paths: tuple[str, ...]
+    required_capabilities: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class PolicyEndpoint(Located):
+    address: str
+    protocol: str
+    port: int
+
+
+@dataclass(frozen=True)
+class PolicyNetwork(Located):
+    egress_allow: tuple[PolicyEndpoint, ...]
+
+
+@dataclass(frozen=True)
+class PolicyV2(Located):
+    version: str
+    network: PolicyNetwork
+    required_capabilities: tuple[str, ...]

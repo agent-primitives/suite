@@ -1,9 +1,11 @@
 package artifact
 
 import (
+	"archive/tar"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -92,7 +94,7 @@ func (row sharedLiteralCase) fullValidatePath(t *testing.T) {
 	}) {
 		return
 	}
-	ociRoot := writeTestOCILayout(t, root)
+	ociRoot := writeTestOCILayoutTar(t, literalPortableTar(t, root))
 	secureDirectoryFixture(t, ociRoot)
 	if !t.Run("oci", func(t *testing.T) {
 		if _, err := ValidatePath(ociRoot); err != nil {
@@ -115,6 +117,66 @@ func (row sharedLiteralCase) fullValidatePath(t *testing.T) {
 	}
 	if got != row.RootDigest {
 		t.Fatalf("validated Go root digest = %q, want frozen %q", got, row.RootDigest)
+	}
+}
+
+// Windows host permissions are not portable archive modes. These fixtures have
+// no executable payloads: author their archive modes instead of copying 0666.
+func literalPortableTar(t *testing.T, root string) []byte {
+	t.Helper()
+	reader := tar.NewReader(bytes.NewReader(tarDirectory(t, root)))
+	var buffer bytes.Buffer
+	writer := tar.NewWriter(&buffer)
+	for {
+		header, err := reader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		header.Mode = 0o644
+		if header.Typeflag == tar.TypeDir {
+			header.Mode = 0o755
+		}
+		if err := writer.WriteHeader(header); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := io.Copy(writer, reader); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return buffer.Bytes()
+}
+
+func TestSharedLiteralPortableModes(t *testing.T) {
+	root := t.TempDir()
+	body := []byte("literal bytes")
+	mustWriteMode(t, root, "data/value.raw", body, 0o666)
+	reader := tar.NewReader(bytes.NewReader(literalPortableTar(t, root)))
+	for {
+		header, err := reader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := int64(0o644)
+		if header.Typeflag == tar.TypeDir {
+			want = 0o755
+		} else {
+			got, err := io.ReadAll(reader)
+			if err != nil || !bytes.Equal(got, body) {
+				t.Fatalf("literal bytes changed: %v", err)
+			}
+		}
+		if header.Mode != want {
+			t.Fatalf("archive mode = %o, want %o", header.Mode, want)
+		}
 	}
 }
 

@@ -53,8 +53,12 @@ class LiteralSnapshot:
 
     def _close(self) -> None:
         self._closed = True
-        if self._file is not None:
-            self._file.close()
+        file, self._file = self._file, None
+        try:
+            if file is not None:
+                file.close()
+        finally:
+            self._ranges.clear()
 
     def close(self) -> None:
         with self._lock:
@@ -139,12 +143,12 @@ class LiteralSnapshot:
         return LiteralContent(ref, self)
 
     def _iter(self, ref: FileRef) -> Iterator[bytes]:
-        with self._lock:
-            item = self._range(ref)
         position = 0
-        while position < item.size:
+        while True:
             with self._lock:
-                self._open()
+                item = self._range(ref)
+                if position >= item.size:
+                    return
                 size = min(CHUNK_BYTES, item.size - position)
                 if item.data is not None:
                     chunk = item.data[position:position+size]
@@ -155,6 +159,8 @@ class LiteralSnapshot:
                 if not chunk:
                     raise OSError(f'{ref.path}: literal snapshot was truncated')
             position += len(chunk)
+            # A suspended iterator must not retain a whole reused payload on close.
+            del item
             yield chunk
 
 

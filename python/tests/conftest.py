@@ -103,6 +103,8 @@ REQUIRED |= {
 REQUIRED |= {f'test_capture_failure_closes_native_source_handles[{cancel}]' for cancel in ('False','True')}
 REQUIRED |= {f'test_captured_go_fixture_literals_outlive_directory[{name}]'
              for name in ('minimal','remote','bundled','runtime-two-profiles')}
+REQUIRED |= {f'test_close_releases_reused_payload_even_with_suspended_iterator[{active}]'
+             for active in ('False','True')}
 PASSED = set()
 SKIPPED = []
 

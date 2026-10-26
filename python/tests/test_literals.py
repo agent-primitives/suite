@@ -148,6 +148,33 @@ def test_failed_literal_capture_closes_snapshot(failure):
     assert snapshot.closed
 
 
+@pytest.mark.parametrize('active_iterator', [False,True])
+def test_close_releases_reused_payload_even_with_suspended_iterator(active_iterator):
+    import gc
+    released = []
+    class RetainedBytes(bytes):
+        def __del__(self):
+            released.append(True)
+    data = RetainedBytes(b'x'*(CHUNK_BYTES+1))
+    ref = reference('schema.json',data)
+    snapshot = LiteralSnapshot()
+    snapshot.reuse(ref,data)
+    snapshot.seal()
+    view = snapshot.get(ref)
+    iterator = view.iter_bytes()
+    if active_iterator:
+        assert next(iterator) == b'x'*CHUNK_BYTES
+    del data
+    assert released == []
+    snapshot.close()
+    gc.collect()
+    assert released == [True]
+    with pytest.raises(ValueError,match='closed'):
+        next(iterator)
+    with pytest.raises(ValueError,match='closed'):
+        snapshot.get(ref)
+
+
 def test_get_checks_each_reference_without_changing_source():
     body = b'body'
     original = reference('shared',body)

@@ -33,7 +33,13 @@ class GraphParts:
 
 def _typed(refs: Iterable[Reference], kind: type[T], raw: Mapping[str, Document], bundle: Bundle) -> tuple[Loaded[T], ...]:
     # read_documents has already checked EVERY reference, even for repeated paths.
-    return tuple(read_document(raw[ref.path], kind, bundle) for ref in refs)
+    cached: dict[str, Loaded[T]] = {}
+    result = []
+    for ref in refs:
+        if ref.path not in cached:
+            cached[ref.path] = read_document(raw[ref.path], kind, bundle)
+        result.append(cached[ref.path])
+    return tuple(result)
 
 
 def _supports(profile: BuildProfile, platform: Platform, *, harness: bool) -> bool:

@@ -57,6 +57,7 @@ REQUIRED |= {
 }
 REQUIRED |= {
     "test_shared_graph_cases", "test_private_graph_minimal_and_original_bytes",
+    "test_repeated_graph_manifests_are_decoded_once_per_call",
     "test_graph_native_directory_and_oci", "test_schema_valid_duplicate_execution_fields",
     "test_schema_valid_duplicate_image_platform", "test_image_semantics_after_owning_schema",
     "test_schema_valid_trailing_newline_profile_values",

@@ -15,7 +15,7 @@ from agent_suite._profiles import validate_build
 from agent_suite._record_decode import DocumentError, read_document
 from agent_suite._records import BuildProfile, RuntimeProfile
 from agent_suite._schema import Bundle
-from test_documents import ROOT, content_fixture, rebind_agent, store_root
+from test_documents import ROOT, content_fixture, rebind_agent, repeated_build_refs, store_root
 
 
 @pytest.fixture
@@ -199,6 +199,33 @@ def test_schema_valid_duplicate_graph_selection_keys(bundle, group, seed):
         read_graph(content, bundle)
     assert error.value.diagnostics[0].code == 'graph.duplicate'
     assert error.value.diagnostics[0].source == Source('agentsuite.json', '/'+group+'/'+str(len(root[group])-1))
+
+
+def test_repeated_graph_manifests_are_decoded_once_per_call(bundle, monkeypatch):
+    import agent_suite._graph as graph
+    content = content_fixture()
+    root, _ = repeated_build_refs(content, 16)
+    store_root(content, root)
+    calls = []
+    original = graph.read_document
+    def counted(document, kind, schemas):
+        if kind is BuildProfile:
+            calls.append(document.source.file)
+        return original(document, kind, schemas)
+    monkeypatch.setattr(graph, 'read_document', counted)
+    for count in (1, 2):
+        with pytest.raises(DocumentError) as error:
+            read_graph(content, bundle)
+        assert error.value.diagnostics[0].code == 'graph.duplicate'
+        assert len(calls) == count
+    # Per-reference pins still precede typed reuse, including a bad later pin.
+    root['buildProfiles'][1]['descriptor']['digest'] = 'sha256:'+'0'*64
+    store_root(content, root)
+    with pytest.raises(DocumentError) as error:
+        read_graph(content, bundle)
+    assert error.value.diagnostics[0].code == 'pin.digest'
+    assert error.value.diagnostics[0].source.pointer == '/buildProfiles/1/descriptor'
+    assert len(calls) == 2
 
 
 def test_stale_variant_points_to_selected_resolution(bundle):

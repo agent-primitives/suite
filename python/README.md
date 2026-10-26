@@ -10,7 +10,7 @@ diagnostics. Schema checks alone do not validate a package's graph or qualify a
 runtime. Construction checks the owning bundle's references in supported schema
 locations, including optional branches. Unresolved references reached during validation
 are refused. Diagnostics retain pointers and codes without copying instance values.
-Domain readers and full validation are a later change.
+The finished public reader and full graph validation remain later work.
 
 Private directory I/O now builds content records through descriptor-relative
 POSIX opens or stdlib Windows handle/ACL operations. It preserves raw bytes and
@@ -40,6 +40,24 @@ allowed. Path-based blob-directory checks and hash-then-parse reads match Go;
 they do not provide an immutable snapshot against concurrent changes.
 The returned artifact digest hashes literal OCI manifest bytes, not the Suite
 root document or a verified package graph. No network or extraction is involved.
+
+Private document collection now preserves original JSON bytes alongside frozen,
+source-addressable Suite, Agent, catalog, ToolProvider and nested declaration
+records. Pinned manifests must already be canonical and match their media type,
+size and SHA-256; the root manifest may retain noncanonical formatting. Instruction
+and tool-schema references match literal streamed file identities, without parsing
+their bodies or requiring them to be retained. Missing/null/empty distinctions stay
+available from the original document rather than reconstructed typed data.
+
+Full owning-schema checks plus local Go declaration rules cover identities,
+invocation declarations, deployment
+environment names, tools, remote headers, delegated authorization and extensions.
+Variant bodies remain explicit raw fragments pending inventory/closure validation;
+other graph manifests remain raw pinned documents. Collection is not whole-graph
+validation, runtime support, verified root identity, or a public partial reader.
+Evaluation indexes and policies also require canonical stored JSON; policy keeps
+its own version envelope. Their references are preserved, while semantic
+completion remains separate.
 
 Both distribution formats carry exact bytes from the repository's owning
 `schema/` tree, with schema revision, IDs and SHA-256 inventory. No runtime

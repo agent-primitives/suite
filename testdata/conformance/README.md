@@ -49,6 +49,32 @@ policy digests. Do not confuse those effective digests with authored-policy cont
 pins. The selected complete [schema bundle](../../schema/) is also shared;
 validation must never fetch schemas or meta-schemas over the network.
 
+## Local declarations and private typed documents
+
+[declaration-cases.json](declaration-cases.json) freezes 23 exact JSON byte inputs:
+four accepted and 19 refused. Go checks each through strict decoding/local
+Suite/Agent/remote-provider declaration validation **and** a correctly repinned
+full package. Python decodes the same bytes into private typed records and checks
+local declarations. The corpus covers unsafe environment names, duplicate names
+and effects, invocation declarations, remote headers, authorization and extensions.
+
+This is declaration-scope evidence, not full inventory, dependency, invocation
+closure, composition, policy or evaluation coverage. Go can join multiple errors;
+these cases compare acceptance and intended field context, not identical diagnostic
+ordering or text. Both CI gates require named no-skip passes. Existing presence and
+string-bound cases also run through Python's typed decoder. Suite/provider
+extensions refuse a present-empty digest per their schemas; Agent extension items
+retain their existing separate rules, including an empty optional digest.
+This Go acceptance tightening belongs to the next minor/draft, not a v0.7.x
+backport. Omit an empty optional extension digest or supply a valid SHA-256,
+then canonicalize the affected manifest and refresh its ancestor pins.
+
+Private pin tests distinguish noncanonical roots from canonical pinned children,
+literal from JSON hashes, retained metadata from unretained literal files, and
+identity/duplicate/refusal paths. The native directory and OCI pipelines and
+installed-wheel smoke reach the same private document prerequisites; none returns
+a verified graph or exposes a public package loader.
+
 ## Authored-document presence and empty files
 
 [document-shape-cases.json](document-shape-cases.json) freezes 32 exact JSON byte

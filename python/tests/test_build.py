@@ -55,6 +55,8 @@ from agent_suite._models import Source
 from agent_suite._directory import load_directory
 from agent_suite._archive import load_layer
 from agent_suite._oci import load_oci_layout
+from agent_suite._documents import read_documents
+from agent_suite._records import Agent
 from pathlib import Path
 import gzip
 import io
@@ -64,6 +66,11 @@ assert not load_layer(io.BytesIO(gzip.compress(b'', mtime=0))).entries
 assert not hasattr(agent_suite, 'Package')
 bundle = Bundle.installed()
 assert len(bundle.schemas) == 15
+records = read_documents(load_oci_layout(Path('layout')), bundle)
+assert isinstance(records.agents[0].record, Agent)
+assert records.agents[0].record.id == 'writer'
+assert records.agents[0].record.instructions.source.pointer == '/instructions'
+assert not hasattr(records, 'verified_root_digest')
 for schema in bundle.schemas.values():
     bundle.registry.resolver(schema['$id'])
 assert bundle.validate('agent.schema.json', {}, Source('agent.json'))

@@ -33,6 +33,19 @@ else:
     REQUIRED |= {"test_posix_directory_races", "test_posix_directory_ancestor_replacement",
                  "test_posix_directory_streams",
                  "test_posix_directory_fd_bound", "test_posix_directory_fifo_swap"}
+REQUIRED |= {
+    "test_shared_declaration_cases", "test_typed_suite_references_are_frozen_and_located",
+    "test_existing_shared_shape_and_string_vectors_through_decoder",
+    "test_private_document_pipeline_native_directory_and_oci",
+    "test_literal_pins_never_parse_or_require_retained_body",
+    "test_noncanonical_root_but_canonical_pinned_children",
+    "test_repeated_raw_manifest_checks_are_collection_local",
+    "test_remote_secret_key_diagnostic_points_to_key",
+}
+REQUIRED |= {
+    f"test_optional_manifest_pins_require_canonical_object_bytes[{bad}-{target}]"
+    for bad in (False, True) for target in ("policy", "evals")
+}
 PASSED = set()
 SKIPPED = []
 

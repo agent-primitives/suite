@@ -140,6 +140,12 @@ func requireExtensionCritical(raw json.RawMessage) error {
 		if critical, present := extension["critical"]; !present || isJSONNull(critical) {
 			return fmt.Errorf("extension %d requires non-null critical", i)
 		}
+		if raw, present := extension["digest"]; present {
+			var digest string
+			if err := json.Unmarshal(raw, &digest); err != nil || digest == "" {
+				return fmt.Errorf("extension %d digest must not be empty when present", i)
+			}
+		}
 	}
 	return nil
 }

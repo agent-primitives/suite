@@ -77,6 +77,42 @@ not claimed as direct helper coverage. Corpus bytes are authoritative frozen inp
 not regenerated during CI. The ignored one-shot fixture promoter is not a shipped
 regeneration tool. Native/no-skip required gates and installed-wheel coverage apply.
 
+## Private profile and composition graph prerequisites
+
+[graph-cases.json](graph-cases.json) freezes **70 complete actual-Go inputs**:
+portable entry metadata and exact base64 bytes for every regular fixture file.
+All 70 run through the real ordinary Go graph phases, excluding only stored
+policy/evaluation semantics. **68 complete directory snapshots also replay full
+`ValidatePath`**; two archive metadata controls keep archive mode authority.
+The phase and refusal are frozen, and full-path cases must reach the intended
+refusal rather than an incidental stale ancestor. Required normal/native no-skip
+passes enforce nonempty populations. Python consumes the same snapshots, not a
+separately translated fixture generator.
+
+Coverage includes minimal/coordinator/remote/bundled/standalone/shared-provider
+seeds, two runtime profiles and their 13 graph refusals, current build/runtime and
+composition pins, exact platform/harness agreement, explicit false/presence,
+execution inputs, sorted/exact provider resolutions, invocations, per-agent
+compositions, standalone dependency collisions, inward retention and exact
+capabilities (including retained/unselected providers). Original Go tests remain
+enabled. Synthetic cryptographic dependency cycles remain isolated closure cases
+in the bundle corpus; they are not claimed as fully pinned package examples.
+
+Additional Python tests use schema-valid distinct objects for duplicate execution
+names/environments, image platforms and graph selection keys; they assert intended
+codes and source fields. Full-string checks preserve Go refusal of final-newline
+identities and HTTP paths even where JSON Schema's `$` anchor can match before a
+final newline. Image checks preserve Go registry normalization and repository/host
+bounds, and strip/check port digit length before integer conversion without adding
+an interpreter-dependent format limit.
+
+Regular payload bytes in this corpus are test replay transport, not broader
+production retention: existing streamed metadata-only payload tests still apply.
+Installed wheels exercise both OCI graph collection and the two-profile snapshot.
+This remains **private graph-prerequisite validation**, not a finished public
+package reader or verified root identity. Policy/evaluation semantics stay pending;
+no model, evaluation, image or runtime is executed and nothing is fetched.
+
 ## Local declarations and private typed documents
 
 [declaration-cases.json](declaration-cases.json) freezes 23 exact JSON byte inputs:
@@ -331,13 +367,13 @@ Go acceptance/refusal parity, share its applicable remaining vectors too:
 
 | Existing coverage | Current source |
 | --- | --- |
-| Runtime-profile graphs, selector/ref/presence failures | [runtime_profile_test.go](../../internal/artifact/runtime_profile_test.go) |
+| Additional runtime-profile wire/diff/evidence cases beyond the shared graph and typed-record tests | [runtime_profile_test.go](../../internal/artifact/runtime_profile_test.go) |
 | Evaluation namespace, ownership, ordering, limits, assertion operands and Go regex syntax | [evaluation_test.go](../../internal/artifact/evaluation_test.go) |
 | Authored-policy reference/document/namespace failures and stale ancestors | [policy_binding_test.go](../../internal/artifact/policy_binding_test.go) |
-| Bundle closure, install collisions, variant refusals and additional JSON resource boundaries | [validate_test.go](../../internal/artifact/validate_test.go) |
+| Additional JSON resource boundaries beyond shared bundle/graph coverage | [validate_test.go](../../internal/artifact/validate_test.go) |
 | Inventory presence and declared-mode conflicts | [inventory_presence_test.go](../../internal/artifact/inventory_presence_test.go), [content_identity_test.go](../../internal/artifact/content_identity_test.go) |
 | Additional native host access, links/special files and case-fold cases beyond the shared directory vectors | [Unix security](../../internal/artifact/directory_security_unix_test.go), [Windows security](../../internal/artifact/directory_security_windows_test.go), [artifact validation](../../internal/artifact/validate_test.go) |
-| Experimental inference/execution value-level checks included by ordinary validation | [core inference](../../core/inference_test.go), [artifact execution](../../internal/artifact/execution_test.go) |
+| Additional inference/execution value cases beyond shared declarations/graphs and direct typed tests | [core inference](../../core/inference_test.go), [artifact execution](../../internal/artifact/execution_test.go) |
 
 Detached evidence, semantic diff report shapes and the separate experimental-flow
 opt-in are not a claim of this corpus. Stored evaluation validation never means

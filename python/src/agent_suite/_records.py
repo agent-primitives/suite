@@ -95,6 +95,92 @@ class Suite(Located):
 
 
 @dataclass(frozen=True)
+class ExecutionInput(Located):
+    name: str
+    environment: str
+    secret: bool
+
+
+@dataclass(frozen=True)
+class ExecutionContract(Located):
+    configuration: str
+    kind: str
+    protocol: str
+    port: int
+    health_path: str
+    inputs: tuple[ExecutionInput, ...]
+
+
+@dataclass(frozen=True)
+class PlatformImage(Located):
+    platform: Platform
+    image_ref: str
+    image: Descriptor
+
+
+@dataclass(frozen=True)
+class BuildProfile(Located):
+    schema_version: str
+    media_type: str
+    id: str
+    runtime_base: tuple[PlatformImage, ...]
+    harness: tuple[PlatformImage, ...]
+    source_epoch: int
+    execution: ExecutionContract | None
+
+
+@dataclass(frozen=True)
+class Implementation(Located):
+    id: str
+    version: str
+    digest: str
+
+
+@dataclass(frozen=True)
+class RuntimeProfile(Located):
+    schema_version: str
+    media_type: str
+    id: str
+    runtime: Implementation
+    harness: Implementation
+    renderer: Implementation
+    configuration_abi: str
+    image_required: bool
+
+
+@dataclass(frozen=True)
+class ResolvedToolProvider(Located):
+    id: str
+    version: str
+    manifest_digest: str
+    variant_digest: str
+    execution_mode: str
+
+
+@dataclass(frozen=True)
+class Composition(Located):
+    schema_version: str
+    media_type: str
+    agent: str
+    platform: Platform
+    build_profile: str
+    tool_providers: tuple[ResolvedToolProvider, ...]
+    runtime_profile: str
+
+
+@dataclass(frozen=True)
+class ToolProviderComposition(Located):
+    schema_version: str
+    media_type: str
+    id: str
+    version: str
+    manifest_digest: str
+    platform: Platform
+    variant_digest: str
+    build_profile: str
+
+
+@dataclass(frozen=True)
 class InferenceRequirements(Located):
     api: str
     context_tokens: int

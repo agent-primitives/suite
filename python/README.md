@@ -58,11 +58,19 @@ Private bundled-subsystem checks bind directory-source modes, compare complete
 payload inventories, validate every dependency graph and detect collisions within
 caller-selected installation sets. Archive/OCI modes remain authoritative; host
 access policy and permissions are unchanged. Dependency traversal does not impose
-Python's process recursion limit. Other graph manifests remain raw pinned documents.
-Neither collection nor successful bundled checks establish whole-graph validation,
-runtime support, verified root identity, or a public partial reader. Composition,
-profile/image/execution graph integration and retention/capability agreement remain
-separate work.
+Python's process recursion limit.
+
+Private graph prerequisites now include frozen build/runtime profiles, image and
+execution records, and agent/standalone-provider compositions. Validation checks
+exact reference identities and selections, image authority/digest/platform rules,
+runtime harness consistency, every agent's provider resolution and invocation
+targets, selected transitive installation collisions, inward retention and exact
+derived capabilities. Schema checks are supplemented by Go's stricter full-string
+identity/HTTP-path rules and semantic uniqueness; no runtime implementation catalog
+or runtime execution is introduced. Original pinned bytes remain authoritative.
+
+Successful private graph checks still do **not** establish finished whole-package
+validation, runtime support, verified root identity or a public partial reader.
 Evaluation indexes and policies also require canonical stored JSON; policy keeps
 its own version envelope. Their references are preserved, while semantic
 completion remains separate.

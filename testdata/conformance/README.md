@@ -79,10 +79,10 @@ regeneration tool. Native/no-skip required gates and installed-wheel coverage ap
 
 ## Private profile and composition graph prerequisites
 
-[graph-cases.json](graph-cases.json) freezes **69 distinct complete actual-Go inputs**:
+[graph-cases.json](graph-cases.json) freezes **71 distinct complete actual-Go inputs**:
 portable entry metadata and exact base64 bytes for every regular fixture file.
-All 69 run through the real ordinary Go graph phases, excluding only stored
-policy/evaluation semantics. **67 complete directory snapshots also replay full
+All 71 run through the real ordinary Go graph phases, excluding only stored
+policy/evaluation semantics. **69 complete directory snapshots also replay full
 `ValidatePath`**; two archive metadata controls keep archive mode authority.
 The phase and refusal are frozen, and full-path cases must reach the intended
 refusal rather than an incidental stale ancestor. Required normal/native no-skip
@@ -114,7 +114,24 @@ package reader or verified root identity. Policy/evaluation semantics stay pendi
 no model, evaluation, image or runtime is executed and nothing is fetched.
 
 The `standalone` snapshot also covers provider-only inward retention; it is counted
-once, not repeated under an alias. Python object-array uniqueness uses structural
+once, not repeated under an alias. The existing `minimal` snapshot is also the
+explicit `Composition.toolProviders: []` control for an agent with no providers.
+Two distinct shared descendants omit that property or set it to null, with exact
+canonical child bytes and current root descriptor size/digest. Both languages run
+all three; Go also replays each complete package through `ValidatePath`. Python's
+owning schema still refuses omission at the composition object (`schema.required`)
+and null at `/toolProviders` (`schema.type`).
+
+Go now refuses missing/null `toolProviders` at the authored `Composition` decoder,
+aligning with the unchanged owning schema. **An empty array remains valid**; this
+does not add a nonempty requirement or change `CompositionRef`. This Go acceptance
+tightening belongs to the next minor/draft, **not a v0.7.x patch**. Authors without
+provider resolutions must write `"toolProviders": []` (Go callers should initialize
+an empty, non-nil `[]core.ResolvedToolProvider`). Recanonicalize changed composition
+bytes, refresh the root composition descriptor's size/digest, then refresh outer
+pins/identities if packaging or publishing the changed root.
+
+Python object-array uniqueness uses structural
 JSON keys instead of all-pairs object comparisons. Deterministic regressions count
 comparison/key work through wide execution inputs and resolved providers, while
 stock-validator parity checks retain boolean/numeric distinctions, numeric equality,

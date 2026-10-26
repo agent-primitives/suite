@@ -96,6 +96,9 @@ func (c *Composition) UnmarshalJSON(data []byte) error {
 	if err := runtimeSelector(data); err != nil {
 		return err
 	}
+	if value.ToolProviders == nil {
+		return errors.New("toolProviders must be present and non-null")
+	}
 	*c = Composition(value)
 	return nil
 }

@@ -49,6 +49,34 @@ policy digests. Do not confuse those effective digests with authored-policy cont
 pins. The selected complete [schema bundle](../../schema/) is also shared;
 validation must never fetch schemas or meta-schemas over the network.
 
+## Bundled variants, dependencies and selected collisions
+
+[bundle-cases.json](bundle-cases.json) freezes **47 actual Go fixture promotions**:
+29 variant/inventory, 10 dependency-closure and 8 selected-collision rows. Each
+stores complete provider JSON bytes and normalized portable entry snapshots,
+including their directory/archive source policy. Snapshots precede directory-mode
+binding; they do not record host uid/gid or umask-dependent access permissions.
+The named Go entry point is explicit. Twenty complete directory-fixture rows also
+run through full `ValidatePath` with literal provider bytes and refreshed ancestors.
+
+Both languages consume the same bytes and snapshots. Positive chain/diamond rows
+pin DFS order; cycles, exact platform/digest selection, a stale incoming edge to
+an already visited node, metadata mismatches and untracked payloads are refused.
+Identical installation overlap is legal; component/path are not installed-entry
+metadata. Unselected variants are not globally combined for collision checking.
+Directory-source declared modes bind every inventory and conflicting declarations
+are refused even across variants that are not coinstalled. Archive modes are exact.
+
+This is **bundled-subsystem parity only**, not Python whole-package validation.
+Graph-only rows use synthetic variant pins like the existing Go closure tests;
+a cryptographic dependency cycle cannot carry self-consistent raw hashes. They
+exercise only the recorded closure/collision entry point, not variant identity.
+Three negative graph rows are refused by the owning Python schema before the
+local helper (duplicate dependency, ambiguous platform, non-root owner); this is
+not claimed as direct helper coverage. Corpus bytes are authoritative frozen inputs,
+not regenerated during CI. The ignored one-shot fixture promoter is not a shipped
+regeneration tool. Native/no-skip required gates and installed-wheel coverage apply.
+
 ## Local declarations and private typed documents
 
 [declaration-cases.json](declaration-cases.json) freezes 23 exact JSON byte inputs:

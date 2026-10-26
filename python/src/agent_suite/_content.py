@@ -1,7 +1,7 @@
 """Private loaded content; neither construction nor loading validates a package."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from ._casefold import fold_case
 from ._json import MAX_BYTES as MAX_JSON_BYTES
@@ -31,6 +31,7 @@ class Content:
     source_type: str = field(default="directory", init=False)
     artifact_digest: str = field(default="", init=False)
     _folded: dict[str, str] = field(default_factory=dict, init=False, repr=False)
+    _declared_modes: dict[str, int] = field(default_factory=dict, init=False, repr=False)
 
     def add(self, entry: Entry) -> None:
         if entry.path in self.entries:
@@ -40,6 +41,15 @@ class Content:
             raise ValueError(f"case-folding path collision: {entry.path}")
         self.entries[entry.path] = entry
         self._folded[folded] = entry.path
+
+    def bind_directory_mode(self, path: str, mode: int) -> None:
+        # Archive modes are authoritative; directory modes come from declarations.
+        if self.source_type != "directory":
+            return
+        if path in self._declared_modes and self._declared_modes[path] != mode:
+            raise ValueError("content path has conflicting declared mode")
+        self._declared_modes[path] = mode
+        self.entries[path] = replace(self.entries[path], mode=mode)
 
     def data(self, path: str) -> bytes:
         path = validate_path(path)

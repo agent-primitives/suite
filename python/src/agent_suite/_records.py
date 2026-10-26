@@ -208,6 +208,70 @@ class RemoteToolProvider(Located):
 
 
 @dataclass(frozen=True)
+class EnvironmentName(Located):
+    name: str
+    required: bool
+    secret: bool
+    delivery: str
+
+
+@dataclass(frozen=True)
+class NetworkAccess(Located):
+    scheme: str
+    host: str
+    port: int
+
+
+@dataclass(frozen=True)
+class RuntimeRequirement(Located):
+    abi: str
+    abi_version: str
+    cpu_baseline: str
+    required_base_paths: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class InventoryEntry(Located):
+    path: str
+    type: str
+    mode: int
+    uid: int
+    gid: int
+    size: int
+    digest: str
+    link_target: str
+    component: str
+
+
+@dataclass(frozen=True)
+class ToolProviderDependency(Located):
+    id: str
+    version: str
+    variant_digest: str
+
+
+@dataclass(frozen=True)
+class ToolProviderVariant(Located):
+    platform: Platform
+    variant_digest: str
+    install_root: str
+    relocatable: bool
+    payload_root: str
+    entrypoint: str
+    arguments: tuple[str, ...]
+    search_path: tuple[str, ...]
+    writable_paths: tuple[str, ...]
+    environment: tuple[EnvironmentName, ...]
+    network: tuple[NetworkAccess, ...]
+    runtime: RuntimeRequirement
+    files: tuple[InventoryEntry, ...]
+    dependencies: tuple[ToolProviderDependency, ...]
+    sbom: Descriptor | None
+    provenance: Descriptor | None
+    raw: RawFragment
+
+
+@dataclass(frozen=True)
 class ToolProvider(Located):
     schema_version: str
     media_type: str
@@ -217,6 +281,6 @@ class ToolProvider(Located):
     protocol: str
     revision: str
     tools: tuple[Tool, ...]
-    variants: tuple[RawFragment, ...]
+    variants: tuple[ToolProviderVariant, ...]
     remote: RemoteToolProvider | None
     extensions: tuple[Extension, ...]

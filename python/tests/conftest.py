@@ -66,6 +66,21 @@ REQUIRED |= {
     "test_schema_valid_duplicate_graph_selection_keys[runtimeProfiles-runtime-two-profiles]",
     "test_schema_valid_duplicate_graph_selection_keys[toolProviderCompositions-standalone]",
 }
+REQUIRED |= {
+    'test_json_uniqueness_matches_stock_equality_and_diagnostics',
+    'test_non_json_values_keep_stock_fallback',
+    'test_nested_array_sorting_keeps_stock_acceptance',
+    'test_disabled_and_non_array_uniqueness_keep_stock',
+    'test_comparison_counter_observes_stock_all_pairs',
+    'test_wide_resolved_provider_objects_keep_schema_uniqueness',
+    'test_schema_views_preserve_original_resources_and_self_references',
+    'test_dynamic_anchor_rebinding_keeps_stock_diagnostics',
+    'test_mixed_and_nested_dialects_keep_stock_semantics',
+    'test_pointer_to_foreign_dialect_in_unknown_keyword_keeps_stock',
+    'test_reference_to_schema_metadata_preserves_previous_behavior',
+}
+REQUIRED |= {f'test_wide_valid_execution_uniqueness_work[{size}]' for size in (256,512,1024,2048)}
+REQUIRED |= {f'test_unique_items_reference_diagnostics_and_work[{ref}]' for ref in ('$ref', '$dynamicRef')}
 PASSED = set()
 SKIPPED = []
 

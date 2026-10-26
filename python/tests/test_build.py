@@ -97,6 +97,23 @@ for e in case['entries']:
 parts = read_graph(content, bundle)
 assert len(parts.runtime_profiles) == len(parts.compositions) == 2
 assert not hasattr(parts, 'verified_root_digest')
+# Installed source and cross-resource execution uniqueness must retain the fast path.
+import jsonschema._utils as equality
+calls = [0]
+original_equal = equality.equal
+def counted_equal(left, right):
+    if isinstance(left, dict) and isinstance(right, dict) and 'environment' in left and 'environment' in right:
+        calls[0] += 1
+    return original_equal(left, right)
+equality.equal = counted_equal
+profile = parts.build_profiles[0].document.value
+profile['execution'] = dict(kind='http-v1', protocol='openai-chat-v1', port=8080, healthPath='/healthz',
+    inputs=[dict(name='input'+str(i), environment='INPUT_'+str(i), secret=False) for i in range(256)])
+assert not bundle.validate('build-profile.schema.json', profile, Source('installed.json'))
+assert calls[0] <= 512
+profile['execution']['inputs'].append(dict(profile['execution']['inputs'][0]))
+assert [d.code for d in bundle.validate('build-profile.schema.json', profile, Source('installed.json'))] == ['schema.uniqueItems']
+equality.equal = original_equal
 for schema in bundle.schemas.values():
     bundle.registry.resolver(schema['$id'])
 assert bundle.validate('agent.schema.json', {}, Source('agent.json'))

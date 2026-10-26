@@ -241,8 +241,8 @@ def test_stale_variant_points_to_selected_resolution(bundle):
 
 def test_shared_graph_cases(bundle):
     cases = json.loads((ROOT/'testdata/conformance/graph-cases.json').read_bytes())['cases']
-    assert len(cases) == len({c['name'] for c in cases}) == 70
-    assert sum(c['fullPath'] for c in cases) == 68
+    assert len(cases) == len({c['name'] for c in cases}) == 69
+    assert sum(c['fullPath'] for c in cases) == 67
     assert sum(c['sourceType'] == 'archive' for c in cases) == 2
     for case in cases:
         assert type(case['valid']) is bool and type(case['fullPath']) is bool

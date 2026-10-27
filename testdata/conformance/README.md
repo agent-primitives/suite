@@ -477,7 +477,7 @@ The following mapping covers every original function/table row. A prefix means
 | `TestEvaluationIdentityCommitsToCasesAndOrder` | `eval-stale-order`, `eval-repinned-order`; reader rich/shared packages bind edited case bytes. Diff affected-agent/reason/identity-report assertions are diff APIs, not public-reader results. |
 | `TestEvaluationJCSIdentityIgnoresJSONFormatting` | `eval-default-suite` and shared JSON canonical-formatting goldens; the original Go unit comparison remains enabled. The producer canonicalized both snapshots to identical bytes/metadata, so no duplicate snapshot is counted. |
 | Current evaluation.go boundary probes, beyond original tables | `eval-source-*`: index/case version and media; reference media/size; invalid case digest; empty assertions; known null operand; rubric control. Pins are refreshed to reach the intended layer. |
-| Additional Unicode, byte-length, identity and numeric-lexeme probes | Existing reader30 origins; [regex-cases.json](regex-cases.json) has 696 Go syntax probes including wide-class resource and class-range/POSIX regressions |
+| Additional Unicode, byte-length, identity and numeric-lexeme probes | Existing reader30 origins; [regex-cases.json](regex-cases.json) has 702 Go syntax probes including wide-class resource and class-range/POSIX regressions |
 
 ### Authored-policy binding inventory
 
@@ -572,10 +572,13 @@ experimental flow are excluded APIs, not silently waived reader cases.
 
 ## Go regex syntax cases
 
-[regex-cases.json](regex-cases.json) freezes 696 actual Go 1.26 `regexp.Compile`
+[regex-cases.json](regex-cases.json) freezes 702 actual Go 1.26 `regexp.Compile`
 accept/refuse results. Go and Python consume the same strings, including Unicode
 property aliases, Go-inaccessible script names, capture names, literal/quoted
-escapes, zero-count repeat barriers and class-range/POSIX boundaries. They also
+escapes, zero-count repeat barriers and class-range/POSIX boundaries. Numeric
+class endpoints consume a complete hex, braced-hex or octal escape before the
+following POSIX atom; invalid classes and accepted controls are shared. The Go
+driver checks both `regexp/syntax.Parse` and `regexp.Compile` for every row. They also
 include valid patterns at the existing 1,024-byte evaluation bound whose repeated
 wide classes exhaust the native binding's matching-program budget without
 syntax-only reduction. No expression is matched or executed.

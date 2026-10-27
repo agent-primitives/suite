@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"regexp"
+	"regexp/syntax"
 	"testing"
 )
 
@@ -42,6 +43,9 @@ func TestSharedRegexCases(t *testing.T) {
 		}
 		names[row.Name] = true
 		t.Run(row.Name, func(t *testing.T) {
+			if _, err := syntax.Parse(*row.Pattern, syntax.Perl); (err == nil) != *row.Valid {
+				t.Fatalf("Parse(%q) = %v; want valid=%t", *row.Pattern, err, *row.Valid)
+			}
 			_, err := regexp.Compile(*row.Pattern)
 			if (err == nil) != *row.Valid {
 				t.Fatalf("Compile(%q) = %v; want valid=%t", *row.Pattern, err, *row.Valid)
@@ -53,12 +57,13 @@ func TestSharedRegexCases(t *testing.T) {
 		"repeat-nested-over", "budget-literal", "budget-letter", "budget-folded-nonword", "budget-dotall",
 		"budget-complement", "budget-quoted-utf8", "budget-nullable-range", "budget-anchor-star",
 		"repeat-range-nested-over", "repeat-range-nested-zero-barrier", "repeat-range-min-leading-zero",
-		"repeat-range-bare-flags", "class-hex-range-reversed", "nul", "newline", "vt", "nel", "nbsp", "bom"} {
+		"repeat-range-bare-flags", "class-hex-range-reversed", "class-hex-range-then-invalid-posix",
+		"class-octal-range-then-invalid-posix", "class-braced-hex-range-then-invalid-posix", "nul", "newline", "vt", "nel", "nbsp", "bom"} {
 		if !names[name] {
 			t.Fatalf("required regex case %q missing", name)
 		}
 	}
-	if len(corpus.Cases) != 696 {
+	if len(corpus.Cases) != 702 {
 		t.Fatalf("truncated regex corpus: %d", len(corpus.Cases))
 	}
 }

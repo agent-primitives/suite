@@ -79,7 +79,7 @@ def valid(pattern: str) -> bool:
             elif not in_class and escape in (r"\d", r"\D", r"\s", r"\S", r"\w", r"\W"):
                 out.append("a")
                 i += 2
-            elif not in_class and (escape == r"\x" or escape[1:] in "01234567" and len(escape) == 2):
+            elif escape == r"\x" or (len(escape) == 2 and escape[1] in "01234567"):
                 end = i + 2
                 if escape == r"\x":
                     if pattern[end:end + 1] == "{":
@@ -92,11 +92,11 @@ def valid(pattern: str) -> bool:
                 else:
                     while end < min(i + 4, len(pattern)) and pattern[end] in "01234567":
                         end += 1
-                # Validate before erasing an escaped rune, including overflow,
-                # short hex and octal/backreference distinctions. No quantifier.
+                # Consume one whole escaped rune before updating range state.
+                # Classes retain its spelling for native endpoint validation.
                 if not _native_valid(pattern[i:end]):
                     return False
-                out.append("a")
+                out.append(pattern[i:end] if in_class else "a")
                 i = end
             else:
                 out.append(escape)

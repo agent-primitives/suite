@@ -31,7 +31,7 @@ def _corpus():
         assert isinstance(row["pattern"], str)
         assert len(row["pattern"].encode("utf-8")) <= 1024
         names.add(row["name"])
-    assert len(names) == 696
+    assert len(names) == 702
     assert {"empty", "named-unicode", "named-digit", "byte-escape", "byte-quoted",
             "byte-after-posix", "property-spaces", "property-Old_Italic-exact",
             "property-SignWriting-exact", "property-Assigned-exact",
@@ -41,7 +41,8 @@ def _corpus():
             "budget-quoted-utf8", "budget-nullable-range", "budget-anchor-star",
             "repeat-range-nested-over", "repeat-range-nested-zero-barrier",
             "repeat-range-min-leading-zero", "repeat-range-bare-flags",
-            "class-hex-range-reversed",
+            "class-hex-range-reversed", "class-hex-range-then-invalid-posix",
+            "class-octal-range-then-invalid-posix", "class-braced-hex-range-then-invalid-posix",
             "nul", "newline", "vt", "nel", "nbsp", "bom"} <= names
     return corpus["cases"]
 
@@ -211,6 +212,13 @@ def test_go_regex_differential(tmp_path):
             for wrapper in ("{}", "({}){0}", "({}){0,0}", "({}){0,2}",
                             "({}){0,1000}", "({}){2,}", "(?i:{})", r"\Q{}\E"):
                 patterns.append(wrapper.replace("{}", expression))
+    # Escaped range endpoints must consume one whole rune before a following
+    # hyphen/POSIX atom; include malformed, scalar and class-valued endpoints.
+    for escape in (r"\x41", r"\x{41}", r"\x{0041}", r"\101", r"\0", r"\01"):
+        for suffix in ("[:bad:]", "[:alpha:]", "[", "a", r"\x42", r"\102"):
+            for start in ("0", r"\0"):
+                patterns.append("[" + start + "-" + escape + "-" + suffix + "]")
+            patterns.append("[" + escape + "-" + suffix + "]")
     patterns += ["(" * n + "a" + ")" * n for n in (1, 10, 100, 500)]
     patterns += ["(" + "a" * n + "){1000}" for n in (1, 100, 500, 1000)]
     request = tmp_path / "patterns.json"

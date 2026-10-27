@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+import re
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from importlib.resources import files
 from typing import Any
 
-from jsonschema import Draft202012Validator, validators
+from jsonschema import Draft202012Validator, ValidationError, validators
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 from referencing.exceptions import Unresolvable
@@ -15,6 +16,20 @@ from referencing.exceptions import Unresolvable
 from ._json import decode, digest_bytes
 from ._models import Diagnostic, Source
 from ._schema_uniqueness import Validator
+
+
+def _format_pattern(validator: Any, pattern: str, value: Any, schema: Any) -> Iterator[ValidationError]:
+    # Go's reference schema engine uses an ASCII Perl whitespace class, without
+    # VT. Python re (including re.ASCII) gives this exact asset pattern a different
+    # meaning. This is schema matching, never execution of an evaluation pattern.
+    if pattern == r'\S':
+        if validator.is_type(value, 'string') and re.search(r'[^\t\n\f\r ]', value) is None:
+            yield ValidationError(f'{value!r} does not match {pattern!r}')
+    else:
+        yield from Draft202012Validator.VALIDATORS['pattern'](validator, pattern, value, schema)
+
+
+_SuiteValidator = validators.extend(Validator, {'pattern': _format_pattern})
 
 
 def _check_references(resource: Resource[Any], resolver: Any) -> None:
@@ -108,7 +123,9 @@ class Bundle:
 
     def validate(self, name: str, value: Any, source: Source) -> list[Diagnostic]:
         if self._validation_schemas is not None and self._validation_registry is not None:
-            validator = Validator(self._validation_schemas[name], registry=self._validation_registry)
+            kind = _SuiteValidator if all(schema['$id'].startswith('https://suite.agent-primitives.dev/schema/')
+                                           for schema in self.schemas.values()) else Validator
+            validator = kind(self._validation_schemas[name], registry=self._validation_registry)
         else:
             validator = Draft202012Validator(self.schemas[name], registry=self.registry)
         try:

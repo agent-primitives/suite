@@ -95,7 +95,7 @@ def literal_fixture(tmp_path,row):
     return root,body
 
 
-def packed_fixture(root,layout):
+def packed_fixture(root,layout,modes=None):
     import gzip
     import io
     import tarfile
@@ -105,7 +105,7 @@ def packed_fixture(root,layout):
     with tarfile.open(fileobj=buffer,mode='w',format=tarfile.USTAR_FORMAT) as archive:
         for path in sorted(root.rglob('*')):
             entry = tarfile.TarInfo(path.relative_to(root).as_posix())
-            entry.mode = 0o755 if path.is_dir() else 0o644
+            entry.mode = modes[entry.name] if modes is not None else (0o755 if path.is_dir() else 0o644)
             if path.is_dir():
                 entry.type = tarfile.DIRTYPE
                 archive.addfile(entry)

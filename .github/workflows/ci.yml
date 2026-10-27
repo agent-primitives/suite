@@ -78,6 +78,13 @@ jobs:
               "TestSharedLiteralCases",
               "TestSharedLiteralBase",
               "TestSharedLiteralPortableModes",
+              "TestSharedReaderCases",
+              "TestSharedReaderOCIPositives",
+              "TestSharedReaderSchemaPatterns",
+              "TestSharedReaderSemanticCases",
+              "TestSharedReaderSemanticOCIPositives",
+              "TestSharedReaderBoundaryCases",
+              "TestSharedRegexCases",
               "TestPackageCorpusRejectsTrailingData",
               "TestRawVariantDigestsPreserveExplicitZeroValues",
               "TestLooseDirectorySharedCorpus",
@@ -182,7 +189,7 @@ jobs:
           TEST_RESULTS: ${{ runner.temp }}/portable-identity.jsonl
         run: |
           set -euo pipefail
-          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity|TestRawVariantDigests|TestRichEvaluationFixture|TestSharedDirectory|TestSharedArchive|TestSharedOCI|TestSharedStringLength|TestSharedDocumentShape|TestSharedCatalogReference|TestSharedDeclaration|TestSharedBundle|TestSharedBuildImageBoundary|TestSharedGraph|TestSharedLiteral|TestEmptyInventory)' ./internal/artifact | tee "$TEST_RESULTS"
+          go test -count=1 -json -run '^(TestLooseDirectory|TestPublishedArtifact|TestWindowsDirectorySecurity|TestRawVariantDigests|TestRichEvaluationFixture|TestSharedDirectory|TestSharedArchive|TestSharedOCI|TestSharedStringLength|TestSharedDocumentShape|TestSharedCatalogReference|TestSharedDeclaration|TestSharedBundle|TestSharedBuildImageBoundary|TestSharedGraph|TestSharedLiteral|TestSharedReader|TestSharedRegex|TestEmptyInventory)' ./internal/artifact | tee "$TEST_RESULTS"
           python3 - <<'PY'
           import json
           import os
@@ -208,6 +215,13 @@ jobs:
               "TestSharedLiteralCases",
               "TestSharedLiteralBase",
               "TestSharedLiteralPortableModes",
+              "TestSharedReaderCases",
+              "TestSharedReaderOCIPositives",
+              "TestSharedReaderSchemaPatterns",
+              "TestSharedReaderSemanticCases",
+              "TestSharedReaderSemanticOCIPositives",
+              "TestSharedReaderBoundaryCases",
+              "TestSharedRegexCases",
               "TestRichEvaluationFixtureConformance",
               "TestRichEvaluationFixtureOrderedConstraints",
               "TestRichEvaluationFixtureRejectsStaleSources",
@@ -263,10 +277,10 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install development dependencies and the distribution
-        run: python -m pip install -r python/requirements-dev.txt ./python
+        run: python -m pip install --only-binary=google-re2 -r python/requirements-dev.txt ./python
       - name: Shared vectors, Go differential checks and isolated wheel/sdist install
         run: python -m pytest python/tests -q
-      - name: Typecheck private implementation
+      - name: Typecheck Python reader
         run: python -m mypy --config-file python/pyproject.toml python/src/agent_suite
 
   typescript:

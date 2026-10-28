@@ -2,6 +2,7 @@
 from ._identity import digest, oci_manifest_digest, variant_digest
 from ._json import Number, canonical_bytes
 from ._literals import LiteralContent
+from ._registry import Registry
 from ._models import Descriptor, Diagnostic, Document, Platform, Source
 from ._package import (
     AgentView, CaseView, EvaluationIndexView, LiteralView, LoadError, Package,
@@ -22,7 +23,7 @@ from ._records import (
 
 __all__ = [
     'canonical_bytes', 'digest', 'variant_digest', 'oci_manifest_digest',
-    'Package', 'LoadError', 'Source', 'Diagnostic', 'Document', 'Descriptor', 'Platform', 'Number',
+    'Registry', 'Package', 'LoadError', 'Source', 'Diagnostic', 'Document', 'Descriptor', 'Platform', 'Number',
     'AgentView', 'CaseView', 'EvaluationIndexView', 'LiteralView', 'LiteralContent', 'PolicyView',
     'ProviderView', 'ToolView', 'Agent', 'AgentInvoke', 'BrokeredCredential', 'BuildProfile', 'Catalog',
     'Composition', 'CompositionRef', 'DelegatedAuthorization', 'EnvironmentName', 'EvaluationAssertion',

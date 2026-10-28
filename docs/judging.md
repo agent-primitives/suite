@@ -109,7 +109,10 @@ UTF-8 document with unique keys at every depth and paired Unicode escapes.
 Unknown provider envelope/choice/message metadata is allowed and follows the
 shared JSON codec's numeric acceptance; this profile does not promise lossless
 numeric metadata conversion or interpret that metadata as score evidence.
-Required fields are exact-case and cannot be absent or null. Score parsing below
+Required fields are exact-case and cannot be absent or null. Case-folded aliases
+of model/choices, choice message/finish_reason, and message role/content are not
+provider metadata: they are rejected, including when a canonical key is also
+present, to prevent conflicting runtime interpretations. Score parsing below
 is separately integer-only; the decoder does not replace the original response
 bytes with canonical JSON.
 

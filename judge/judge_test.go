@@ -244,6 +244,40 @@ func TestProducerV1ToolAndRefusalAliases(t *testing.T) {
 	}
 }
 
+func TestProducerV1RequiredFieldAliasShadowing(t *testing.T) {
+	for _, key := range []string{"Model", "Choices", "Message", "Finish_Reason", "Content", "Role"} {
+		t.Run(key, func(t *testing.T) {
+			var envelope map[string]any
+			if err := json.Unmarshal(scored("80"), &envelope); err != nil {
+				t.Fatal(err)
+			}
+			choice := envelope["choices"].([]any)[0].(map[string]any)
+			message := choice["message"].(map[string]any)
+			switch key {
+			case "Model":
+				envelope[key] = "wrong"
+			case "Choices":
+				envelope[key] = []any{}
+			case "Message":
+				choice[key] = map[string]any{"tool_calls": []any{map[string]any{}}}
+			case "Finish_Reason":
+				choice[key] = "tool_calls"
+			case "Content":
+				message[key] = `{"score":0,"reasoning":"not the same answer"}`
+			case "Role":
+				message[key] = "user"
+			}
+			raw, err := json.Marshal(envelope)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := judge.DecodeResponse(definition(), raw); !errors.Is(err, judge.ErrResponse) {
+				t.Fatalf("reserved alias %s treated as metadata: %v", key, err)
+			}
+		})
+	}
+}
+
 func TestProducerV1MalformedResponses(t *testing.T) {
 	good := string(scored("80"))
 	bad := map[string][]byte{

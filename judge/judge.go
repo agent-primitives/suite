@@ -37,7 +37,7 @@ A known verdict requires two valid independent scores for the same attributed an
 // Non-equivalent policy, projection, decoding or quorum changes need a new profile.
 const (
 	projection  = "json-marshal-v1:model,max_completion_tokens=1024,stream=false,messages=[system,user];user-json=input,answer,rubric;no-sampling-override;request<=1048576"
-	decoder     = "agentsuite-judge-decoder-v1:response<=65536;strict-json-unicode-unique-keys;open-envelope;exact-model-or-model-version;one-assistant-stop;no-tool-function-refusal-including-case-aliases;closed-score-reasoning;integer-score=0..100;reasoning-utf8<=4096;no-content-admission-or-normalization"
+	decoder     = "agentsuite-judge-decoder-v1:response<=65536;strict-json-unicode-unique-keys;open-envelope;no-required-field-case-alias-shadowing;exact-model-or-model-version;one-assistant-stop;no-tool-function-refusal-including-case-aliases;closed-score-reasoning;integer-score=0..100;reasoning-utf8<=4096;no-content-admission-or-normalization"
 	aggregation = "agentsuite-judge-quorum-v1:exact-request-bytes;exactly-two-valid-independent-scores;both-at-or-above=pass;both-below=fail;split=unknown;invalid-or-partial=unknown-without-scores-models;no-execution-attestation"
 )
 
@@ -154,7 +154,7 @@ func DecodeResponse(d Definition, raw []byte) (Sample, error) {
 		return Sample{}, ErrResponse
 	}
 	var envelope map[string]json.RawMessage
-	if jsoncodec.Unmarshal(raw, &envelope) != nil {
+	if jsoncodec.Unmarshal(raw, &envelope) != nil || hasCaseAlias(envelope, "model", "choices") {
 		return Sample{}, ErrResponse
 	}
 	var model string
@@ -174,11 +174,11 @@ func DecodeResponse(d Definition, raw []byte) (Sample, error) {
 	}
 	var finish string
 	var message map[string]json.RawMessage
-	if required(choices[0]["finish_reason"], &finish) != nil || finish != "stop" || required(choices[0]["message"], &message) != nil {
+	if hasCaseAlias(choices[0], "finish_reason", "message") || required(choices[0]["finish_reason"], &finish) != nil || finish != "stop" || required(choices[0]["message"], &message) != nil {
 		return Sample{}, ErrResponse
 	}
 	var role, content string
-	if required(message["role"], &role) != nil || role != "assistant" || required(message["content"], &content) != nil {
+	if hasCaseAlias(message, "role", "content") || required(message["role"], &role) != nil || role != "assistant" || required(message["content"], &content) != nil {
 		return Sample{}, ErrResponse
 	}
 	// Keep runtime adapters' case-insensitive recognition of effect/refusal fields;
@@ -243,6 +243,20 @@ func validDefinition(d Definition) bool {
 	}
 	return d.MinScore >= 0 && d.MinScore <= 100 && utf8.ValidString(d.Rubric) && strings.TrimSpace(d.Rubric) != "" && len(d.Rubric) <= 4096 && strings.IndexFunc(d.Rubric, func(r rune) bool { return unicode.IsControl(r) && r != '\n' && r != '\t' }) < 0
 }
+
+// Reserved semantic fields cannot masquerade as open provider metadata and
+// produce a different interpretation in a case-insensitive runtime adapter.
+func hasCaseAlias(fields map[string]json.RawMessage, names ...string) bool {
+	for field := range fields {
+		for _, name := range names {
+			if field != name && strings.EqualFold(field, name) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func required(raw json.RawMessage, out any) error {
 	if len(raw) == 0 || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		return ErrResponse

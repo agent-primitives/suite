@@ -60,6 +60,10 @@ func TestSharedWriteIdentityCases(t *testing.T) {
 				if !found {
 					t.Fatal("missing shared large-literal source")
 				}
+			} else {
+				// Checkouts need not belong to the Windows runner identity.
+				path = copyAgentSuiteDirectory(t, path)
+				secureDirectoryFixture(t, path)
 			}
 			content, err := loadPathContent(path)
 			if err != nil {

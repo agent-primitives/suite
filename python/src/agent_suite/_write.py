@@ -111,17 +111,27 @@ def _fresh(dest: str | os.PathLike[str]) -> Iterator[Path]:
         if os.name == 'posix':
             os.mkdir(path.name, 0o700, dir_fd=parent)
         else:
-            from ._write_windows import create_root
-            create_root(path, parent)
+            from ._write_windows import create_directory
+            create_directory(path, parent)
     try:
         with _fd(native.open_root(path)) as root:
-            native.check(root)  # On Windows inherit only the trusted parent's ACL.
+            native.check(root)
         yield path
     except BaseException:
         # Cleanup must not mask the error that made this output incomplete.
         with suppress(OSError):
             _remove_fresh(path)
         raise
+
+
+def _mkdir(path: Path, mode: int = 0o755) -> None:
+    if os.name == 'posix':
+        path.mkdir(mode=mode)
+    else:
+        from ._write_windows import create_directory
+        native = Native()
+        with _fd(native.open_root(path.parent)) as parent:
+            create_directory(path, parent)
 
 
 def _file(root: Path, relative: str, chunks: Iterable[bytes], mode: int = 0o644) -> None:
@@ -146,7 +156,8 @@ def _file(root: Path, relative: str, chunks: Iterable[bytes], mode: int = 0o644)
                 flags |= int(getattr(os, 'O_NOFOLLOW')) | int(getattr(os, 'O_CLOEXEC'))
                 fd = os.open(pieces[-1], flags, mode, dir_fd=parent)
             else:
-                fd = os.open(root / relative, flags, mode)
+                from ._write_windows import create_file
+                fd = create_file(root / relative, parent)
             with _fd(fd):
                 if os.name == 'posix':
                     getattr(os, 'fchmod')(fd, mode)
@@ -160,6 +171,8 @@ def _file(root: Path, relative: str, chunks: Iterable[bytes], mode: int = 0o644)
                         remaining = remaining[count:]
         finally:
             os.close(parent)
+    if os.name == 'nt':
+        (root / relative).chmod(mode)
 
 
 def _entries(package: Package) -> list[Entry]:
@@ -187,9 +200,7 @@ def _entries(package: Package) -> list[Entry]:
 def _directory(root: Path, entries: list[Entry], snapshot: LiteralSnapshot) -> None:
     for entry in entries:
         if entry.kind == 'directory':
-            # On Windows inherit the protected root's owner-only ACL; Python
-            # mkdir(0700) instead installs its own platform-specific DACL.
-            (root / entry.path).mkdir(mode=0o700 if os.name == 'posix' else 0o755)
+            _mkdir(root / entry.path, 0o700)
     for entry in entries:
         if entry.kind == 'file':
             _file(root, entry.path, snapshot.get(file_ref(entry)).iter_bytes(), entry.mode)
@@ -268,8 +279,8 @@ def _tar(file: BinaryIO | _GzipStore, entries: list[Entry], snapshot: LiteralSna
 
 
 def _new_oci(root: Path, entries: list[Entry], snapshot: LiteralSnapshot) -> None:
-    (root/'blobs').mkdir(mode=0o755)
-    (root/'blobs/sha256').mkdir(mode=0o755)
+    _mkdir(root/'blobs')
+    _mkdir(root/'blobs/sha256')
     with tempfile.TemporaryFile(mode='w+b') as layer:
         compressed = _GzipStore(layer)
         _tar(compressed, entries, snapshot)
@@ -309,8 +320,8 @@ def _copy_oci(package: Package, root: Path) -> None:
     config, layer = j.manifest(manifest)
     if _read_blob(source, config) != b'{}':
         raise ValueError('source OCI config must be exact bytes {}')
-    (root/'blobs').mkdir(mode=0o755)
-    (root/'blobs/sha256').mkdir(mode=0o755)
+    _mkdir(root/'blobs')
+    _mkdir(root/'blobs/sha256')
     # Verify original descriptors; never reserialize or recompress their bytes.
     for descriptor in (selected, config, layer):
         with _open_blob(source, descriptor) as blob:

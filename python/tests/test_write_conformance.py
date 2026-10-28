@@ -96,6 +96,7 @@ def test_shared_write_identities_and_go_outputs(tmp_path, api, writer_oracle, ca
 def test_go_writer_variant_payloads(tmp_path, api, writer_oracle, name):
     secure(tmp_path)
     source, _ = extracted(tmp_path, name)
+    secure(source)
     outputs = []
     with api.Package(source) as package:
         directory = package.write_directory(tmp_path/'directory')

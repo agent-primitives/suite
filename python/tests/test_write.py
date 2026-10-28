@@ -341,8 +341,15 @@ def test_writer_new_root_passes_native_security_checks(tmp_path, api):
         for method in ('write_directory', 'write_oci'):
             output = getattr(package, method)(tmp_path/method)
             native = Native()
+            def check_tree(parent, directory):
+                for path in directory.iterdir():
+                    with _fd(native.open_child(parent, path.name, path.is_dir())) as child:
+                        native.check(child, root=path.is_dir())
+                        if path.is_dir():
+                            check_tree(child, path)
             with _fd(native.open_root(output)) as fd:
                 native.check(fd, root=True)
+                check_tree(fd, output)
 
 
 def test_writer_mode_authority_and_links(tmp_path, api):

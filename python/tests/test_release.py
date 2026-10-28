@@ -206,7 +206,8 @@ def test_python_release_all_differentials_use_selected_contract(tmp_path, monkey
     if compiled:
         assert calls[1][1] == selected or calls[1][1] == selected/'internal/artifact'
     else:
-        assert str(selected) in str(calls[0][0]) or calls[0][0][2].startswith('./')
+        source = Path(calls[0][0][2])
+        assert (source if source.is_absolute() else selected/source).is_relative_to(selected)
 
 
 def test_python_release_qualifies_frozen_vector_suite():

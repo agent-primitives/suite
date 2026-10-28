@@ -14,6 +14,7 @@ from test_package import api
 def layout(tmp_path, api):
     secure(tmp_path)
     root, _ = extracted(tmp_path)
+    secure(root)
     with api.Package.load(root) as package:
         return package.write_oci(tmp_path/'layout')
 

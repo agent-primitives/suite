@@ -2,11 +2,13 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+ORACLE_ROOT = Path(os.environ.get('AGENTSUITE_GO_ORACLE_ROOT', str(ROOT))).resolve()
 CORPUS = ROOT / "testdata/conformance"
 
 
@@ -158,7 +160,7 @@ def test_go_numeric_differential():
     requests += [{"Input": '{"mediaType":"x","digest":"x","size":' + number + '}',
                   "Target": "descriptor"} for number in lexemes]
     oracle = subprocess.run(
-        ["go", "run", "./python/tests/testdata/oracle.go"], cwd=ROOT,
+        ["go", "run", "./python/tests/testdata/oracle.go"], cwd=ORACLE_ROOT,
         input="".join(json.dumps(item) + "\n" for item in requests),
         text=True, capture_output=True, check=True,
     )

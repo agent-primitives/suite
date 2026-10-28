@@ -104,7 +104,8 @@ def qualify(options):
         raise ValueError('reviewed catalog/schema inventory mismatch')
     entry = entries[0]
     if (entry['release'] != 'v0.8.0' or entry['sourceCommit'] != revision(catalog, 'refs/tags/v0.8.0')
-            or registry['releases'].get('v0.8.0') != 'v0.8'):
+            or registry['releases'].get('v0.8.0') != 'v0.8'
+            or registry['releases'].get(options.contract_tag) != 'v0.8'):
         raise ValueError('catalog/root tag binding mismatch')
     if Path(os.environ.get('AGENTSUITE_GO_ORACLE_ROOT', '')).resolve() != contract:
         raise ValueError('frozen contract Go oracle root mismatch')

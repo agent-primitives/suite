@@ -9,6 +9,7 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+ORACLE_ROOT = Path(os.environ.get('AGENTSUITE_GO_ORACLE_ROOT', str(ROOT))).resolve()
 
 
 def header(name="file.json", kind=b"0", size=0):
@@ -99,8 +100,8 @@ def test_go_archive_differential(tmp_path):
     requests = tmp_path / "requests.json"
     requests.write_text(json.dumps(probes), encoding="utf-8")
     executable = tmp_path / ("oracle.exe" if os.name == "nt" else "oracle")
-    subprocess.run(["go", "test", "-c", "-o", str(executable), "./internal/artifact"], cwd=ROOT, check=True)
-    subprocess.run([str(executable), "-test.run=^TestSharedArchiveCases$"], cwd=ROOT, check=True,
+    subprocess.run(["go", "test", "-c", "-o", str(executable), "./internal/artifact"], cwd=ORACLE_ROOT, check=True)
+    subprocess.run([str(executable), "-test.run=^TestSharedArchiveCases$"], cwd=ORACLE_ROOT, check=True,
                    env={**os.environ, "AGENTSUITE_ARCHIVE_ORACLE": str(requests)}, capture_output=True)
     expected = json.loads(Path(str(requests) + ".result").read_bytes())
     mismatches = []

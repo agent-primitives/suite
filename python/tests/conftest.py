@@ -253,6 +253,21 @@ REQUIRED |= {
     "test_python_release_rejects_downloaded_artifact_changes[missing]",
     "test_python_release_rejects_downloaded_artifact_changes[tampered]",
 }
+REQUIRED |= {
+    'test_registry_idna_transport_origin_binds_credentials[False]',
+    'test_registry_idna_transport_origin_binds_credentials[True]',
+    'test_registry_unicode_auth_failures_are_redacted[basic]',
+    'test_registry_unicode_auth_failures_are_redacted[realm-basic]',
+    'test_registry_unicode_auth_failures_are_redacted[bearer-token]',
+    'test_registry_bearer_parameters_allow_optional_whitespace',
+    'test_python_release_all_differentials_use_selected_contract[test_codec-test_go_numeric_differential-False-False]',
+    'test_python_release_all_differentials_use_selected_contract[test_directory-test_go_casefold_differential-False-False]',
+    'test_python_release_all_differentials_use_selected_contract[test_archive_differential-test_go_archive_differential-True-True]',
+    'test_python_release_all_differentials_use_selected_contract[test_oci_differential-test_go_oci_differential-True-True]',
+    'test_python_release_all_differentials_use_selected_contract[test_regex-test_go_regex_differential-True-True]',
+    'test_python_release_qualifies_frozen_vector_suite',
+    'test_python_release_unmapped_maintenance_tag_refused',
+}
 PASSED = set()
 SKIPPED = []
 

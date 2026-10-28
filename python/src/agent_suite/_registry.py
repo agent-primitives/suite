@@ -109,6 +109,6 @@ class Registry:
                     require(response, 200, 'manifest verification', digest)
                     if read_response(response) != manifest:
                         raise ValueError('registry manifest verification digest mismatch')
-            except requests.RequestException:
+            except (requests.RequestException, UnicodeError):
                 raise ValueError('registry publication request failed') from None
         return urlsplit(self._origin).netloc + '/' + repository + '@' + digest

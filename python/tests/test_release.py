@@ -175,11 +175,61 @@ def test_python_release_oracle_override_selects_build_and_run(tmp_path, tmp_path
     assert calls == [selected, selected/'internal/artifact']
 
 
+@pytest.mark.parametrize('module_name, function_name, needs_path, compiled', [
+    ('test_codec', 'test_go_numeric_differential', False, False),
+    ('test_directory', 'test_go_casefold_differential', False, False),
+    ('test_archive_differential', 'test_go_archive_differential', True, True),
+    ('test_oci_differential', 'test_go_oci_differential', True, True),
+    ('test_regex', 'test_go_regex_differential', True, True),
+])
+def test_python_release_all_differentials_use_selected_contract(tmp_path, monkeypatch, module_name, function_name, needs_path, compiled):
+    import importlib
+    import subprocess
+    module = importlib.import_module(module_name)
+    selected = tmp_path/'frozen-contract'
+    calls = []
+
+    class Captured(Exception):
+        pass
+
+    def run(command, **kwargs):
+        calls.append((command, kwargs['cwd']))
+        if compiled and len(calls) == 1:
+            return SimpleNamespace(returncode=0)
+        raise Captured
+
+    monkeypatch.setattr(module, 'ORACLE_ROOT', selected, raising=False)
+    monkeypatch.setattr(subprocess, 'run', run)
+    with pytest.raises(Captured):
+        getattr(module, function_name)(tmp_path) if needs_path else getattr(module, function_name)()
+    assert calls[0][1] == selected
+    if compiled:
+        assert calls[1][1] == selected or calls[1][1] == selected/'internal/artifact'
+    else:
+        assert str(selected) in str(calls[0][0]) or calls[0][0][2].startswith('./')
+
+
+def test_python_release_qualifies_frozen_vector_suite():
+    workflow = (ROOT/'.github/workflows/python-release.yml').read_text()
+    assert 'python -m pytest contract-source/python/tests -q' in workflow
+
+
+def test_python_release_unmapped_maintenance_tag_refused(candidate, release):
+    candidate.options.contract_tag = 'v0.8.1'
+    candidate.tags['refs/tags/v0.8.1^{commit}'] = '2'*40
+    with pytest.raises(ValueError, match='catalog'):
+        release.qualify(candidate.options)
+
+
 def test_python_release_accepts_frozen_maintenance_tags(candidate, release):
     # No main-ancestry restriction: exact canonical tags are the maintained authority.
     candidate.options.sdk_tag = 'python/v0.1.1'
     candidate.options.contract_tag = 'v0.8.1'
     candidate.tags.update({'refs/tags/python/v0.1.1^{commit}': '1'*40, 'refs/tags/v0.8.1^{commit}': '2'*40})
+    catalog_path = candidate.catalog/'docs/schema-catalog.json'
+    catalog = json.loads(catalog_path.read_bytes())
+    catalog['releases']['v0.8.1'] = 'v0.8'
+    catalog_path.write_text(json.dumps(catalog))
     candidate.distributions(version='0.1.1')
     for key in ('wheel', 'sdist'):
         previous = getattr(candidate.options, key)

@@ -74,6 +74,7 @@ jobs:
         run: |
           python -m pip install --only-binary=google-re2 -r sdk-source/python/requirements-dev.txt ./sdk-source/python
           PYTHONPATH="$GITHUB_WORKSPACE/sdk-source/python/src" python -m pytest sdk-source/python/tests -q
+          PYTHONPATH="$GITHUB_WORKSPACE/sdk-source/python/src" python -m pytest contract-source/python/tests -q
           GOWORK=off go -C contract-source test -count=1 ./...
       - name: Build direct and sdist-derived distributions
         run: |

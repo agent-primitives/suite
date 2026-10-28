@@ -21,7 +21,14 @@ def origin(url: str) -> str:
         if (parsed.scheme not in ('http', 'https') or not host or parsed.username is not None
                 or parsed.password is not None or parsed.fragment or any(ord(c) <= 32 for c in url)):
             raise ValueError
-        host = host.encode('idna').decode('ascii').lower()
+        # Bind credentials to the same IDNA/URL authority Requests will send.
+        prepared = requests.PreparedRequest()
+        prepared.prepare_url(url, None)
+        if not isinstance(prepared.url, str):
+            raise ValueError
+        host = urlsplit(prepared.url).hostname
+        if not host:
+            raise ValueError
         authority = '[' + host + ']' if ':' in host else host
         if port is not None:
             if not 1 <= port <= 65535:
@@ -29,7 +36,7 @@ def origin(url: str) -> str:
             if port != (443 if parsed.scheme == 'https' else 80):
                 authority += ':' + str(port)
         return parsed.scheme + '://' + authority
-    except (ValueError, UnicodeError, AttributeError):
+    except (ValueError, UnicodeError, AttributeError, requests.RequestException):
         raise ValueError('invalid registry HTTP origin or location') from None
 
 
@@ -94,7 +101,7 @@ class HTTP:
                 negotiated = True
                 continue
             if response.status_code in (307, 308):
-                value = response.headers.get('Location', '')
+                value = self.session.get_redirect_target(response)
                 response.close()
                 if not value or redirects == 3:
                     raise ValueError('registry ' + stage + ' redirect failed') from None
@@ -109,7 +116,7 @@ class HTTP:
         challenges: list[tuple[str, list[str]]] = []
         for item in parse_http_list(challenge):
             parts = item.split(None, 1)
-            if len(parts) == 2 and '=' not in parts[0]:
+            if len(parts) == 2 and '=' not in parts[0] and not parts[1].lstrip().startswith('='):
                 challenges.append((parts[0].lower(), [parts[1]]))
             elif challenges:
                 challenges[-1][1].append(item)
@@ -126,11 +133,11 @@ class HTTP:
             raise ValueError('registry authentication challenge is unsupported') from None
         fields = {}
         for item in parameters:
-            key, separator, _ = item.partition('=')
+            key, separator, value = item.partition('=')
             key = key.strip().lower()
             if not separator or key in fields:
                 raise ValueError('invalid registry Bearer challenge') from None
-            parsed = parse_keqv_list([item])
+            parsed = parse_keqv_list([key + '=' + value.strip()])
             fields[key] = next(iter(parsed.values()))
         realm = fields.get('realm', '')
         if not realm:

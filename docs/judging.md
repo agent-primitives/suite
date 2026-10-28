@@ -114,8 +114,9 @@ is separately integer-only; the decoder does not replace the original response
 bytes with canonical JSON.
 
 There must be exactly one choice, `finish_reason: "stop"`, an assistant message
-and string content. Message `tool_calls`, `function_call` and `refusal` must be
-absent or null (even an empty array/string is a refusal). The envelope model must
+and string content. Message `tool_calls`, `function_call` and `refusal`, including
+case-folded aliases recognized by runtime adapters, must be absent or null
+(even an empty array/string is a refusal). The envelope model must
 exactly equal `Model` or `Model + "-" + Version`; labels are declarations, not
 attestation. No prefix, whitespace normalization or case folding is used.
 

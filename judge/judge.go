@@ -37,7 +37,7 @@ A known verdict requires two valid independent scores for the same attributed an
 // Non-equivalent policy, projection, decoding or quorum changes need a new profile.
 const (
 	projection  = "json-marshal-v1:model,max_completion_tokens=1024,stream=false,messages=[system,user];user-json=input,answer,rubric;no-sampling-override;request<=1048576"
-	decoder     = "agentsuite-judge-decoder-v1:response<=65536;strict-json-unicode-unique-keys;open-envelope;exact-model-or-model-version;one-assistant-stop;no-tool-function-refusal;closed-score-reasoning;integer-score=0..100;reasoning-utf8<=4096;no-content-admission-or-normalization"
+	decoder     = "agentsuite-judge-decoder-v1:response<=65536;strict-json-unicode-unique-keys;open-envelope;exact-model-or-model-version;one-assistant-stop;no-tool-function-refusal-including-case-aliases;closed-score-reasoning;integer-score=0..100;reasoning-utf8<=4096;no-content-admission-or-normalization"
 	aggregation = "agentsuite-judge-quorum-v1:exact-request-bytes;exactly-two-valid-independent-scores;both-at-or-above=pass;both-below=fail;split=unknown;invalid-or-partial=unknown-without-scores-models;no-execution-attestation"
 )
 
@@ -181,9 +181,13 @@ func DecodeResponse(d Definition, raw []byte) (Sample, error) {
 	if required(message["role"], &role) != nil || role != "assistant" || required(message["content"], &content) != nil {
 		return Sample{}, ErrResponse
 	}
-	for _, field := range []string{"tool_calls", "function_call", "refusal"} {
-		if raw := message[field]; len(raw) != 0 && !bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-			return Sample{}, ErrResponse
+	// Keep runtime adapters' case-insensitive recognition of effect/refusal fields;
+	// an alias is not harmless provider metadata. Explicit null remains absence.
+	for field, raw := range message {
+		if strings.EqualFold(field, "tool_calls") || strings.EqualFold(field, "function_call") || strings.EqualFold(field, "refusal") {
+			if !bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+				return Sample{}, ErrResponse
+			}
 		}
 	}
 	var score struct {

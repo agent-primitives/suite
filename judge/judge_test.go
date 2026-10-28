@@ -5,8 +5,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -214,6 +216,31 @@ func TestProducerV1RawResponses(t *testing.T) {
 	got, err := judge.DecodeResponse(definition(), raw)
 	if err != nil || got.Reasoning != "Bearer example-secret\n\x1b[31m" {
 		t.Fatalf("pure decoder changed content: %+v %v", got, err)
+	}
+}
+
+// Runtime adapters historically recognize these fields case-insensitively.
+// A provider's alternate casing must not hide a tool call or refusal as metadata.
+func TestProducerV1ToolAndRefusalAliases(t *testing.T) {
+	for _, key := range []string{"tool_calls", "Tool_Calls", "function_call", "FUNCTION_CALL", "refusal", "Refusal", "Refuſal"} {
+		t.Run(key, func(t *testing.T) {
+			for _, value := range []string{`[]`, `{}`, `"no"`, `false`} {
+				raw := []byte(strings.Replace(string(scored("80")), `"role":"assistant"`, `"role":"assistant",`+strconv.Quote(key)+`:`+value, 1))
+				sample, err := judge.DecodeResponse(definition(), raw)
+				if !errors.Is(err, judge.ErrResponse) || !reflect.DeepEqual(sample, judge.Sample{}) {
+					t.Fatalf("alias %s accepted: %+v %v", key, sample, err)
+				}
+				request, _ := judge.Prepare(definition(), "question", "answer")
+				result, err := judge.Verify(definition(), "question", "answer", request, [][]byte{scored("100"), raw})
+				if !errors.Is(err, judge.ErrResponse) || result.Outcome != "unknown" || len(result.Scores) != 0 || len(result.ObservedModels) != 0 {
+					t.Fatalf("alias retained partial pair: %+v %v", result, err)
+				}
+			}
+			raw := []byte(strings.Replace(string(scored("80")), `"role":"assistant"`, `"role":"assistant",`+strconv.Quote(key)+`:null`, 1))
+			if _, err := judge.DecodeResponse(definition(), raw); err != nil {
+				t.Fatalf("null alias should remain absence: %v", err)
+			}
+		})
 	}
 }
 

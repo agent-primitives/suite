@@ -234,6 +234,25 @@ REQUIRED |= {
     "test_registry_validates_target_and_closes_resources[team/suite:tag]",
 }
 REQUIRED.add('test_registry_selects_bearer_from_multiple_challenges')
+REQUIRED |= {
+    "test_python_release_accepts_frozen_maintenance_tags",
+    "test_python_release_binds_exact_frozen_contract_and_schema_bytes[catalog]",
+    "test_python_release_binds_exact_frozen_contract_and_schema_bytes[draft]",
+    "test_python_release_binds_exact_frozen_contract_and_schema_bytes[oracle]",
+    "test_python_release_binds_exact_frozen_contract_and_schema_bytes[schema]",
+    "test_python_release_checks_both_distribution_provenances",
+    "test_python_release_oracle_override_selects_build_and_run",
+    "test_python_release_records_validator_and_artifact_identities",
+    "test_python_release_rejects_development_or_wrong_tags[contract-tag]",
+    "test_python_release_rejects_development_or_wrong_tags[development-tag]",
+    "test_python_release_rejects_development_or_wrong_tags[development]",
+    "test_python_release_rejects_development_or_wrong_tags[retargeted-contract]",
+    "test_python_release_rejects_development_or_wrong_tags[retargeted-sdk]",
+    "test_python_release_rejects_development_or_wrong_tags[sdk-tag]",
+    "test_python_release_rejects_downloaded_artifact_changes[extra]",
+    "test_python_release_rejects_downloaded_artifact_changes[missing]",
+    "test_python_release_rejects_downloaded_artifact_changes[tampered]",
+}
 PASSED = set()
 SKIPPED = []
 

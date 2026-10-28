@@ -105,9 +105,13 @@ fields, omits `stream:false` or changes 1024 cannot claim these exact sent bytes
 ### Original response decoding
 
 The complete original Chat envelope is bounded to 64 KiB. JSON must be one valid
-UTF-8 document with unique keys at every depth, paired Unicode escapes and
-lossless JCS numbers. Unknown provider envelope/choice/message metadata is allowed;
-required fields are exact-case and cannot be absent or null.
+UTF-8 document with unique keys at every depth and paired Unicode escapes.
+Unknown provider envelope/choice/message metadata is allowed and follows the
+shared JSON codec's numeric acceptance; this profile does not promise lossless
+numeric metadata conversion or interpret that metadata as score evidence.
+Required fields are exact-case and cannot be absent or null. Score parsing below
+is separately integer-only; the decoder does not replace the original response
+bytes with canonical JSON.
 
 There must be exactly one choice, `finish_reason: "stop"`, an assistant message
 and string content. Message `tool_calls`, `function_call` and `refusal` must be

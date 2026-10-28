@@ -83,6 +83,7 @@ def test_shared_write_identities_and_go_outputs(tmp_path, api, writer_oracle, ca
     # The loader, not a second writer, must refuse a stale edited ancestor.
     stale = tmp_path/'stale'
     shutil.copytree(edited, stale)
+    secure(stale)
     root = stale/'agentsuite.json'
     value = json.loads(root.read_bytes())
     value['agents'][0]['descriptor']['digest'] = 'sha256:' + '0'*64

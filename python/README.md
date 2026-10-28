@@ -1,4 +1,4 @@
-# AgentSuite Python reader
+# AgentSuite Python package SDK
 
 Read and validate an extracted AgentSuite content directory or a local OCI
 image-layout directory. A successful `Package.load` validates the complete
@@ -7,8 +7,9 @@ bytes. It does not execute evaluations, qualify a runtime, enforce policy or
 resolve administrative restrictions.
 
 This development distribution is not a PyPI release. Publication and release
-qualification are separate maintainer steps. No writer, registry client, network
-fetching or public outer-archive loader is included.
+qualification are separate maintainer steps. Local writing and canonical identity
+helpers are included; registry clients, network fetching and public outer-archive
+loading are not.
 
 ## Install
 
@@ -88,7 +89,13 @@ Instruction and tool-schema pins hash their exact literal bytes.
 
 `artifact_digest` is the distinct SHA-256 of the exact OCI manifest bytes, or
 `None` for directory input. It is not the Suite root digest or an aggregate hash
-of content. No digest mutation or registry-reference API is provided.
+of content. No public aggregate digest or registry-reference API is provided.
+
+The pure `canonical_bytes(value)` and `digest(value)` helpers use RFC 8785, not
+sorted Python JSON. `variant_digest(value)` blanks only the top-level
+`variantDigest` before canonical hashing. `oci_manifest_digest(manifest_bytes)`
+hashes the exact bytes without JSON normalization. These helpers compute identities;
+they do not establish that a document or package is valid.
 
 ### Lifetime and source independence
 
@@ -108,6 +115,65 @@ Prefer a context manager, or explicitly call `close()`. Repeated close is harmle
 Literal views, suspended iterators and `validate()` refuse use after close with
 `ValueError`. Frozen normative metadata and identity remain readable; application
 copies of returned chunks remain the application's own data.
+
+## Edit and write a package
+
+```python
+from agent_suite import Package
+
+with Package.load("path/to/package") as package:
+    package.set_instructions("writer", "Answer briefly.\n")
+    assert package.validate() == ()
+    directory = package.write_directory("path/to/new-content")
+    layout = package.write_oci("path/to/new-layout")
+    with Package.load(layout) as written:
+        assert written.root_digest == package.root_digest
+        print(written.artifact_digest)  # Exact new OCI manifest identity
+```
+
+`set_instructions(agent_id, str_or_bytes)` is a transactional, copy-on-write edit.
+It creates a fresh root-relative instruction file, refreshes the selected agent's
+literal descriptor, then its agent manifest and Suite descriptor. Original files
+and other agents sharing the original path are not changed. This also avoids
+changing provider schemas or executable payloads that happen to share the bytes.
+Raw tree mutation is unsupported and stale ancestors are refused, not repaired.
+Unrelated authored presence, numeric spellings and raw documents remain intact.
+
+After an edit, reacquire views from the package: earlier frozen metadata remains
+historical, but old literal handles become closed. This avoids accumulating old
+spools across edits. `root_digest` reflects the validated replacement and
+`artifact_digest` becomes `None`; load the written layout for its new OCI identity.
+A later edit retires its previous SDK-created instruction file, while original
+input files remain untouched. Repeated edits therefore do not accumulate private
+instruction-file history. No general manifest builder or payload-editing framework
+is exposed.
+
+Both writers return a `Path`. The destination must be absent and its existing
+parent must satisfy the native reader's ownership/security checks. Writers do not
+overwrite, merge, repair existing permissions or create missing parent directories.
+Portable inventory modes and supported content links are retained. Directory
+output must also pass the native reader's permission checks: modes accepted in OCI
+(such as POSIX group-writable directories or files unreadable by the caller) can
+make `write_directory` fail. Modes are not repaired; `write_oci` can preserve them.
+An unsupported native link operation fails with context rather than silently
+flattening it.
+Partial failures do not return success, and cleanup removes only the newly created
+output. Runtime source reads use verified pins; output passes full validation.
+
+Writing uses captured metadata and literal bodies where available. To copy an
+arbitrary payload that was not retained, keep the original source available and
+unchanged until writing completes. Those bytes are rechecked against their loaded
+sizes and digests. Source removal still does not affect read-only views or
+`validate()`. The writer retains source provenance privately; there is no additional
+public source argument or eager whole-package snapshot on ordinary load.
+
+An unedited OCI-to-OCI write verifies and copies its exact existing envelope,
+manifest, config and compressed layer bytes. It needs that original layout to
+remain available. Edited packages and directory inputs generate a new deterministic
+OCI envelope: sorted entries, portable metadata, epoch timestamps and stable gzip
+store blocks. Store blocks avoid cross-version compressor heuristics, trading some
+space for reproducible bytes. No archive tree is extracted. New OCI bytes need not
+match Go's test-only compressor; Go validates the actual emitted package instead.
 
 ## Validation boundary
 

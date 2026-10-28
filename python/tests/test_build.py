@@ -130,6 +130,30 @@ public_oci = Package.load('rich-layout')
 assert public_directory.root_digest == public_oci.root_digest
 assert public_directory.artifact_digest is None
 assert public_oci.artifact_digest and public_oci.artifact_digest != public_oci.root_digest
+# Full writing needs the unretained executable payload while its source exists.
+# Only read/validate/literal access is promised after source removal.
+from agent_suite import canonical_bytes, digest, variant_digest, oci_manifest_digest
+for package_index, package in enumerate((public_directory,public_oci)):
+    destination = Path('writer-output')
+    if package_index == 1:
+        unchanged = package.write_oci(destination/'original-oci')
+        with Package.load(unchanged) as copied:
+            assert copied.artifact_digest == package.artifact_digest
+    before = package.root_digest
+    package.set_instructions('writer', 'Installed writer round trip.')
+    assert package.root_digest != before and package.validate() == ()
+    assert digest(package.suite.document.value) == package.root_digest
+    assert canonical_bytes({}) == b'{}'
+    assert variant_digest({'variantDigest':'old'}) == digest({'variantDigest':''})
+    for method in ('write_directory','write_oci'):
+        path = getattr(package,method)(destination/(str(package_index)+'-'+method))
+        with Package.load(path) as output:
+            assert output.root_digest == package.root_digest and output.validate() == ()
+            assert b''.join(output.agents['writer'].instructions.content.iter_bytes()) == b'Installed writer round trip.'
+            if method == 'write_oci':
+                import json
+                selected = json.loads((path/'index.json').read_bytes())['manifests'][0]['digest']
+                assert oci_manifest_digest((path/'blobs/sha256'/selected[7:]).read_bytes()) == output.artifact_digest
 shutil.rmtree('rich-directory')
 shutil.rmtree('rich-layout')
 for package in (public_directory,public_oci):
@@ -207,4 +231,9 @@ print('installed offline bundle: 15 exact schemas; complete public reader; nativ
         # Author archive modes from the portable inventory, not host stat modes
         # (Windows host files commonly report 0666 regardless of bundle intent).
         packed_fixture(rich,tmp_path/'rich-layout',{path:e.mode for path,e in content.entries.items()})
+        output_parent = tmp_path/'writer-output'
+        output_parent.mkdir(exist_ok=True)
+        if os.name == 'nt':
+            secure_fixture(output_parent)
         subprocess.run([str(python), "-I", "-c", smoke], cwd=tmp_path, check=True)
+        shutil.rmtree(output_parent)

@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 import re
+from collections.abc import Mapping
 from typing import Any
 
 import rfc8785
@@ -93,9 +94,9 @@ def _jcs_value(value: Any) -> Any:
         # rfc8785's Python integer guard is stricter than Go. Apply Go's
         # equivalence check first, then use its binary64 number representation.
         return _number(str(value))
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return {key: _jcs_value(child) for key, child in value.items()}
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         return [_jcs_value(child) for child in value]
     raise ValueError(f"unsupported JSON value type: {type(value).__name__}")
 
@@ -113,6 +114,6 @@ def digest_bytes(data: bytes) -> str:
 
 
 def variant_bytes(value: Any) -> bytes:
-    if not isinstance(value, dict) or "variantDigest" not in value:
+    if not isinstance(value, Mapping) or "variantDigest" not in value:
         raise ValueError("variant must contain variantDigest")
     return canonical_bytes({**value, "variantDigest": ""})

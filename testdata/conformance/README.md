@@ -612,6 +612,32 @@ Detached evidence, semantic diff report shapes and the separate experimental-flo
 opt-in are not a claim of this corpus. Stored evaluation validation never means
 that tests or models were executed.
 
+## Python writer identities and round trips
+
+[write-cases.json](write-cases.json) freezes the canonical Suite-root identity and
+exact deterministic Python OCI-manifest identity for five byte-exact sources:
+minimal, coordinator-workers, policy-binding, rich-evaluations, and the existing
+`instructions-above-4mib` shared literal vector. The `literal:` locator reuses each
+language's existing literal materializer instead of committing another large blob.
+Both languages consume these rows; Go independently validates their source graphs and
+root JCS identities. No second handwritten translation of the fixture is used.
+
+Python writes actual fresh directories and OCI layouts, then a compiled test-only
+Go oracle runs the ordinary loader/validator over those outputs and checks their
+root and exact OCI identities. It also checks copied layouts, edited outputs,
+stale-ancestor refusals, remote/bundled/runtime-profile payloads and all 25 accepted
+shared full-reader snapshots in both output forms. Go has no production writer;
+this oracle validates the Python bytes rather than constructing competing output.
+The SDK never invokes Go at runtime.
+
+New gzip output uses explicitly framed 65,535-byte store blocks with fixed metadata,
+independent of stdlib/zlib buffering. A large shared artifact golden and fixed 3 MiB
+compressed-byte goldens exercise cross-version boundaries; its bytes
+need not match Go's test-only gzip helper. An unedited OCI copy instead retains the
+original envelope and blobs exactly. Existing noncanonical root bytes, authored
+presence, literal bytes and portable inventory modes are not rewritten merely to
+make a round trip pass. No output result is returned before full validation.
+
 Run the corpus and all existing tests with:
 
 ```bash

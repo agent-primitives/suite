@@ -141,6 +141,10 @@ class Package:
     _bundle: Bundle
     _parts: GraphParts
     _snapshot: LiteralSnapshot
+    _source_path: Path
+    _source_artifact_digest: str
+    _edited: bool
+    _created_instruction_paths: frozenset[str]
     suite: Loaded[Suite]
     agents: Mapping[str, AgentView]
     tool_providers: Mapping[tuple[str, str], ProviderView]
@@ -185,6 +189,10 @@ class Package:
                 providers[(provider.id, provider.version)] = ProviderView(loaded_provider.document, provider, tools)
             # Capture has matched every literal before this identity becomes visible.
             root_digest = digest_bytes(canonical_bytes(documents.suite.document.value))
+            object.__setattr__(self, '_source_path', Path(raw).absolute())
+            object.__setattr__(self, '_source_artifact_digest', content.artifact_digest)
+            object.__setattr__(self, '_edited', False)
+            object.__setattr__(self, '_created_instruction_paths', frozenset())
             object.__setattr__(self, '_content', content)
             object.__setattr__(self, '_bundle', bundle)
             object.__setattr__(self, '_parts', parts)
@@ -251,6 +259,21 @@ class Package:
         except (OSError, ValueError) as error:
             return (Diagnostic(Source('<snapshot>'), 'snapshot.read', str(error)),)
         return ()
+
+    def set_instructions(self, agent_id: str, content: str | bytes) -> None:
+        """Edit one agent using a fresh literal path; old literal handles go stale."""
+        from ._edit import set_instructions
+        set_instructions(self, agent_id, content)
+
+    def write_directory(self, dest: str | os.PathLike[str]) -> Path:
+        """Write and validate a fresh directory, never overwrite or merge."""
+        from ._write import write
+        return write(self, dest, oci=False)
+
+    def write_oci(self, dest: str | os.PathLike[str]) -> Path:
+        """Write a fresh local OCI layout; unchanged OCI requires its source."""
+        from ._write import write
+        return write(self, dest, oci=True)
 
     def close(self) -> None:
         try:

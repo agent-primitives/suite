@@ -1,5 +1,6 @@
 """Validated AgentSuite readers and immutable authored format models."""
-from ._json import Number
+from ._identity import digest, oci_manifest_digest, variant_digest
+from ._json import Number, canonical_bytes
 from ._literals import LiteralContent
 from ._models import Descriptor, Diagnostic, Document, Platform, Source
 from ._package import (
@@ -20,6 +21,7 @@ from ._records import (
 )
 
 __all__ = [
+    'canonical_bytes', 'digest', 'variant_digest', 'oci_manifest_digest',
     'Package', 'LoadError', 'Source', 'Diagnostic', 'Document', 'Descriptor', 'Platform', 'Number',
     'AgentView', 'CaseView', 'EvaluationIndexView', 'LiteralView', 'LiteralContent', 'PolicyView',
     'ProviderView', 'ToolView', 'Agent', 'AgentInvoke', 'BrokeredCredential', 'BuildProfile', 'Catalog',

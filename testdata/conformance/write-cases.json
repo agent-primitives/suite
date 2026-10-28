@@ -1,0 +1,34 @@
+{
+  "cases": [
+    {
+      "name": "minimal",
+      "path": "testdata/minimal",
+      "rootDigest": "sha256:59b19197bc5a053ec68968dfd9f990d50c24829c5761f251559f26cff6ba0711",
+      "artifactDigest": "sha256:5eabb9004efb307be3b04b22e72e52627f3e5d5fe3ffda513ba4bc73f495c5fc"
+    },
+    {
+      "name": "coordinator-workers",
+      "path": "testdata/coordinator-workers",
+      "rootDigest": "sha256:4657080578bef06a67c1e92bae20564a6d3fddef9ab371cd67cf03ee8e06511e",
+      "artifactDigest": "sha256:f65d07760b4001252fe2329750349a67cc2a7eb38e340c179e4985c05355ee36"
+    },
+    {
+      "name": "policy-binding",
+      "path": "testdata/policy-binding",
+      "rootDigest": "sha256:a10fdc4d6125d9c68ac5319d96c45fa62b3ab813e7458e2a49dad8f5ad2964c1",
+      "artifactDigest": "sha256:4756ffef238637cf93fb221d088c78d48c042c90ab0e69d81f47da51cb3898c0"
+    },
+    {
+      "name": "rich-evaluations",
+      "path": "testdata/rich-evaluations",
+      "rootDigest": "sha256:acbcc68b1099d0aacd0fc484756355b8f7a8622efd70af234eb5f08e5cf2bf4f",
+      "artifactDigest": "sha256:200522934707b961122bcc6d45c88261e6b65cdb0135dcacf57de70c1795403f"
+    },
+    {
+      "name": "large-instructions",
+      "path": "literal:instructions-above-4mib",
+      "rootDigest": "sha256:54ca5c331a37c453c50fb9ba259c458452aec349c2f079011c31af2bb771cf29",
+      "artifactDigest": "sha256:10da585dcff9bb9a3417cb831a56a8f8ff116cd4ec8a86b03efc79828976a2ca"
+    }
+  ]
+}

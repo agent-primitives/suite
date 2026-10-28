@@ -4,6 +4,7 @@ from __future__ import annotations
 import binascii
 import hashlib
 import os
+import posixpath
 import shutil
 import stat
 import struct
@@ -12,7 +13,7 @@ import tempfile
 from collections.abc import Iterable, Iterator
 from contextlib import closing, contextmanager, suppress
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, BinaryIO, Protocol
+from typing import TYPE_CHECKING, Any, BinaryIO, NamedTuple, Protocol
 
 from . import _oci_json as j
 from ._capture import _directory_chunks
@@ -89,90 +90,140 @@ def _parent_path(dest: str | os.PathLike[str]) -> Path:
     return path.parent.resolve(strict=True) / path.name
 
 
-def _remove_fresh(root: Path) -> None:
-    # Only this invocation's new tree: never follow links or repair source ACLs.
-    pending = [root]
+class _Destination(NamedTuple):
+    path: Path
+    fd: int
+    parent: int
+
+
+def _remove_fresh(root: _Destination) -> None:
+    if os.name == 'posix':
+        # The retained parent/root descriptors identify only our new output.
+        getattr(os, 'fchmod')(root.fd, 0o700)
+        stack: list[tuple[int, Iterator[str], str]] = []
+        first = os.dup(root.fd)
+        try:
+            stack.append((first, iter(()), root.path.name))
+            stack[-1] = (first, iter(os.listdir(first)), root.path.name)
+            while stack:
+                fd, names, name = stack[-1]
+                child = next(names, None)
+                if child is None:
+                    stack.pop()
+                    os.close(fd)
+                    os.rmdir(name, dir_fd=stack[-1][0] if stack else root.parent)
+                    continue
+                info = os.stat(child, dir_fd=fd, follow_symlinks=False)
+                if stat.S_ISDIR(info.st_mode):
+                    os.chmod(child, stat.S_IMODE(info.st_mode) | stat.S_IRWXU, dir_fd=fd)
+                    child_fd = os.open(child, int(getattr(Native(), 'flags')) | int(getattr(os, 'O_DIRECTORY')), dir_fd=fd)
+                    stack.append((child_fd, iter(()), child))
+                    stack[-1] = (child_fd, iter(os.listdir(child_fd)), child)
+                else:
+                    os.unlink(child, dir_fd=fd)
+        finally:
+            for fd, _, _ in stack:
+                os.close(fd)
+        return
+    pending = [root.path]
     while pending:
         directory = pending.pop()
         info = directory.lstat()
         if stat.S_ISDIR(info.st_mode) and not getattr(info, 'st_reparse_tag', 0):
             directory.chmod(stat.S_IMODE(info.st_mode) | stat.S_IRWXU)
             pending.extend(directory.iterdir())
-    shutil.rmtree(root)
+        elif stat.S_ISREG(info.st_mode) and not getattr(info, 'st_reparse_tag', 0):
+            directory.chmod(stat.S_IMODE(info.st_mode) | stat.S_IWRITE)
+    shutil.rmtree(root.path)
 
 
 @contextmanager
-def _fresh(dest: str | os.PathLike[str]) -> Iterator[Path]:
+def _fresh(dest: str | os.PathLike[str]) -> Iterator[_Destination]:
     path = _parent_path(dest)
     native = Native()
     with _fd(native.open_root(path.parent)) as parent:
         native.check(parent, root=True)
-        # mkdir is exclusive. Never remove anything unless this invocation made it.
         if os.name == 'posix':
             os.mkdir(path.name, 0o700, dir_fd=parent)
         else:
             from ._write_windows import create_directory
             create_directory(path, parent)
-    try:
-        with _fd(native.open_root(path)) as root:
-            native.check(root)
-        yield path
-    except BaseException:
-        # Cleanup must not mask the error that made this output incomplete.
-        with suppress(OSError):
-            _remove_fresh(path)
-        raise
-
-
-def _mkdir(path: Path, mode: int = 0o755) -> None:
-    if os.name == 'posix':
-        path.mkdir(mode=mode)
-    else:
-        from ._write_windows import create_directory
-        native = Native()
-        with _fd(native.open_root(path.parent)) as parent:
-            create_directory(path, parent)
-
-
-def _file(root: Path, relative: str, chunks: Iterable[bytes], mode: int = 0o644) -> None:
-    relative = validate_path(relative)
-    native = Native()
-    with _fd(native.open_root(root)) as initial:
-        native.check(initial)
-        parent = os.dup(initial)
         try:
-            pieces = relative.split('/')
-            for piece in pieces[:-1]:
-                child = native.open_child(parent, piece, True)
-                try:
-                    native.check(child)
-                except BaseException:
-                    os.close(child)
-                    raise
-                os.close(parent)
-                parent = child
-            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | int(getattr(os, 'O_BINARY', 0))
-            if os.name == 'posix':
-                flags |= int(getattr(os, 'O_NOFOLLOW')) | int(getattr(os, 'O_CLOEXEC'))
-                fd = os.open(pieces[-1], flags, mode, dir_fd=parent)
-            else:
-                from ._write_windows import create_file
-                fd = create_file(root / relative, parent)
-            with _fd(fd):
+            fd = native.open_child(parent, path.name, True)
+        except BaseException:
+            with suppress(OSError):
                 if os.name == 'posix':
-                    getattr(os, 'fchmod')(fd, mode)
-                native.check(fd)
-                for chunk in chunks:
-                    remaining = memoryview(chunk)
-                    while remaining:
-                        count = os.write(fd, remaining)
-                        if count is None or count <= 0 or count > len(remaining):
-                            raise OSError('output short write')
-                        remaining = remaining[count:]
-        finally:
+                    os.rmdir(path.name, dir_fd=parent)
+                else:
+                    path.rmdir()
+            raise
+        with _fd(fd):
+            root = _Destination(path, fd, parent)
+            try:
+                native.check(fd, root=True)
+                yield root
+            except BaseException:
+                with suppress(OSError):
+                    _remove_fresh(root)
+                raise
+
+
+@contextmanager
+def _parent(root: _Destination, relative: str) -> Iterator[tuple[int, str]]:
+    pieces = validate_path(relative).split('/')
+    parent = os.dup(root.fd)
+    try:
+        for piece in pieces[:-1]:
+            native = Native()
+            child = native.open_child(parent, piece, True)
+            try:
+                native.check(child)
+            except BaseException:
+                os.close(child)
+                raise
             os.close(parent)
+            parent = child
+        yield parent, pieces[-1]
+    finally:
+        os.close(parent)
+
+
+def _mkdir(root: _Destination, relative: str, mode: int = 0o755) -> None:
+    with _parent(root, relative) as (parent, name):
+        if os.name == 'posix':
+            os.mkdir(name, mode, dir_fd=parent)
+        else:
+            from ._write_windows import create_directory
+            create_directory(root.path / relative, parent)
+
+
+def _file(root: _Destination, relative: str, chunks: Iterable[bytes], mode: int = 0o644) -> None:
+    native = Native()
+    with _parent(root, relative) as (parent, name):
+        if os.name == 'posix':
+            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | int(getattr(os, 'O_NOFOLLOW')) | int(getattr(os, 'O_CLOEXEC'))
+            fd = os.open(name, flags, mode, dir_fd=parent)
+        else:
+            from ._write_windows import create_file
+            fd = create_file(root.path / relative, parent)
+        with _fd(fd):
+            if os.name == 'posix':
+                getattr(os, 'fchmod')(fd, mode)
+            native.check(fd)
+            for chunk in chunks:
+                remaining = memoryview(chunk)
+                while remaining:
+                    count = os.write(fd, remaining)
+                    if count is None or count <= 0 or count > len(remaining):
+                        raise OSError('output short write')
+                    remaining = remaining[count:]
     if os.name == 'nt':
-        (root / relative).chmod(mode)
+        (root.path / relative).chmod(mode)
+
+
+def _check_destination(root: _Destination) -> None:
+    if not os.path.samestat(root.path.stat(), os.fstat(root.fd)):
+        raise ValueError('destination identity changed during writing')
 
 
 def _entries(package: Package) -> list[Entry]:
@@ -197,29 +248,60 @@ def _entries(package: Package) -> list[Entry]:
     return sorted(entries.values(), key=lambda e: e.path)
 
 
-def _directory(root: Path, entries: list[Entry], snapshot: LiteralSnapshot) -> None:
+def _directory_names(entries: list[Entry]) -> None:
+    if os.name != 'nt':
+        return
+    from ._directory_windows import Native as WindowsNative
+    native = WindowsNative()
+    for entry in entries:
+        paths = [entry.path]
+        if entry.kind == 'symlink':
+            paths.append(posixpath.normpath(posixpath.join(
+                posixpath.dirname(entry.path), entry.link_target)))
+        try:
+            for path in paths:
+                for component in path.split('/'):
+                    if native._clean_name(component) != component:
+                        raise ValueError('native basename differs from authored path')
+        except (OSError, ValueError) as error:
+            raise ValueError(f'{entry.path}: cannot materialize Windows path: {error}') from error
+
+
+def _directory(root: _Destination, entries: list[Entry], snapshot: LiteralSnapshot) -> None:
     for entry in entries:
         if entry.kind == 'directory':
-            _mkdir(root / entry.path, 0o700)
+            _mkdir(root, entry.path, 0o700)
     for entry in entries:
         if entry.kind == 'file':
             _file(root, entry.path, snapshot.get(file_ref(entry)).iter_bytes(), entry.mode)
     for entry in entries:
         if entry.kind == 'symlink':
-            os.symlink(entry.link_target, root / entry.path)
+            if os.name == 'posix':
+                os.symlink(entry.link_target, entry.path, dir_fd=root.fd)
+            else:
+                os.symlink(entry.link_target, root.path / entry.path)
         elif entry.kind == 'hardlink':
-            os.link(root / entry.link_target, root / entry.path, follow_symlinks=False)
+            if os.name == 'posix':
+                os.link(entry.link_target, entry.path, src_dir_fd=root.fd,
+                        dst_dir_fd=root.fd, follow_symlinks=False)
+            else:
+                os.link(root.path / entry.link_target, root.path / entry.path, follow_symlinks=False)
     # _entries rejects link ancestors. Finish all children before read-only modes.
     for entry in reversed(entries):
         if entry.kind == 'directory':
-            (root / entry.path).chmod(entry.mode)
+            if os.name == 'posix':
+                with _parent(root, entry.path) as (parent, name):
+                    with _fd(Native().open_child(parent, name, True)) as child:
+                        getattr(os, 'fchmod')(child, entry.mode)
+            else:
+                (root.path / entry.path).chmod(entry.mode)
 
 
 def _descriptor(media: str, digest: str, size: int) -> dict[str, Any]:
     return {'mediaType': media, 'digest': digest, 'size': size}
 
 
-def _blob(root: Path, data: bytes) -> dict[str, Any]:
+def _blob(root: _Destination, data: bytes) -> dict[str, Any]:
     digest = digest_bytes(data)
     _file(root, 'blobs/sha256/' + digest[7:], (data,))
     return _descriptor('', digest, len(data))
@@ -278,9 +360,9 @@ def _tar(file: BinaryIO | _GzipStore, entries: list[Entry], snapshot: LiteralSna
     file.write(b'\x00' * 1024)
 
 
-def _new_oci(root: Path, entries: list[Entry], snapshot: LiteralSnapshot) -> None:
-    _mkdir(root/'blobs')
-    _mkdir(root/'blobs/sha256')
+def _new_oci(root: _Destination, entries: list[Entry], snapshot: LiteralSnapshot) -> None:
+    _mkdir(root, 'blobs')
+    _mkdir(root, 'blobs/sha256')
     with tempfile.TemporaryFile(mode='w+b') as layer:
         compressed = _GzipStore(layer)
         _tar(compressed, entries, snapshot)
@@ -305,7 +387,7 @@ def _new_oci(root: Path, entries: list[Entry], snapshot: LiteralSnapshot) -> Non
                                               'manifests': [selected]}),))
 
 
-def _copy_oci(package: Package, root: Path) -> None:
+def _copy_oci(package: Package, root: _Destination) -> None:
     source = package._source_path
     layout = read_regular(source/'oci-layout', MAX_BYTES)
     j.layout(layout)
@@ -320,8 +402,8 @@ def _copy_oci(package: Package, root: Path) -> None:
     config, layer = j.manifest(manifest)
     if _read_blob(source, config) != b'{}':
         raise ValueError('source OCI config must be exact bytes {}')
-    _mkdir(root/'blobs')
-    _mkdir(root/'blobs/sha256')
+    _mkdir(root, 'blobs')
+    _mkdir(root, 'blobs/sha256')
     # Verify original descriptors; never reserialize or recompress their bytes.
     for descriptor in (selected, config, layer):
         with _open_blob(source, descriptor) as blob:
@@ -339,6 +421,8 @@ def write(package: Package, dest: str | os.PathLike[str], *, oci: bool) -> Path:
     # Return the caller's Path spelling while privately using an absolute root.
     result = Path(dest)
     try:
+        if not oci:
+            _directory_names(entries)
         with _fresh(dest) as root:
             if oci and package._content.source_type == 'oci-layout' and not package._edited:
                 _copy_oci(package, root)
@@ -350,9 +434,11 @@ def write(package: Package, dest: str | os.PathLike[str], *, oci: bool) -> Path:
                         _directory(root, entries, snapshot)
             # Output framing, all original pins and the complete graph must pass
             # the real public reader before success; never extract a tar layer.
-            with Package(root) as loaded:
+            _check_destination(root)
+            with Package(root.path) as loaded:
                 if loaded.root_digest != package.root_digest or loaded.validate():
                     raise ValueError('written package identity or validation mismatch')
+            _check_destination(root)
         return result
     except (OSError, ValueError) as error:
         raise ValueError(f'write {result}: {error}') from error

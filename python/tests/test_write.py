@@ -352,6 +352,27 @@ def test_writer_new_root_passes_native_security_checks(tmp_path, api):
                 check_tree(fd, output)
 
 
+def test_writer_retains_output_descriptors_until_completion(tmp_path, api, monkeypatch):
+    from agent_suite import _write
+    root, _ = extracted(tmp_path)
+    secure(root)
+    directory = _write._directory
+    handles = []
+    def checked(output, *args):
+        assert os.fstat(output.fd)
+        assert os.fstat(output.parent)
+        handles.extend((output.fd, output.parent))
+        directory(output, *args)
+    monkeypatch.setattr(_write, '_directory', checked)
+    with api.Package(root) as package:
+        package.write_directory(tmp_path/'output')
+        assert package.validate() == ()
+    assert len(handles) == 2
+    for fd in handles:
+        with pytest.raises(OSError):
+            os.fstat(fd)
+
+
 def test_writer_mode_authority_and_links(tmp_path, api):
     root, _ = extracted(tmp_path, 'bundled')
     secure(root)
@@ -560,8 +581,8 @@ def test_writer_cleanup_after_final_modes_preserves_original_error(tmp_path, api
     directory = _write._directory
     def fail_after_modes(*args):
         directory(*args)
-        (args[0]/'outside').symlink_to(root, target_is_directory=True)
-        (args[0]/relative).chmod(0)
+        (args[0].path/'outside').symlink_to(root, target_is_directory=True)
+        (args[0].path/relative).chmod(0)
         raise RuntimeError('original post-mode failure')
     monkeypatch.setattr(_write, '_directory', fail_after_modes)
     try:
@@ -575,6 +596,29 @@ def test_writer_cleanup_after_final_modes_preserves_original_error(tmp_path, api
         (root/relative).chmod(0o700)
         if (output/relative).exists():
             (output/relative).chmod(0o700)
+
+
+def test_writer_cleanup_removes_readonly_files(tmp_path, api, monkeypatch):
+    from agent_suite import _write
+    root, _ = extracted(tmp_path)
+    (root/'readonly.bin').write_bytes(b'readonly payload')
+    modes = {p.relative_to(root).as_posix():
+             (0o755 if p.is_dir() else 0o444 if p.name == 'readonly.bin' else 0o644)
+             for p in root.rglob('*')}
+    layout = tmp_path/'layout'
+    packed_fixture(root, layout, modes)
+    secure(layout)
+    directory = _write._directory
+    def fail_after_files(*args):
+        directory(*args)
+        assert not (args[0].path/'readonly.bin').stat().st_mode & 0o200
+        raise RuntimeError('post-write test failure')
+    monkeypatch.setattr(_write, '_directory', fail_after_files)
+    with api.Package(layout) as package:
+        with pytest.raises(RuntimeError, match='post-write test failure'):
+            package.write_directory(tmp_path/'failed')
+        assert not (tmp_path/'failed').exists()
+        assert package.validate() == ()
 
 
 @pytest.mark.parametrize('method', ['write_directory', 'write_oci'])

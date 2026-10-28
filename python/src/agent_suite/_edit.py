@@ -66,7 +66,9 @@ def set_instructions(package: Package, agent_id: str, content: str | bytes) -> N
     stem = 'instruction-' + agent_id + '-' + digest_bytes(body)[7:23]
     path = stem + '.md'
     suffix = 0
-    while fold_case(path) in replacement._folded:
+    # OCI files can imply a parent directory without an explicit entry.
+    reserved = {fold_case(name.partition('/')[0]) for name in replacement.entries}
+    while fold_case(path) in reserved:
         suffix += 1
         path = stem + '-' + str(suffix) + '.md'
     replacement.add(Entry(path, size=len(body), digest=digest_bytes(body), data=body))

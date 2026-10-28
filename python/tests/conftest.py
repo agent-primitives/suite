@@ -147,6 +147,11 @@ REQUIRED |= {
     'test_edit_preserves_authored_presence_and_unrelated_raw_documents',
     'test_shared_write_case_population', 'test_write_all_shared_reader_positives',
     'test_instruction_copy_on_write_avoids_folded_name_collisions',
+    'test_instruction_copy_on_write_reserves_implicit_directories[False]',
+    'test_instruction_copy_on_write_reserves_implicit_directories[True]',
+    'test_windows_directory_basename_validation[D:payload.bin]',
+    'test_windows_directory_basename_validation[folder/name:stream]',
+    'test_windows_directory_basename_validation[folder/CON]',
 }
 for method in ('write_directory', 'write_oci'):
     REQUIRED.add(f'test_write_closed_and_existing_destination[{method}]')
@@ -179,9 +184,11 @@ REQUIRED |= {
     'test_fixed_gzip_store_small_goldens[abc-1f8b08000000000000ff010300fcff616263c241243503000000]',
     'test_repeated_edits_bound_created_history_and_preserve_original_files',
     'test_writer_cleanup_after_final_modes_preserves_original_error',
+    'test_writer_cleanup_removes_readonly_files',
     'test_writer_dotdot_destination_resolves_checked_parent[write_directory]',
     'test_writer_dotdot_destination_resolves_checked_parent[write_oci]',
     'test_writer_new_root_passes_native_security_checks',
+    'test_writer_retains_output_descriptors_until_completion',
     'test_writer_readonly_inventory_directory_with_link',
 }
 PASSED = set()

@@ -124,7 +124,8 @@ assert bundle.validate('agent.schema.json', {}, Source('agent.json'))
 # Both distribution paths exercise the public complete reader with the REAL
 # native backend, full authored evaluations and no runtime checkout dependency.
 import shutil
-from agent_suite import Package, CaseView, PolicyV2
+from agent_suite import Package, CaseView, PolicyV2, Registry
+import sys
 public_directory = Package.load('rich-directory')
 public_oci = Package.load('rich-layout')
 assert public_directory.root_digest == public_oci.root_digest
@@ -154,6 +155,8 @@ for package_index, package in enumerate((public_directory,public_oci)):
                 import json
                 selected = json.loads((path/'index.json').read_bytes())['manifests'][0]['digest']
                 assert oci_manifest_digest((path/'blobs/sha256'/selected[7:]).read_bytes()) == output.artifact_digest
+                reference = Registry(sys.argv[1]).publish(path, 'installed/suite')
+                assert reference.endswith('@' + output.artifact_digest)
 shutil.rmtree('rich-directory')
 shutil.rmtree('rich-layout')
 for package in (public_directory,public_oci):
@@ -235,5 +238,9 @@ print('installed offline bundle: 15 exact schemas; complete public reader; nativ
         output_parent.mkdir(exist_ok=True)
         if os.name == 'nt':
             secure_fixture(output_parent)
-        subprocess.run([str(python), "-I", "-c", smoke], cwd=tmp_path, check=True)
+        from _registry_fixture import registry_server
+        with registry_server() as remote:
+            subprocess.run([str(python), "-I", "-c", smoke, remote.base], cwd=tmp_path, check=True)
+            assert remote.manifests and len(remote.blobs) >= 2
+            assert sum(method == 'PUT' and '/manifests/' in path for method, path, _, _ in remote.calls) == 2
         shutil.rmtree(output_parent)

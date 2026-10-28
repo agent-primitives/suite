@@ -1,4 +1,5 @@
 build==1.6.1
 mypy==2.4.0
 pytest==9.1.1
+types-requests==2.33.0.20261006
 setuptools==84.2.1

@@ -14,6 +14,7 @@ from test_reader_conformance import cases, materialize
 
 
 CASES = json.loads((ROOT/'testdata/conformance/write-cases.json').read_bytes())['cases']
+ORACLE_ROOT = Path(os.environ.get('AGENTSUITE_GO_ORACLE_ROOT', str(ROOT))).resolve()
 
 
 @pytest.fixture(scope='session')
@@ -21,7 +22,7 @@ def writer_oracle(tmp_path_factory):
     root = tmp_path_factory.mktemp('writer-oracle')
     executable = root/('oracle.exe' if os.name == 'nt' else 'oracle')
     subprocess.run(['go', 'test', '-c', '-o', str(executable), './internal/artifact'],
-                   cwd=ROOT, check=True, capture_output=True, timeout=120)
+                   cwd=ORACLE_ROOT, check=True, capture_output=True, timeout=120)
     return executable
 
 
@@ -29,7 +30,7 @@ def go_validate(executable, root, rows):
     request = root/'write-oracle.json'
     request.write_text(json.dumps(rows), encoding='utf-8')
     completed = subprocess.run([str(executable), '-test.run=TestPythonWriterOutput', '-test.count=1', '-test.v'],
-        cwd=ROOT/'internal/artifact', env={**os.environ, 'AGENTSUITE_WRITE_ORACLE': str(request)},
+        cwd=ORACLE_ROOT/'internal/artifact', env={**os.environ, 'AGENTSUITE_WRITE_ORACLE': str(request)},
         text=True, capture_output=True, timeout=120)
     assert completed.returncode == 0, completed.stdout + completed.stderr
     assert '--- PASS: TestPythonWriterOutput ' in completed.stdout, completed.stdout

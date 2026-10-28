@@ -10,6 +10,7 @@ import pytest
 import re2
 
 ROOT = Path(__file__).resolve().parents[2]
+ORACLE_ROOT = Path(os.environ.get('AGENTSUITE_GO_ORACLE_ROOT', str(ROOT))).resolve()
 
 
 def _corpus():
@@ -225,9 +226,9 @@ def test_go_regex_differential(tmp_path):
     request.write_text(json.dumps(patterns), encoding="utf-8")
     executable = tmp_path / ("oracle.exe" if os.name == "nt" else "oracle")
     subprocess.run(["go", "test", "-c", "-o", str(executable), "./internal/artifact"],
-                   cwd=ROOT, check=True, capture_output=True, timeout=120)
+                   cwd=ORACLE_ROOT, check=True, capture_output=True, timeout=120)
     subprocess.run([str(executable), "-test.run=^TestRegexDifferentialOracle$"],
-                   cwd=ROOT / "internal/artifact", check=True, capture_output=True,
+                   cwd=ORACLE_ROOT / "internal/artifact", check=True, capture_output=True,
                    env={**os.environ, "AGENTSUITE_REGEX_ORACLE": str(request)}, timeout=120)
     expected = json.loads(Path(str(request) + ".result").read_bytes())
     mismatches = [(pattern, want, valid(pattern))

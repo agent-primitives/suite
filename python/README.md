@@ -7,9 +7,10 @@ bytes. It does not execute evaluations, qualify a runtime, enforce policy or
 resolve administrative restrictions.
 
 This development distribution is not a PyPI release. Publication and release
-qualification are separate maintainer steps. Local writing and canonical identity
-helpers are included; registry clients, network fetching and public outer-archive
-loading are not.
+qualification are separate maintainer steps. Local writing, canonical identity
+helpers and digest-preserving registry publication are included; registry pull and
+public outer-archive loading are not. See the [complete integration path](../docs/python.md)
+for explicit credentials, publication failures and owner-controlled release plumbing.
 
 ## Install
 
@@ -89,7 +90,8 @@ Instruction and tool-schema pins hash their exact literal bytes.
 
 `artifact_digest` is the distinct SHA-256 of the exact OCI manifest bytes, or
 `None` for directory input. It is not the Suite root digest or an aggregate hash
-of content. No public aggregate digest or registry-reference API is provided.
+of content. No public aggregate digest is provided. `Registry.publish` returns a registry reference
+using the exact OCI manifest identity, not this root/document identity.
 
 The pure `canonical_bytes(value)` and `digest(value)` helpers use RFC 8785, not
 sorted Python JSON. `variant_digest(value)` blanks only the top-level

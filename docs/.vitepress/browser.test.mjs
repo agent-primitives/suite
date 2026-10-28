@@ -80,6 +80,20 @@ test('landing and specification reflow at narrow, tablet and enlarged-text width
   } finally { await page.close() }
 })
 
+test('Python integration is navigable and readable on desktop and mobile', async () => {
+  const page = await browser.newPage({ reducedMotion: 'reduce' })
+  try {
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 1000 })
+      await ready(page, '/python')
+      assert.equal(await page.getByRole('heading', { level: 1, name: 'Python integration' }).count(), 1)
+      assert.equal(await page.locator('.vp-doc').getByText('Registry', { exact: false }).count() > 0, true)
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
+      assert.equal(await page.locator('.VPSidebar a[href="/python"]').count(), 1)
+    }
+  } finally { await page.close() }
+})
+
 test('legacy specification fragments land beside their relocated sections', async () => {
   for (const [old, current] of [
     ['822-case-documents-and-assertions', '32-case-documents-and-assertions'],

@@ -9,6 +9,8 @@ from pathlib import Path
 
 from test_oci import ROOT, materialize, snapshot
 
+ORACLE_ROOT = Path(os.environ.get('AGENTSUITE_GO_ORACLE_ROOT', str(ROOT))).resolve()
+
 
 def test_go_oci_differential(tmp_path):
     from agent_suite._oci import load_oci_layout
@@ -62,8 +64,8 @@ def test_go_oci_differential(tmp_path):
     requests = tmp_path / 'requests.json'
     requests.write_text(json.dumps(probes), encoding='utf-8')
     executable = tmp_path / ('oracle.exe' if os.name == 'nt' else 'oracle')
-    subprocess.run(['go', 'test', '-c', '-o', str(executable), './internal/artifact'], cwd=ROOT, check=True)
-    subprocess.run([str(executable), '-test.run=^TestSharedOCICases$'], cwd=ROOT / 'internal/artifact', check=True,
+    subprocess.run(['go', 'test', '-c', '-o', str(executable), './internal/artifact'], cwd=ORACLE_ROOT, check=True)
+    subprocess.run([str(executable), '-test.run=^TestSharedOCICases$'], cwd=ORACLE_ROOT / 'internal/artifact', check=True,
                    env={**os.environ, 'AGENTSUITE_OCI_ORACLE': str(requests)}, capture_output=True, timeout=60)
     expected = json.loads(Path(str(requests) + '.result').read_bytes())
     mismatches = []

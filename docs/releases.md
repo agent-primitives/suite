@@ -371,6 +371,13 @@ execution contracts. v0.2.0 introduced the filesystem policy package.
 See the [normative policy contract](../spec.md#appendix-b-standalone-policy-contracts-normative)
 and [reference schemas](schemas.md).
 
+## Python release preparation
+
+Before the first SDK release, the Suite v0.8 freeze commit must also contain the
+final SDK code and SDK version bump. Keep those immutable tags, merge the reviewed
+schema catalog, then follow [Python release qualification](python.md#owner-controlled-release-qualification).
+Qualification is not an upload; the protected `pypi` environment requires release-owner approval.
+
 ## Compatibility
 
 Go module versions and format/schema versions are independent. A Go release does

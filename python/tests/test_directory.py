@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+ORACLE_ROOT = Path(os.environ.get('AGENTSUITE_GO_ORACLE_ROOT', str(ROOT))).resolve()
 
 
 def named_rows(data, key, minimum, name="name"):
@@ -260,8 +261,8 @@ def test_go_casefold_differential():
     # A new Unicode endpoint needs full-scalar verification, not a runtime refusal.
     assert unicodedata.unidata_version in {"13.0.0", "14.0.0", "15.0.0", "15.1.0", "16.0.0"}
     result = subprocess.run(
-        ["go", "run", str(ROOT / "python/tests/testdata/fold_oracle.go")],
-        cwd=ROOT, check=True, capture_output=True,
+        ["go", "run", str(ORACLE_ROOT / "python/tests/testdata/fold_oracle.go")],
+        cwd=ORACLE_ROOT, check=True, capture_output=True,
     )
     reference = json.loads(result.stdout)
     for scalar in range(0x110000):

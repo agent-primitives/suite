@@ -1,0 +1,130 @@
+name: python-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      sdk_tag:
+        description: Existing immutable SDK tag (python/vX.Y.Z)
+        required: true
+        type: string
+      suite_tag:
+        description: Existing frozen Suite tag (v0.8.P), catalogued before dispatch
+        required: true
+        type: string
+      publish:
+        description: Upload verified artifacts (requires owner-configured pypi approval)
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: python-release-${{ inputs.sdk_tag }}
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      SDK_TAG: ${{ inputs.sdk_tag }}
+      SUITE_TAG: ${{ inputs.suite_tag }}
+      GOWORK: 'off'
+      AGENTSUITE_GO_ORACLE_ROOT: ${{ github.workspace }}/contract-source
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.14'
+      - name: Validate tag namespaces before executing release source
+        run: |
+          python - <<'PY'
+          import os, re
+          assert re.fullmatch(r'python/v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)', os.environ['SDK_TAG']), 'exact SDK tag required'
+          assert re.fullmatch(r'v0\.8\.(0|[1-9]\d*)', os.environ['SUITE_TAG']), 'frozen v0.8 tag required'
+          PY
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.sdk_tag }}
+          path: sdk-source
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.suite_tag }}
+          path: contract-source
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: contract-source/go.mod
+      - name: Verify frozen source against the pinned trusted catalog
+        run: |
+          SUITE_SHA=$(git -C contract-source rev-parse HEAD)
+          node scripts/schema-release.mjs check --release "$SUITE_TAG" --ref "$SUITE_SHA" --catalog-ref "$GITHUB_SHA"
+      - name: Qualify SDK and frozen Go output parity
+        run: |
+          python -m pip install --only-binary=google-re2 -r sdk-source/python/requirements-dev.txt ./sdk-source/python
+          PYTHONPATH="$GITHUB_WORKSPACE/sdk-source/python/src" python -m pytest sdk-source/python/tests -q
+          PYTHONPATH="$GITHUB_WORKSPACE/sdk-source/python/src" python -m pytest contract-source/python/tests -q
+          GOWORK=off go -C contract-source test -count=1 ./...
+      - name: Build direct and sdist-derived distributions
+        run: |
+          python -m build sdk-source/python --outdir dist
+          mkdir derived-source derived-wheel
+          python - <<'PY'
+          import pathlib, tarfile
+          with tarfile.open(next(pathlib.Path('dist').glob('*.tar.gz'))) as archive:
+              archive.extractall('derived-source', filter='data')
+          PY
+          python -m build --wheel derived-source/* --outdir derived-wheel
+      - name: Bind exact source, schema and artifact identities
+        run: |
+          python scripts/check-python-release.py qualify \
+            --sdk-repo sdk-source --contract-repo contract-source \
+            --catalog-repo . --catalog-ref "$GITHUB_SHA" \
+            --sdk-tag "$SDK_TAG" --contract-tag "$SUITE_TAG" \
+            --wheel dist/*.whl --sdist dist/*.tar.gz --sdist-wheel derived-wheel/*.whl \
+            --out qualification.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-release-qualified
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+            qualification.json
+          if-no-files-found: error
+
+  publish:
+    if: github.ref == 'refs/heads/main' && inputs.publish
+    needs: qualify
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.14'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-release-qualified
+          path: qualified
+      - name: Recheck downloaded distributions before publishing authority is used
+        run: python scripts/check-python-release.py verify-artifacts --qualification qualified/qualification.json --dist qualified/dist
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: qualified/dist

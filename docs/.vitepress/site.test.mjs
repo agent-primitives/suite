@@ -13,7 +13,7 @@ const html = name => readFile(path.join(dist, `${name}.html`), 'utf8')
 const catalog = JSON.parse(await readFile(path.join(root, 'docs/schema-catalog.json'), 'utf8'))
 
 test('all documentation pages render with root-based navigation and assets', async () => {
-  const pages = ['404', 'index', 'spec', 'schemas', 'conformance', 'go', 'releases', 'hosting', 'legacy-draft', 'directory-identity', 'experimental-flow']
+  const pages = ['404', 'index', 'spec', 'schemas', 'conformance', 'go', 'python', 'releases', 'hosting', 'legacy-draft', 'directory-identity', 'experimental-flow']
   assert.deepEqual((await readdir(dist)).filter(name => name.endsWith('.html')).sort(), pages.map(name => `${name}.html`).sort())
   for (const page of pages) {
     const content = await html(page)
@@ -24,6 +24,13 @@ test('all documentation pages render with root-based navigation and assets', asy
   for (const word of ['AgentSuite', 'kmx', 'agentsessions', 'Orka', 'planned']) assert.ok(home.includes(word))
   assert.match(home, /href="\/spec"/)
   assert.match(home, /https:\/\/github.com\/agent-primitives\/suite/)
+})
+
+test('Python integration renders the complete package-to-digest path and owner boundaries', async () => {
+  const content = await html('python')
+  for (const value of ['Package', 'Registry', 'set_instructions', 'write_oci', 'publish', 'root_digest', 'artifact_digest', 'AGENTSUITE_GO_ORACLE_ROOT']) assert.ok(content.includes(value), value)
+  for (const value of ['does not execute', 'origin', 'owner', 'development', 'pypi']) assert.ok(content.includes(value), value)
+  assert.ok((await html('go')).includes('href="/python"'))
 })
 
 test('experimental flow documentation renders the explicit opt-in and runtime boundary', async () => {

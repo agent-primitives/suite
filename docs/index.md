@@ -7,3 +7,5 @@ description: An open, content-addressed format for agent definitions, tool depen
 ---
 
 <SuiteOverview />
+
+[Pure judge producer profile (main, not yet released)](judging.md)

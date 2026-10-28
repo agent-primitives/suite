@@ -1,0 +1,1 @@
+{"model":"judge-v1","choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"{\"score\":20,\"reasoning\":\"checked\"}"}}]}

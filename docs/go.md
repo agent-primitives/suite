@@ -66,6 +66,14 @@ Portable manifest fields are documented in `core`. Keep existing exported
 identifier spellings when migrating; no conversion or wire-format rewrite is
 needed. The examples below use supported focused APIs with the published pin.
 
+## Pure judge producer (main, not yet released)
+
+Main additionally provides `github.com/agent-primitives/suite/judge`: a pure
+request producer, original-response decoder and two-score verifier. It is not in
+v0.7.0. Read the [producer profile and runtime trust boundary](judging.md) before
+adopting a future containing release. Routes, credentials, content admission,
+execution and retention remain runtime-owned; a pure pass is not qualification.
+
 ## Validate content offline
 
 `ValidatePath` accepts an extracted content directory or an OCI image-layout

@@ -54,7 +54,7 @@ func (row sharedLiteralCase) body(t *testing.T) []byte {
 	return body
 }
 
-func (row sharedLiteralCase) fullValidatePath(t *testing.T) {
+func (row sharedLiteralCase) fullValidatePath(t *testing.T) string {
 	t.Helper()
 	root := writeMinimalSuite(t)
 	body := row.body(t)
@@ -92,7 +92,7 @@ func (row sharedLiteralCase) fullValidatePath(t *testing.T) {
 			t.Fatalf("ValidatePath(directory): %v", err)
 		}
 	}) {
-		return
+		return ""
 	}
 	ociRoot := writeTestOCILayoutTar(t, literalPortableTar(t, root))
 	secureDirectoryFixture(t, ociRoot)
@@ -101,7 +101,7 @@ func (row sharedLiteralCase) fullValidatePath(t *testing.T) {
 			t.Fatalf("ValidatePath(OCI): %v", err)
 		}
 	}) {
-		return
+		return ""
 	}
 	stored, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(row.Path)))
 	if err != nil || !bytes.Equal(stored, body) {
@@ -118,6 +118,7 @@ func (row sharedLiteralCase) fullValidatePath(t *testing.T) {
 	if got != row.RootDigest {
 		t.Fatalf("validated Go root digest = %q, want frozen %q", got, row.RootDigest)
 	}
+	return root
 }
 
 // Windows host permissions are not portable archive modes. These fixtures have

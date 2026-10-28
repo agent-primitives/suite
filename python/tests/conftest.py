@@ -137,6 +137,53 @@ for case in json.loads((CORPUS / 'reader-boundary-cases.json').read_bytes())['ca
 for case in json.loads((CORPUS / 'literal-cases.json').read_bytes())['cases']:
     for oci in ('False', 'True'):
         REQUIRED.add(f"test_package_shared_literal_bytes_outlive_source[{case['name']}-{oci}]")
+REQUIRED |= {
+    'test_public_identity_domains', 'test_instruction_edit_copy_on_write_and_rollback',
+    'test_stale_graph_is_never_repaired', 'test_unchanged_oci_preserves_noncanonical_manifest_bytes',
+    'test_edit_shared_agent_and_provider_literal_aliases', 'test_edit_failure_transaction_and_stale_old_handles',
+    'test_write_cached_metadata_and_literals_ignore_changed_source',
+    'test_source_oci_changed_is_refused_without_affecting_reader', 'test_writer_mode_authority_and_links',
+    'test_writer_dest_symlink_and_parent_alias_are_refused', 'test_writer_long_pax_paths_and_safe_hardlinks',
+    'test_edit_preserves_authored_presence_and_unrelated_raw_documents',
+    'test_shared_write_case_population', 'test_write_all_shared_reader_positives',
+    'test_instruction_copy_on_write_avoids_folded_name_collisions',
+}
+for method in ('write_directory', 'write_oci'):
+    REQUIRED.add(f'test_write_closed_and_existing_destination[{method}]')
+    for name in ('minimal', 'remote', 'bundled', 'runtime-two-profiles', 'rich'):
+        REQUIRED.add(f'test_write_roundtrip_and_repeat[{method}-{name}]')
+for flag in ('False', 'True'):
+    REQUIRED.add(f'test_missing_or_changed_arbitrary_payload_refused_and_cleaned[{flag}]')
+    REQUIRED.add(f'test_writer_missing_payload_above_json_bound[{flag}]')
+for failure in ('short', 'zero', 'none', 'io'):
+    REQUIRED.add(f'test_write_short_writes_complete_or_clean_up[{failure}]')
+for case in json.loads((CORPUS/'literal-cases.json').read_bytes())['cases']:
+    REQUIRED.add(f"test_writer_large_and_non_utf8_literals_outlive_source[{case['name']}]")
+for name in ('remote', 'bundled', 'runtime-two-profiles'):
+    REQUIRED.add(f'test_go_writer_variant_payloads[{name}]')
+for case in json.loads((CORPUS/'write-cases.json').read_bytes())['cases']:
+    REQUIRED.add(f"test_shared_write_identities_and_go_outputs[{case['name']}]")
+REQUIRED |= {
+    'test_edit_checks_aggregate_bounds_after_repin_and_rolls_back[regular]',
+    'test_edit_checks_aggregate_bounds_after_repin_and_rolls_back[retained]',
+    'test_edit_committed_state_survives_old_spool_close_error',
+    'test_failed_history_edit_keeps_content_snapshot_and_owned_paths',
+    'test_fixed_gzip_store_block_boundaries[131070]',
+    'test_fixed_gzip_store_block_boundaries[65534]',
+    'test_fixed_gzip_store_block_boundaries[65535]',
+    'test_fixed_gzip_store_block_boundaries[65536]',
+    'test_fixed_gzip_store_large_sha_and_partitioning[131072]',
+    'test_fixed_gzip_store_large_sha_and_partitioning[17408]',
+    'test_fixed_gzip_store_large_sha_and_partitioning[3145728]',
+    'test_fixed_gzip_store_small_goldens[-1f8b08000000000000ff010000ffff0000000000000000]',
+    'test_fixed_gzip_store_small_goldens[abc-1f8b08000000000000ff010300fcff616263c241243503000000]',
+    'test_repeated_edits_bound_created_history_and_preserve_original_files',
+    'test_writer_cleanup_after_final_modes_preserves_original_error',
+    'test_writer_dotdot_destination_resolves_checked_parent[write_directory]',
+    'test_writer_dotdot_destination_resolves_checked_parent[write_oci]',
+    'test_writer_new_root_passes_native_security_checks',
+    'test_writer_readonly_inventory_directory_with_link',
+}
 PASSED = set()
 SKIPPED = []
 

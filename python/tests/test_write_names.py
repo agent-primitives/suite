@@ -25,6 +25,7 @@ def test_instruction_copy_on_write_avoids_folded_name_collisions(tmp_path, api):
 
 @pytest.mark.parametrize('folded', [False, True])
 def test_instruction_copy_on_write_reserves_implicit_directories(tmp_path, api, folded):
+    secure(tmp_path)
     root, _ = extracted(tmp_path)
     body = b'implicit directory naming'
     candidate = 'instruction-writer-' + digest_bytes(body)[7:23] + '.md'

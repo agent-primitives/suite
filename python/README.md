@@ -151,8 +151,12 @@ is exposed.
 Both writers return a `Path`. The destination must be absent and its existing
 parent must satisfy the native reader's ownership/security checks. Writers do not
 overwrite, merge, repair existing permissions or create missing parent directories.
-Portable inventory modes and supported content links are retained; an unsupported
-native link operation fails with context rather than silently flattening it.
+Portable inventory modes and supported content links are retained. Directory
+output must also pass the native reader's permission checks: modes accepted in OCI
+(such as POSIX group-writable directories or files unreadable by the caller) can
+make `write_directory` fail. Modes are not repaired; `write_oci` can preserve them.
+An unsupported native link operation fails with context rather than silently
+flattening it.
 Partial failures do not return success, and cleanup removes only the newly created
 output. Runtime source reads use verified pins; output passes full validation.
 
